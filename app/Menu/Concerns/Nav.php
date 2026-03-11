@@ -7,7 +7,7 @@ use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
-trait NavItems
+trait Nav
 {
     public static function make() : CompoundComponent
     {

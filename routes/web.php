@@ -24,6 +24,8 @@ Route::get('/cruds', function (Request $request) {
 
     $cruds = CrudCollection::list($oldValues, $errors);
 
+    // dd($cruds);
+
     return view('cruds')
         ->with('cruds', $cruds);
     

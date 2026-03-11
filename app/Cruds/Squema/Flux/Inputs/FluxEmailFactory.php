@@ -1,36 +1,23 @@
 <?php
 
-namespace App\Cruds\Squema\Unstyled\Inputs;
+namespace App\Cruds\Squema\Flux\Inputs;
 
-use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
 use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
 
-class EmailFactory
+class FluxEmailFactory
 {
-    const NAME = 'email_unstyled';
+    const NAME = 'flux_email';
 
     const LABEL = 'Email';
 
     public static function make() : InputInterface
-    {        
-        $input = new DefaultInput(
-            name: self::NAME,
-            label: self::LABEL,
-        );
+    {
+        $input = new DefaultInput(self::NAME, self::LABEL);
 
         self::form($input);
-
-        $input->setRecipe(
-            (new LaravelValidationRulesRecipe(
-                rules: [
-                    'required',
-                    'email',
-                ]
-            ))
-        );
 
         return $input;
     }

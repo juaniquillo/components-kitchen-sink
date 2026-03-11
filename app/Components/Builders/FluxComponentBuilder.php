@@ -14,8 +14,6 @@ class FluxComponentBuilder implements StaticBuilder
      {
         $builder = new FluxBackendComponent($name);
 
-        $builder->setNamespace('flux::');
-
         return $builder;
      }
 }

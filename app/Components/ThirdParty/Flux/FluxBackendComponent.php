@@ -30,6 +30,14 @@ class FluxBackendComponent implements BackendComponent, ContentComponent, PathCo
         private ThemeManager $themeManager = new DefaultThemeManager
     ) {}
 
+    /**
+     * Hardcode context
+     */
+    public function getContext(): string
+    {
+        return 'flux::';
+    }
+
     public function getName(): string
     {
         $name = $this->name;

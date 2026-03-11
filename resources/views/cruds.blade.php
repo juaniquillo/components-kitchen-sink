@@ -4,7 +4,7 @@
         <h1 class="text-4xl font-bold text-center">Cruds</h1>
 
             
-            <div class="mt-5 flex flex-wrap gap-3">
+            <div class="mt-5 flex flex-wrap gap-3 md:flex-row flex-col">
                 @foreach ($cruds as $name => $component)
                         
                     <div id="{{ $name }}" class="flex-1 p-3 bg-gray-300 dark:bg-gray-800/40 rounded-md">
@@ -12,7 +12,7 @@
                             
                             <x-success-alert :component="$component" />
                             
-                            <h2 class="text-3xl mb-4">{{ $component['name'] }}</h2>
+                            <h2 class="text-3xl mb-5">{{ $component['name'] }}</h2>
 
                             <div>
                                 {{ $component['component'] }}

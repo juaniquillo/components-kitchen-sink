@@ -3,12 +3,20 @@
 namespace App\Cruds\Squema\Flux;
 
 use App\Components\Builders\FluxComponentBuilder;
+use App\Components\ThirdParty\Flux\FluxBackendComponent;
 use App\Cruds\Contracts\Crud;
+use App\Cruds\Squema\Flux\Inputs\FluxEmailFactory;
+use App\Cruds\Squema\Flux\Inputs\FluxNameFactory;
+use App\Cruds\Squema\Flux\Inputs\FluxYearFactory;
+use BackedEnum;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\CrudAssistant\InputCollection;
+use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
+use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
 use Juaniquillo\InputComponentAction\InputComponentAction;
 
@@ -20,19 +28,51 @@ class FluxCrud implements Crud
     public static function make(?array $values = null, ?array $errors = null): InputCollection
     {
         return CrudAssistant::make([
-            
+            FluxNameFactory::make(),
+            FluxEmailFactory::make(),
+            FluxYearFactory::make(),
         ]);
     }
 
     public static function build(?array $values = null, ?array $errors = null): BackendComponent
     {
-        $crud  = CrudAssistant::make();
+        $crud = self::make();
 
         $output = $crud->execute(
             (new InputComponentAction(
                 $values ?? [],
                 $errors ?? [],
             ))
+            ->setDefaultComponentBag(
+                (new DefaultComponentBag())
+                    // Input
+                    ->setInputType('input')
+                    ->setInputComponent(
+                        function(string|BackedEnum $type, ThemeManager $manager) {
+                            return new FluxBackendComponent($type, $manager);
+                        }
+                    )
+                    // Error
+                    ->setErrorType('text')
+                    ->setErrorComponent(
+                        function(string|BackedEnum $type, ThemeManager $manager) {
+                            return (new FluxBackendComponent($type, $manager))
+                                ->setAttributes([
+                                    'color' => 'red',
+                                ]);
+                        }
+                    )
+                    
+            )
+            ->setDefaultThemeBag(
+                (new DefaultThemeBag())
+                ->setWrapperTheme([
+                    'display' => 'grid',
+                    'grid' => [
+                        'gap-sm'
+                    ]
+                ])
+            )
         );
 
         /** @var InputComponentOutput $output */
@@ -43,10 +83,21 @@ class FluxCrud implements Crud
             ->setContents($inputs->toArray())
             ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER, '#'.self::IDENTIFIER]))
             ->setAttribute('enctype', 'multipart/form-data')
+            ->setThemes([
+                'display' => 'grid',
+                'grid' => [
+                    'gap-md'
+                ]
+            ])
             ->setContent(
-                FluxComponentBuilder::make('button')
-                    ->setContent('Send')
-                    ->setAttribute('type', 'submit')
+                ComponentBuilder::make(ComponentEnum::DIV)
+                    ->setContent(
+                        FluxComponentBuilder::make('button')
+                        ->setContent('Send')
+                        ->setAttribute('type', 'submit')
+                        ->setAttribute('variant', 'primary')
+                        ->setAttribute('color', 'blue')
+                    )
             );
     }
 }

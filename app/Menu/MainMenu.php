@@ -2,11 +2,11 @@
 
 namespace App\Menu;
 
-use App\Menu\Concerns\NavItems;
+use App\Menu\Concerns\Nav;
 
 final class MainMenu
 {
-    use NavItems;
+    use Nav;
 
     public static function items(): array
     {
