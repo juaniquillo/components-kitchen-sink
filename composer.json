@@ -9,27 +9,27 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "juaniquillo/crud-assistant": "^0.1.0",
         "juaniquillo/input-component-action": "@dev",
-        "juaniquillo/laravel-backend-component": "*",
-        "laravel/fortify": "^1.30",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1",
+        "juaniquillo/laravel-backend-component": ">=0.1",
+        "laravel/fortify": "^1.36.1",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
+        "livewire/blaze": "^1.0.7",
         "livewire/flux": "^2.13",
-        "livewire/livewire": "^4.2"
+        "livewire/livewire": "^4.2.1"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.16",
-        "fakerphp/faker": "^1.23",
-        "laravel/boost": "2.0",
-        "laravel/pail": "^1.2.2",
-        "laravel/pint": "^1.24",
-        "laravel/sail": "^1.41",
-        "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.6",
-        "pestphp/pest": "^4.3",
-        "pestphp/pest-plugin-laravel": "^4.0"
+        "fakerphp/faker": "^1.24.1",
+        "laravel/boost": "^2.3",
+        "laravel/pail": "^1.2.6",
+        "laravel/pint": "^1.29",
+        "laravel/sail": "^1.53",
+        "mockery/mockery": "^1.6.12",
+        "nunomaduro/collision": "^8.9.1",
+        "pestphp/pest": "^4.4.2",
+        "pestphp/pest-plugin-laravel": "^4.1"
     },
     "autoload": {
         "psr-4": {
@@ -43,15 +43,6 @@
             "Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../packages/input-component-action",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
     "scripts": {
         "setup": [
             "composer install",

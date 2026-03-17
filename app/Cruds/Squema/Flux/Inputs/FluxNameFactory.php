@@ -5,6 +5,8 @@ namespace App\Cruds\Squema\Flux\Inputs;
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
+use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
+use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
 
 class FluxNameFactory
 {
@@ -18,15 +20,30 @@ class FluxNameFactory
 
         self::validation($input);
 
+        self::form($input);
+
         return $input;
     }
 
-    public static function validation(InputInterface $input) : void
+    public static function validation(InputInterface $input): void
     {
         $input->setRecipe(
-            new LaravelValidationRulesRecipe([
+            recipe: new LaravelValidationRulesRecipe([
                 'required'
             ])
+        );
+    }
+
+    public static function form(InputInterface $input): void
+    {
+        $input->setRecipe(
+            recipe: new InputComponentRecipe(
+                attributeBag: (new DefaultAttributeBag())
+                    ->setInputAttributes([
+                        'label' => self::LABEL,
+                    ])
+
+            )
         );
     }
 }

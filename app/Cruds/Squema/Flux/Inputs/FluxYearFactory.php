@@ -2,11 +2,11 @@
 
 namespace App\Cruds\Squema\Flux\Inputs;
 
-use App\Components\ThirdParty\Flux\FluxBackendComponent;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
+use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultDisableBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
@@ -26,7 +26,11 @@ class FluxYearFactory
         $input->setRecipe(
             new InputComponentRecipe(
                 componentBag: (new DefaultComponentBag)
-                    ->setInputType('select')
+                    ->setInputType('select'),
+                attributeBag: (new DefaultAttributeBag())
+                    ->setInputAttributes([
+                        'label' => self::LABEL,
+                    ])
             )
         );
 
@@ -46,6 +50,10 @@ class FluxYearFactory
             [
                 'name' => 1990,
                 'label' => '1990',
+            ],
+            [
+                'name' => 2000,
+                'label' => '2000',
             ],
         ];
     }

@@ -1,4 +1,4 @@
-<x-layouts.default>
+<x-layouts.default page-title="Cruds">
     
     <div>
         <h1 class="text-4xl font-bold text-center">Cruds</h1>

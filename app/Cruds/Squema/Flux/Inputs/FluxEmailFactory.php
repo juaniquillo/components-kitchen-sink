@@ -28,7 +28,8 @@ class FluxEmailFactory
             new InputComponentRecipe(
                 attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
-                        'type' => 'email'
+                        'type' => 'email',
+                        'label' => self::LABEL,
                     ])
             )
         );

@@ -16,8 +16,8 @@ use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
-use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
+use Juaniquillo\InputComponentAction\Groups\NoWrapSoleInputGroup;
 use Juaniquillo\InputComponentAction\InputComponentAction;
 
 class FluxCrud implements Crud
@@ -43,6 +43,7 @@ class FluxCrud implements Crud
                 $values ?? [],
                 $errors ?? [],
             ))
+            ->setDefaultInputGroup(new NoWrapSoleInputGroup)
             ->setDefaultComponentBag(
                 (new DefaultComponentBag())
                     // Input
@@ -52,26 +53,7 @@ class FluxCrud implements Crud
                             return new FluxBackendComponent($type, $manager);
                         }
                     )
-                    // Error
-                    ->setErrorType('text')
-                    ->setErrorComponent(
-                        function(string|BackedEnum $type, ThemeManager $manager) {
-                            return (new FluxBackendComponent($type, $manager))
-                                ->setAttributes([
-                                    'color' => 'red',
-                                ]);
-                        }
-                    )
                     
-            )
-            ->setDefaultThemeBag(
-                (new DefaultThemeBag())
-                ->setWrapperTheme([
-                    'display' => 'grid',
-                    'grid' => [
-                        'gap-sm'
-                    ]
-                ])
             )
         );
 
