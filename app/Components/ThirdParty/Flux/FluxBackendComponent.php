@@ -19,7 +19,7 @@ use Juaniquillo\BackendComponents\Components\DefaultAttributeBag;
 use function Juaniquillo\BackendComponents\isBackedEnum;
 use function Juaniquillo\BackendComponents\backendComponentNamespace;
 
-class FluxBackendComponent implements BackendComponent, ContentComponent, PathComponent, Htmlable
+final class FluxBackendComponent implements BackendComponent, ContentComponent, PathComponent, Htmlable
 {
     use HasContent,
         HasPath,

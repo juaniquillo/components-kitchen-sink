@@ -3,6 +3,7 @@
 namespace App\Cruds;
 
 use App\Cruds\Squema\Flux\FluxCrud;
+use App\Cruds\Squema\InputGroup\InputGroupCrud;
 use App\Cruds\Squema\Simple\SimpleCrud;
 use App\Cruds\Squema\Unstyled\UnstyledCrud;
 
@@ -12,22 +13,28 @@ class CrudCollection
     {
         return [
             UnstyledCrud::IDENTIFIER => [
-                'identifier' => UnstyledCrud::IDENTIFIER,
                 'name' => UnstyledCrud::NAME,
+                'description' => UnstyledCrud::description(),
                 'component' => UnstyledCrud::build($values, $errors),
                 'crud' => UnstyledCrud::class,
             ],
             SimpleCrud::IDENTIFIER => [
-                'identifier' => SimpleCrud::IDENTIFIER,
                 'name' => SimpleCrud::NAME,
+                'description' => SimpleCrud::description(),
                 'component' => SimpleCrud::build($values, $errors),
                 'crud' => SimpleCrud::class,
             ],
             FluxCrud::IDENTIFIER => [
-                'identifier' => FluxCrud::IDENTIFIER,
                 'name' => FluxCrud::NAME,
+                'description' => FluxCrud::description(),
                 'component' => FluxCrud::build($values, $errors),
                 'crud' => FluxCrud::class,
+            ],
+            InputGroupCrud::IDENTIFIER => [
+                'name' => InputGroupCrud::NAME,
+                'description' => InputGroupCrud::description(),
+                'component' => InputGroupCrud::build($values, $errors),
+                'crud' => InputGroupCrud::class,
             ],
 
         ];

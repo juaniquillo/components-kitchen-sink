@@ -4,6 +4,7 @@ namespace App\Cruds\Squema\Flux;
 
 use App\Components\Builders\FluxComponentBuilder;
 use App\Components\ThirdParty\Flux\FluxBackendComponent;
+use App\Cruds\Concerns\IsCrud;
 use App\Cruds\Contracts\Crud;
 use App\Cruds\Squema\Flux\Inputs\FluxEmailFactory;
 use App\Cruds\Squema\Flux\Inputs\FluxNameFactory;
@@ -16,12 +17,15 @@ use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
+use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
 use Juaniquillo\InputComponentAction\Groups\NoWrapSoleInputGroup;
 use Juaniquillo\InputComponentAction\InputComponentAction;
 
 class FluxCrud implements Crud
 {
+    use IsCrud;
+    
     public const IDENTIFIER = 'flux';
     public const NAME = 'Flux Crud';
 
@@ -43,7 +47,7 @@ class FluxCrud implements Crud
                 $values ?? [],
                 $errors ?? [],
             ))
-            ->setDefaultInputGroup(new NoWrapSoleInputGroup)
+            ->setDefaultInputGroup(NoWrapSoleInputGroup::class)
             ->setDefaultComponentBag(
                 (new DefaultComponentBag())
                     // Input
@@ -53,8 +57,14 @@ class FluxCrud implements Crud
                             return new FluxBackendComponent($type, $manager);
                         }
                     )
-                    
             )
+            ->setDefaultThemeBag(
+                (new DefaultThemeBag())
+                    ->setWrapperTheme([
+                        'margin' => 'top-sm',
+                    ])
+            )
+
         );
 
         /** @var InputComponentOutput $output */
@@ -74,11 +84,15 @@ class FluxCrud implements Crud
             ->setContent(
                 ComponentBuilder::make(ComponentEnum::DIV)
                     ->setContent(
-                        FluxComponentBuilder::make('button')
-                        ->setContent('Send')
-                        ->setAttribute('type', 'submit')
-                        ->setAttribute('variant', 'primary')
-                        ->setAttribute('color', 'blue')
+                        ComponentBuilder::make(ComponentEnum::DIV)
+                            ->setTheme('margin', 'top-sm')
+                            ->setContent(
+                                FluxComponentBuilder::make('button')
+                                    ->setContent('Send')
+                                    ->setAttribute('type', 'submit')
+                                    ->setAttribute('variant', 'primary')
+                                    ->setAttribute('color', 'blue')
+                            )
                     )
             );
     }

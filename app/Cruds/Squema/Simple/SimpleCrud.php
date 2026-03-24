@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Cruds\Squema\Simple;
 
+use App\Cruds\Concerns\IsCrud;
 use App\Cruds\Contracts\Crud;
 use App\Cruds\Squema\Simple\Inputs\AvatarFactory;
 use App\Cruds\Squema\Simple\Inputs\CitiesFactory;
@@ -21,10 +22,13 @@ use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
+use Juaniquillo\InputComponentAction\Groups\InputLabelErrorGroup;
 use Juaniquillo\InputComponentAction\InputComponentAction;
 
 class SimpleCrud implements Crud
 {
+    use IsCrud;
+    
     const NAME = 'Simple Themed Crud';
 
     const IDENTIFIER = 'simple_crud';
@@ -44,34 +48,34 @@ class SimpleCrud implements Crud
     {
         $crud = SimpleCrud::make();
 
-        // dump($values, $errors);
+        InputLabelErrorGroup::class;
 
         $output = $crud->execute(
             (new InputComponentAction(
                 $values ?? [],
                 $errors ?? [],
             ))
-                ->setDefaultThemeBag(
-                    (new DefaultThemeBag)
-                        ->setWrapperTheme([
-                            'margin' => 'top-sm',
-                        ])
-                        ->setInputTheme(Inputs::inputs())
-                        ->setLabelTheme(Inputs::label())
-                        ->setErrorTheme([
-                            'color' => [
-                                'error',
-                                'error-dark',
-                            ],
-                            'padding' => 'top-xs',
-                        ])
-                )
-                ->setDefaultComponentBag(
-                    (new DefaultComponentBag())
-                    ->setInputComponent(function(\BackedEnum|string $type, ThemeManager $themeManager){
-                        return new MainBackendComponent($type, $themeManager);
-                    })
-                )
+            ->setDefaultThemeBag(
+                (new DefaultThemeBag)
+                    ->setWrapperTheme([
+                        'margin' => 'top-sm',
+                    ])
+                    ->setInputTheme(Inputs::inputs())
+                    ->setLabelTheme(Inputs::label())
+                    ->setErrorTheme([
+                        'color' => [
+                            'error',
+                            'error-dark',
+                        ],
+                        'padding' => 'top-xs',
+                    ])
+            )
+            ->setDefaultComponentBag(
+                (new DefaultComponentBag())
+                ->setInputComponent(function(\BackedEnum|string $type, ThemeManager $themeManager){
+                    return new MainBackendComponent($type, $themeManager);
+                })
+            )
         );
 
         /** @var InputComponentOutput $output */

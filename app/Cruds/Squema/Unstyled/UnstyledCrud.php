@@ -3,6 +3,7 @@
 namespace App\Cruds\Squema\Unstyled;
 
 
+use App\Cruds\Concerns\IsCrud;
 use App\Cruds\Contracts\Crud;
 use App\Cruds\Squema\Unstyled\Inputs\EmailFactory;
 use App\Cruds\Squema\Unstyled\Inputs\NameFactory;
@@ -17,6 +18,8 @@ use Juaniquillo\InputComponentAction\InputComponentAction;
 
 class UnstyledCrud implements Crud
 {
+    use IsCrud;
+
     public const IDENTIFIER = 'unstyled';
     public const NAME = 'Unstyled Crud';
 
@@ -55,11 +58,6 @@ class UnstyledCrud implements Crud
             ->setContent(
                 ComponentBuilder::make(ComponentEnum::BUTTON)
                     ->setContent('Send')
-                    ->setTheme('action', 'default')
-                    ->setTheme('color', 'light')
-                    ->setTheme('padding', 'button')
-                    ->setTheme('display', 'inline-block')
-                    ->setTheme('margin', 'top-md')
             );
 
         return $form;

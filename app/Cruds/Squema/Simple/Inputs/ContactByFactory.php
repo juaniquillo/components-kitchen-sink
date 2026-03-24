@@ -31,13 +31,31 @@ class ContactByFactory
         $input = new DefaultInput(self::NAME, self::LABEL);
 
         $input->setSubElements(
-            CrudAssistant::make(self::checkboxes($livewireGroup))
+            CrudAssistant::make(self::radio($livewireGroup))
         );
 
         self::formRecipe($input);
         self::validation($input);
 
         return $input;
+    }
+
+    public static function radioArray(): array
+    {
+        return [
+            [
+                'name' => 'by_text',
+                'label' => 'By Text',
+            ],
+            [
+                'name' => 'by_email',
+                'label' => 'By Email',
+            ],
+            [
+                'name' => 'by_phone',
+                'label' => 'By Phone',
+            ],
+        ];
     }
 
     public static function formRecipe(InputInterface $input): void
@@ -71,34 +89,16 @@ class ContactByFactory
                 rules: [
                     'required',
                     Rule::in(
-                        values: array_column(self::checkboxesArray(), 
+                        values: array_column(self::radioArray(), 
                         column_key: 'name')),
                 ]
             )
         );
     }
 
-    public static function checkboxesArray(): array
+    public static function radio(?string $livewireGroup = null): array
     {
-        return [
-            [
-                'name' => 'by_text',
-                'label' => 'By Text',
-            ],
-            [
-                'name' => 'by_email',
-                'label' => 'By Email',
-            ],
-            [
-                'name' => 'by_phone',
-                'label' => 'By Phone',
-            ],
-        ];
-    }
-
-    public static function checkboxes(?string $livewireGroup = null): array
-    {
-        $checkboxes = [];
+        $radio = [];
 
         $inputAttributes = ['name' => self::NAME];
         $labelAttributes = [];
@@ -114,7 +114,7 @@ class ContactByFactory
 
         $attributes = $attributes ?? ['name' => self::NAME,];
 
-        foreach (self::checkboxesArray() as $optionArray) {
+        foreach (self::radioArray() as $optionArray) {
             $option = new DefaultInput(name: $optionArray['name'], label: $optionArray['label']);
 
             if($livewireGroup) {
@@ -147,7 +147,7 @@ class ContactByFactory
                 inputGroup: new InputLabelErrorGroup,
                 attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes(inputAttributes: $inputAttributes)
-                    ->setLabelAttributes(labelAttributes:$labelAttributes),
+                    ->setLabelAttributes(labelAttributes: $labelAttributes),
                 themeBag: (new DefaultThemeBag)
                     ->setWrapperTheme([
                         'display' => 'flex',
@@ -172,10 +172,10 @@ class ContactByFactory
 
             $option->setRecipe($optionRecipe);
 
-            $checkboxes[] = $option;
+            $radio[] = $option;
         }
 
-        return $checkboxes;
+        return $radio;
 
     }
 

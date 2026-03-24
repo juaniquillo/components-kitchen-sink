@@ -1,12 +1,12 @@
  @props([
-    'component' => [],
+    'identifier' => null,
 ])
 
 @php
     use function Juaniquillo\BackendComponents\processThemes;
 @endphp
  
- @if(session()->has('success_'.$component['identifier']))
+ @if(session()->has('success_'.$identifier))
     <div class="max-w-6xl mx-auto mb-3">
         <div class="{{ processThemes([
             'padding' => 'xs', 
@@ -19,6 +19,6 @@
                 'success',
                 'success-dark',
             ],
-        ]) }}">{{ session()->get('success_'.$component['identifier']) }}</div>
+        ]) }}">{{ session()->get('success_'.$identifier) }}</div>
     </div>
 @endif
