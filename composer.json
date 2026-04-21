@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "juaniquillo/crud-assistant": "^0.1.0",
+        "juaniquillo/crud-assistant": "@dev",
         "juaniquillo/input-component-action": "@dev",
         "juaniquillo/laravel-backend-component": ">=0.1",
         "laravel/fortify": "^1.36.1",
