@@ -92,7 +92,9 @@ nav li {
 .justify-center {
     justify-content: center;
 }
-
+.wrap {
+    flex-wrap: wrap;
+}
 .component-box-bg{
     background-color: var(--cmp-bg-color);
 }

@@ -1,5 +1,5 @@
 @php
-    $pageTitle = "{$name} Components";
+    $pageTitle = "{$name} - Components";
     /* @var array<string, array{name: string, components: ComponentCollection, assets: array<string>}> $group */
     $componentGroup = $group['components'];
     $assets = $group['assets'] ?? [];
@@ -7,14 +7,14 @@
 <x-layouts.default :page-title="$pageTitle" :replace-assets="$assets">
     
     <div>
-        <h1 class="text-4xl font-bold text-center">Components</h1>
+        <h1 class="text-4xl font-bold text-center">{{ $name }}</h1>
 
-        <div class="mt-5 flex gap-2 justify-center">
+        <div class="mt-5 flex gap-2 wrap justify-center">
             @foreach ($componentGroup->list() as $components)
                 <div class="component-box-bg p-3">
                     <h2 class="component-box-h2">{{ $components::NAME }}</h2>
                     
-                    <div class="mt-4">
+                    <div class="mt-4 flex gap-2 wrap justify-center">
 
                         @foreach ($components->list() as $component)
                             {{ $component }}

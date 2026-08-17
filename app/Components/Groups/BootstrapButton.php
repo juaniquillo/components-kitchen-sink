@@ -9,7 +9,7 @@ use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
 class BootstrapButton implements Component
 {
-    const NAME = 'Bootstrap Buttons';
+    const NAME = 'Bootstrap Button';
     
     public static function list() : array
     {

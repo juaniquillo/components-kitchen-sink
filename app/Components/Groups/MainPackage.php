@@ -11,9 +11,9 @@ use Juaniquillo\BackendComponents\Utils\ModalUtil;
 class MainPackage implements Component
 {
     
-    CONST NAME = 'Main Package';
+    CONST NAME = 'Alpine JS Modals';
 
-    public static function make() : array
+    public static function list() : array
     {
         return [
             'Default modal' => self::default(),
