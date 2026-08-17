@@ -4,5 +4,5 @@ namespace App\Components\Contracts;
 
 interface Component
 {
-    public static function make() : array;
+    public static function list() : array;
 }

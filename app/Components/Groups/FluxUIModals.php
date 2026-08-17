@@ -4,21 +4,22 @@ namespace  App\Components\Groups;
 
 use App\Components\Builders\FluxComponentBuilder;
 use App\Components\Contracts\Component;
+use App\Components\ThirdParty\Flux\FluxComponentEnum;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
-class FluxModals implements Component 
+class FluxUIModals implements Component 
 {
-    const NAME = 'Modals (Livewire Flux)';
+    const NAME = 'Flux UI Modals';
     
-    public static function make(): array
+    public static function list(): array
     {
         return [
-            self::default(),
-            self::confirm(),
-            self::flyout(),
+            self::modalDefault(),
+            self::modalConfirm(),
+            self::modalFlyout(),
         ];
     }
 
@@ -27,17 +28,17 @@ class FluxModals implements Component
         return [];
     }
     
-    public static function default(): BackendComponent
+    public static function modalDefault(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::COLLECTION)
             ->setContents([
-                'button' => FluxComponentBuilder::make('modal.trigger')
+                'button' => FluxComponentBuilder::make(FluxComponentEnum::MODAL_TRIGGER)
                     ->setAttribute('name', 'flux-modal-test')
                     ->setContent(
-                        FluxComponentBuilder::make('button')
+                        FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
                             ->setContent('Open Modal')
                     ),
-                'modal' => FluxComponentBuilder::make('modal')
+                'modal' => FluxComponentBuilder::make(FluxComponentEnum::MODAL)
                     ->setAttribute('name', 'flux-modal-test')
                     ->setContent(
                         ComponentBuilder::make(ComponentEnum::DIV)
@@ -48,18 +49,18 @@ class FluxModals implements Component
             ]);
     }
 
-    public static function confirm(): BackendComponent
+    public static function modalConfirm(): BackendComponent
     {
          return ComponentBuilder::make(ComponentEnum::COLLECTION)
             ->setContents([
-                    'button' => FluxComponentBuilder::make('modal.trigger')
+                    'button' => FluxComponentBuilder::make(FluxComponentEnum::MODAL_TRIGGER)
                     ->setAttribute('name', 'flux-modal-confirm')
                     ->setContent(
-                        FluxComponentBuilder::make('button')
+                        FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
                             ->setAttribute('variant', 'danger')
                             ->setContent('Confirm')
                     ),
-                'modal' =>  FluxComponentBuilder::make('modal')
+                'modal' =>  FluxComponentBuilder::make(FluxComponentEnum::MODAL)
                     ->setAttribute('name', 'flux-modal-confirm')
                     // ->setAttribute(':dismissible', 'false')
                     ->setContent(
@@ -67,17 +68,17 @@ class FluxModals implements Component
                             ->setTheme('modal', 'flux-spacing')
                             ->setTheme('padding', 'x-md')
                             ->setContents([
-                                FluxComponentBuilder::make('heading')
+                                FluxComponentBuilder::make(FluxComponentEnum::HEADING)
                                     ->setContent('Delete project?'),
-                                FluxComponentBuilder::make('text')
+                                FluxComponentBuilder::make(FluxComponentEnum::TEXT)
                                     ->setAttribute('margin', 'top-xs')
                                     ->setContents([
                                         ComponentBuilder::make(ComponentEnum::PARAGRAPH)
                                             ->setContent('You\'re about to delete this project.'),
                                     ]),
                                 
-                                FluxComponentBuilder::make('spacer'),
-                                FluxComponentBuilder::make('modal.close')
+                                FluxComponentBuilder::make(FluxComponentEnum::SPACER),
+                                FluxComponentBuilder::make(FluxComponentEnum::MODAL_CLOSE)
                                     ->setContent(
                                         FluxComponentBuilder::make('button')
                                             ->setAttribute('variant', 'ghost')
@@ -94,7 +95,7 @@ class FluxModals implements Component
             ]);
     }
 
-    public static function flyout(): BackendComponent
+    public static function modalFlyout(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::COLLECTION)
             ->setContents([

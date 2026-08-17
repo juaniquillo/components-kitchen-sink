@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "start": "vite start", 
+        "start": "vite start",
         "build": "vite build",
         "dev": "vite"
     },
@@ -22,6 +22,9 @@
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "devDependencies": {
-        "@tailwindcss/forms": "^0.5.11"
+        "@popperjs/core": "^2.11.8",
+        "@tailwindcss/forms": "^0.5.11",
+        "bootstrap": "^5.3.8",
+        "sass": "^1.102.0"
     }
 }

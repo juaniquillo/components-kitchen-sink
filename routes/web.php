@@ -1,6 +1,6 @@
 <?php
 
-use App\Components\ComponentCollection;
+use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
 use App\Cruds\CrudCollection;
@@ -10,12 +10,32 @@ use Illuminate\Support\Facades\Validator;
 
 Route::get('/', function () {
 
-    $components = ComponentCollection::list();
-
-    return view('index')
-        ->with('components', $components);
+    return view('index');
 
 })->name('home');
+
+Route::get('components', function () {
+   
+    $links = RouteCollectionGroup::makeLinks();
+
+    return view('components')
+        ->with('links', $links);
+    
+})->name('components');
+
+Route::get('components/{group}', function ($group) {
+    
+    $group = RouteCollectionGroup::get($group);
+
+    if(!$group) {
+        return abort(404);
+    }
+    
+    return view('component-group')
+        ->with('name', $group['name'])
+        ->with('group', $group);
+
+})->name('component');
 
 Route::get('/cruds', function (Request $request) {
     

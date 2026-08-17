@@ -1,34 +1,44 @@
 <?php
 
-namespace  App\Components\ThirdParty\Flux;
+namespace App\Components\ThirdParty\Flux;
 
 use BackedEnum;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\View\ComponentAttributeBag;
-use Juaniquillo\BackendComponents\Concerns\HasPath;
+use Juaniquillo\BackendComponents\Components\DefaultAttributeBag;
 use Juaniquillo\BackendComponents\Concerns\HasContent;
+use Juaniquillo\BackendComponents\Concerns\HasPath;
+use Juaniquillo\BackendComponents\Concerns\IsBackendComponent;
+use Juaniquillo\BackendComponents\Concerns\IsThemeable;
 use Juaniquillo\BackendComponents\Contracts\AttributeBag;
-use Juaniquillo\BackendComponents\Contracts\ThemeManager;
-use Juaniquillo\BackendComponents\Contracts\PathComponent;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ContentComponent;
+use Juaniquillo\BackendComponents\Contracts\PathComponent;
+use Juaniquillo\BackendComponents\Contracts\ThemeComponent;
+use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Themes\DefaultThemeManager;
-use Juaniquillo\BackendComponents\Concerns\IsBackendComponent;
-use Juaniquillo\BackendComponents\Components\DefaultAttributeBag;
 
-use function Juaniquillo\BackendComponents\isBackedEnum;
 use function Juaniquillo\BackendComponents\backendComponentNamespace;
+use function Juaniquillo\BackendComponents\isBackedEnum;
 
-final class FluxBackendComponent implements BackendComponent, ContentComponent, PathComponent, Htmlable
+final class FluxBackendComponent implements BackendComponent, ContentComponent, Htmlable, PathComponent, ThemeComponent
 {
     use HasContent,
         HasPath,
-        IsBackendComponent;
+        IsBackendComponent,
+        IsThemeable;
 
     public function __construct(
         private string|BackedEnum $name,
         private ThemeManager $themeManager = new DefaultThemeManager
     ) {}
+
+    public function setAttribute(string $name, mixed $value): static
+    {
+        $this->attributes[$name] = $value;
+
+        return $this;
+    }
 
     /**
      * Hardcode context
@@ -52,9 +62,10 @@ final class FluxBackendComponent implements BackendComponent, ContentComponent, 
     public function getAttributeBag(): AttributeBag
     {
         return new DefaultAttributeBag(
-            attributes: $this->getAttributes(),
-            content:$this->processContent(),
-            path: $this->getComponentPath(),
+            $this->getAttributes(),
+            $this->processContent(),
+            $this->compileTheme(),
+            $this->getComponentPath(),
         );
     }
 
@@ -65,6 +76,12 @@ final class FluxBackendComponent implements BackendComponent, ContentComponent, 
             'attributes' => $this->getAttributes(),
             'content' => $this->processContent()->toArray(),
             'path' => $this->getComponentPath(),
+            'theme' => [
+                'manager' => get_class($this->themeManager),
+                'themes' => $this->getThemes(),
+                'path' => $this->themeManager->getDefaultPath(),
+                'realPath' => $this->themeManager->getThemePath(),
+            ],
         ];
     }
 
@@ -74,7 +91,7 @@ final class FluxBackendComponent implements BackendComponent, ContentComponent, 
         $attributes = $this->getAttributeBag()->getAttributes();
         $attributeBag = new ComponentAttributeBag($attributes);
         $content = $this->processContent();
-        
+
         return \view(backendComponentNamespace().'_utilities.resolve-third-party-component')
             ->with('path', $path)
             ->with('attributes', $attributeBag)

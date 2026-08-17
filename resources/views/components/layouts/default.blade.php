@@ -1,6 +1,6 @@
 @php
     use App\Menu\MainMenu;
-    $mainMenu = MainMenu::make();
+    $mainMenu = MainMenu::makeNav();
 @endphp
 
 <!DOCTYPE html>
@@ -12,8 +12,15 @@
     <title>{{ $pageTitle ?? 'Title' }}</title>
 
     @php
-        $additionalAssets = $additionalAssets ?? [];
-        $assets = array_merge(['resources/css/app.css', 'resources/js/app.js'], $additionalAssets);
+       $replaceAssets = $replaceAssets ?? [];
+
+        if(count($replaceAssets) > 0) {
+             $assets = $replaceAssets;
+        } else {
+            $additionalAssets = $additionalAssets ?? [];
+            $assets = array_merge(['resources/css/app.css', 'resources/js/app.js'], $additionalAssets);
+        }
+
     @endphp
     @vite($assets)
 
