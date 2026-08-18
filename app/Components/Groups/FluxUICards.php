@@ -31,7 +31,6 @@ class FluxUICards implements Component
     {
         return [
             'flex-column' => true,
-            'width' => 'component-box-lg-width',
         ];
     }
 

@@ -23,10 +23,7 @@ class BootstrapCard implements Component
 
     public static function options(): array
     {
-        return [
-            'flex-column' => true,
-            'max-width' => 'component-box-max-bootstrap',
-        ];
+        return [];
     }
 
     public static function simple(): CompoundComponent

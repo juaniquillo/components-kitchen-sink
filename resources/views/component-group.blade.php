@@ -13,21 +13,19 @@
 
         <h1 class="mt-sm text-4xl font-bold text-center">{{ $name }}</h1>
 
-        <div class="mt-5 flex gap-2 flex-wrap justify-center">
+        <div class="component-container mt-sm">
             @foreach ($componentGroup->list() as $components)
                 @php
                     $options = $components->options();
                     $disableFlex = $options['disable-flex'] ?? false;
                     $flexColumn = $options['flex-column'] ?? false;
-                    $flexGap = $options['flex-gap'] ?? 'gap-2';
-                    $maxWidth = $options['max-width'] ?? 'component-box-max-width';
-                    $width = $options['width'] ?? 'component-box-width';
+                    $flexGap = $options['flex-gap'] ?? 'flex-gap-sm';
                     
                 @endphp
-                <div class="component-box-bg p-3">
+                <div class="component-box-bg p-sm ">
                     <h2 class="component-box-h2">{{ $components::NAME }}</h2>
                     
-                    <div class="mt-4 {{ $maxWidth.' '.$width }} @if(!$disableFlex)flex {{ $flexGap }} flex-wrap justify-center items-center @endif @if($flexColumn) flex-columns @endif">
+                    <div class="mt-sm @if(!$disableFlex)flex {{ $flexGap }} flex-wrap justify-center items-center @endif @if($flexColumn) flex-columns @endif">
 
                         @foreach ($components->list() as $component)
                             {{ $component }}

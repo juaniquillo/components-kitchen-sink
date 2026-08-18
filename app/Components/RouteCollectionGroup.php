@@ -12,6 +12,7 @@ use App\Components\Groups\FluxUIButtons;
 use App\Components\Groups\FluxUIModals;
 use App\Components\Groups\FluxUICards;
 use App\Components\Groups\FluxUISkeletons;
+use App\Components\Groups\FluxUITables;
 use App\Components\Groups\MainPackage;
 use App\Menu\Concerns\Links;
 
@@ -48,6 +49,7 @@ class RouteCollectionGroup
                     new FluxUIButtons,
                     new FluxUISkeletons,
                     new FluxUICards,
+                    new FluxUITables,
                 ]),
                 'assets' => [],
             ],

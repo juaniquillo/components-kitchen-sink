@@ -43,7 +43,6 @@ class FluxUISkeletons implements Component
     {
         return [
             'disable-flex' => true,
-            'width' => 'component-box-md-width',
         ];
     }
     

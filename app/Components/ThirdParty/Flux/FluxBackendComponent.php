@@ -30,8 +30,10 @@ final class FluxBackendComponent implements BackendComponent, ContentComponent, 
 
     public function __construct(
         private string|BackedEnum $name,
-        private ThemeManager $themeManager = new DefaultThemeManager
-    ) {}
+        ThemeManager $themeManager = new DefaultThemeManager
+    ) {
+        $this->themeManager = $themeManager;
+    }
 
     public function setAttribute(string $name, mixed $value): static
     {

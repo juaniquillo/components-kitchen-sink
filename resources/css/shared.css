@@ -35,6 +35,14 @@
     flex-direction: column;
 }
 
+.flex-gap {
+    gap:1rem;
+}
+
+.flex-gap-sm {
+    gap:.8rem;
+}
+
 .component-box-max-width {
     max-width: none;
 }
@@ -59,3 +67,11 @@
     }
 }
 
+.component-container {
+    --gap: 1rem;
+    @media (min-width: 576px) {
+        display: grid;
+        gap: var(--gap);
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+}
