@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Components\Groups;
 
 use App\Components\Builders\FluxLocalThemeComponentBuilder;
+use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use App\Components\ThirdParty\Flux\FluxComponentEnum;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
@@ -19,7 +20,7 @@ class FluxUISkeletons implements Component
     {
         return [
             self::container([
-                self::basic()
+                self::basic(),
             ]),
             self::container([
                 self::pulse(),
@@ -33,21 +34,21 @@ class FluxUISkeletons implements Component
             self::container([
                 self::cardSkeleton(),
             ]),
-            self::container([
-                self::avatarWithText(),
-            ]),
+            // self::container([
+            //     self::avatarWithText(),
+            // ]),
         ];
     }
 
-    public static function options(): array
+    public static function options(): ContainerOptions
     {
-        return [
-            'disable-flex' => true,
-        ];
+        return new ContainerOptions(
+            disableFlex: true,
+        );
     }
-    
+
     /** @param array<int|string, BackendComponent> $contents */
-    public  static function container(array $contents): BackendComponent
+    public static function container(array $contents): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::DIV)
             ->setTheme('padding', 'xs')

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Components\Groups;
 
 use App\Components\Builders\FluxLocalThemeComponentBuilder;
+use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use App\Components\ThirdParty\Flux\FluxComponentEnum;
 use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
@@ -27,11 +28,11 @@ class FluxUICards implements Component
         ];
     }
 
-    public static function options(): array
+    public static function options(): ContainerOptions
     {
-        return [
-            'flex-column' => true,
-        ];
+        return new ContainerOptions(
+            flexColumn: true,
+        );
     }
 
     public static function simple(): BackendComponent
@@ -131,8 +132,7 @@ class FluxUICards implements Component
                     ->setTheme('card', 'image'),
                 FluxLocalThemeComponentBuilder::make(FluxComponentEnum::HEADING)
                     ->setAttribute('level', 2)
-                    ->setContent('Card with image')
-                    ,
+                    ->setContent('Card with image'),
                 FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT)
                     ->setContent('An image sits at the top of this card followed by text content.'),
             ]);

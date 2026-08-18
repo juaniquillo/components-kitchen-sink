@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Components\Groups;
 
+use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
@@ -28,9 +29,9 @@ class BootstrapBadge implements Component
         ];
     }
 
-    public static function options(): array
+    public static function options(): ContainerOptions
     {
-        return [];
+        return new ContainerOptions;
     }
 
     public static function primary(): BackendComponent

@@ -17,9 +17,9 @@
             @foreach ($componentGroup->list() as $components)
                 @php
                     $options = $components->options();
-                    $disableFlex = $options['disable-flex'] ?? false;
-                    $flexColumn = $options['flex-column'] ?? false;
-                    $flexGap = $options['flex-gap'] ?? 'flex-gap-sm';
+                    $disableFlex = $options->disableFlex;
+                    $flexColumn = $options->flexColumn;
+                    $flexGap = $options->flexGap;
                     
                 @endphp
                 <div class="component-box-bg p-sm ">

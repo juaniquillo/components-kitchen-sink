@@ -8,9 +8,11 @@ use App\Components\Groups\BootstrapBadge;
 use App\Components\Groups\BootstrapButton;
 use App\Components\Groups\BootstrapCard;
 use App\Components\Groups\BootstrapCarousel;
+use App\Components\Groups\BootstrapTables;
 use App\Components\Groups\FluxUIButtons;
-use App\Components\Groups\FluxUIModals;
 use App\Components\Groups\FluxUICards;
+use App\Components\Groups\FluxUIFileInputs;
+use App\Components\Groups\FluxUIModals;
 use App\Components\Groups\FluxUISkeletons;
 use App\Components\Groups\FluxUITables;
 use App\Components\Groups\MainPackage;
@@ -50,6 +52,7 @@ class RouteCollectionGroup
                     new FluxUISkeletons,
                     new FluxUICards,
                     new FluxUITables,
+                    new FluxUIFileInputs,
                 ]),
                 'assets' => [],
             ],
@@ -58,8 +61,9 @@ class RouteCollectionGroup
                 'components' => ComponentCollection::make()->addComponents([
                     new BootstrapButton,
                     new BootstrapBadge,
-                    new BootstrapCarousel,
                     new BootstrapCard,
+                    new BootstrapCarousel,
+                    new BootstrapTables,
                 ]),
                 'assets' => ['resources/sass/bootstrap.scss', 'resources/js/bootstrap.js'],
             ],

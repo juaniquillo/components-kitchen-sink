@@ -12,11 +12,8 @@ it('has the correct NAME constant', function () {
     expect(FluxUICards::NAME)->toBe('Flux UI Cards');
 });
 
-it('sets disable-flex and width options', function () {
-    $options = FluxUICards::options();
-
-    expect($options['disable-flex'])->toBeTrue()
-        ->and($options['width'])->toBe('component-box-md-width');
+it('sets flex-column option', function () {
+    expect(FluxUICards::options()->flexColumn)->toBeTrue();
 });
 
 it('renders a simple card with heading and text', function () {
@@ -73,7 +70,7 @@ it('renders a card with an image at the top', function () {
 
     expect($html)->toContain('data-flux-card')
         ->toContain('<img')
-        ->toContain('https://placehold.co/600x200')
+        ->toContain('https://placehold.co/200x100')
         ->toContain('alt="Placeholder image"')
         ->toContain('Card with image')
         ->toContain('An image sits at the top');

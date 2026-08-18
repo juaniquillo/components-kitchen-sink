@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Components\Groups;
 
 use App\Components\Builders\FluxLocalThemeComponentBuilder;
+use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use App\Components\ThirdParty\Flux\FluxComponentEnum;
 use App\Components\Utilities\FluxUITableUtil;
@@ -44,14 +45,14 @@ class FluxUITables implements Component
         ];
     }
 
-    public static function options(): array
+    public static function options(): ContainerOptions
     {
-        return [
-            'disable-flex' => true,
-        ];
+        return new ContainerOptions(
+            disableFlex: true,
+        );
     }
 
-     /** @param array<int|string, BackendComponent> $contents */
+    /** @param array<int|string, BackendComponent> $contents */
     public static function container(array $contents): BackendComponent
     {
         return LocalThemeComponentBuilder::make(ComponentEnum::DIV)

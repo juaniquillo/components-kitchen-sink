@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Components\Groups;
 
 use App\Components\Builders\FluxComponentBuilder;
+use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use App\Components\ThirdParty\Flux\FluxComponentEnum;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
@@ -25,14 +26,9 @@ class FluxUIModals implements Component
         ];
     }
 
-    public static function options(): array
+    public static function options(): ContainerOptions
     {
-        return [];
-    }
-
-    public static function config(): array
-    {
-        return [];
+        return new ContainerOptions;
     }
 
     public static function modalDefault(): BackendComponent
