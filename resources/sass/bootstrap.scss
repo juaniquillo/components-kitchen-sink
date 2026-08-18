@@ -1,5 +1,7 @@
 @use "bootstrap/scss/bootstrap";
 
+@import "./../css/shared.css";
+
 :root {
   /* Step 1: Tell the browser the site supports both modes */
   color-scheme: light dark;
@@ -92,24 +94,10 @@ nav li {
 .justify-center {
     justify-content: center;
 }
-.wrap {
+.flex-wrap {
     flex-wrap: wrap;
 }
-.component-box-bg{
-    background-color: var(--cmp-bg-color);
-}
 
-.component-box-bg {
-    background-color: var(--cmp-bg-color);
-}
-
-.component-box-h2 {
-    display: block;
-    font-size: 1.5em;
-    margin-block-start: 0;
-    margin-block-end: 0.83em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-    unicode-bidi: isolate;
+.component-box-max-bootstrap {
+    max-width: 400px;
 }

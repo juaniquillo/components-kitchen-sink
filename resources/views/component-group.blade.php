@@ -1,20 +1,33 @@
 @php
     $pageTitle = "{$name} - Components";
-    /* @var array<string, array{name: string, components: ComponentCollection, assets: array<string>}> $group */
     $componentGroup = $group['components'];
     $assets = $group['assets'] ?? [];
+    
 @endphp
 <x-layouts.default :page-title="$pageTitle" :replace-assets="$assets">
     
     <div>
-        <h1 class="text-4xl font-bold text-center">{{ $name }}</h1>
+        <div class="text-center ">
+            <a class="text-blue-500 underline" href="{{ route('components') }}">Back to components</a>
+        </div>
 
-        <div class="mt-5 flex gap-2 wrap justify-center">
+        <h1 class="mt-sm text-4xl font-bold text-center">{{ $name }}</h1>
+
+        <div class="mt-5 flex gap-2 flex-wrap justify-center">
             @foreach ($componentGroup->list() as $components)
+                @php
+                    $options = $components->options();
+                    $disableFlex = $options['disable-flex'] ?? false;
+                    $flexColumn = $options['flex-column'] ?? false;
+                    $flexGap = $options['flex-gap'] ?? 'gap-2';
+                    $maxWidth = $options['max-width'] ?? 'component-box-max-width';
+                    $width = $options['width'] ?? 'component-box-width';
+                    
+                @endphp
                 <div class="component-box-bg p-3">
                     <h2 class="component-box-h2">{{ $components::NAME }}</h2>
                     
-                    <div class="mt-4 flex gap-2 wrap justify-center">
+                    <div class="mt-4 {{ $maxWidth.' '.$width }} @if(!$disableFlex)flex {{ $flexGap }} flex-wrap justify-center items-center @endif @if($flexColumn) flex-columns @endif">
 
                         @foreach ($components->list() as $component)
                             {{ $component }}

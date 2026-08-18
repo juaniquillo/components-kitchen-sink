@@ -29,7 +29,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-200 dark:bg-slate-700 dark:text-white">
 
-    <div class="max-w-7xl mx-auto p-4">
+    <div class="max-w-7xl mx-auto p-sm">
         <nav>
             {{ $mainMenu }}
         </nav>

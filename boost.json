@@ -8,6 +8,10 @@
     "guidelines": true,
     "herd_mcp": true,
     "mcp": true,
+    "packages": [
+        "juaniquillo/laravel-backend-component",
+        "livewire/blaze"
+    ],
     "sail": false,
     "skills": [
         "infer-conventions",
@@ -17,6 +21,7 @@
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
-        "backend-component"
+        "backend-component",
+        "blaze-optimize"
     ]
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Components\ThirdParty\Flux;
 
 enum FluxComponentEnum: string
@@ -48,5 +50,10 @@ enum FluxComponentEnum: string
 
     // tooltip
     case TOOLTIP = 'tooltip';
+
+    // skeleton
+    case SKELETON = 'skeleton';
+    case SKELETON_LINE = 'skeleton.line';
+    case SKELETON_GROUP = 'skeleton.group';
 
 }

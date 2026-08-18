@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/forms";
 
+@import "./shared.css";
+
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @source '../views';
@@ -30,7 +32,6 @@
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
 
-    --cmp-bg-color: #ededed;
 }
 
 @layer theme {
@@ -38,7 +39,6 @@
         --color-accent: var(--color-white);
         --color-accent-content: var(--color-white);
         --color-accent-foreground: var(--color-neutral-800);
-        --cmp-bg-color: #2b3647;
     }
 }
 
@@ -70,18 +70,3 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
-
-.component-box-bg {
-    background-color: var(--cmp-bg-color);
-}
-
-.component-box-h2 {
-    display: block;
-    font-size: 1.5em;
-    margin-block-start: 0;
-    margin-block-end: 0.83em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-    unicode-bidi: isolate;
-}

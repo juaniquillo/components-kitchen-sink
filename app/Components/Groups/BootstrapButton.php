@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Components\Groups;
 
 use App\Components\Contracts\Component;
@@ -10,8 +12,8 @@ use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 class BootstrapButton implements Component
 {
     const NAME = 'Bootstrap Button';
-    
-    public static function list() : array
+
+    public static function list(): array
     {
         return [
             'primary' => self::primary(),
@@ -21,7 +23,12 @@ class BootstrapButton implements Component
             'link' => self::link(),
         ];
     }
-    
+
+    public static function options(): array
+    {
+        return [];
+    }
+
     public static function primary(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::BUTTON)
@@ -31,7 +38,7 @@ class BootstrapButton implements Component
                 'type' => 'button',
             ]);
     }
-    
+
     public static function secondary(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::BUTTON)
@@ -41,7 +48,7 @@ class BootstrapButton implements Component
                 'type' => 'button',
             ]);
     }
-    
+
     public static function success(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::BUTTON)
@@ -51,7 +58,7 @@ class BootstrapButton implements Component
                 'type' => 'button',
             ]);
     }
-    
+
     public static function danger(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::BUTTON)
@@ -61,7 +68,7 @@ class BootstrapButton implements Component
                 'type' => 'button',
             ]);
     }
-    
+
     public static function link(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::BUTTON)

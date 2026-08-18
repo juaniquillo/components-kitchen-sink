@@ -1,6 +1,8 @@
 <?php
 
-namespace  App\Components\Groups;
+declare(strict_types=1);
+
+namespace App\Components\Groups;
 
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
@@ -10,10 +12,9 @@ use Juaniquillo\BackendComponents\Utils\ModalUtil;
 
 class MainPackage implements Component
 {
-    
-    CONST NAME = 'Alpine JS Modals';
+    const NAME = 'Alpine JS Modals';
 
-    public static function list() : array
+    public static function list(): array
     {
         return [
             'Default modal' => self::default(),
@@ -23,6 +24,11 @@ class MainPackage implements Component
         ];
     }
 
+    public static function options(): array
+    {
+        return [];
+    }
+
     public static function default(): BackendComponent
     {
         return ModalUtil::make(
@@ -30,7 +36,7 @@ class MainPackage implements Component
         )->getComponent();
     }
 
-    public static function basic() : BackendComponent
+    public static function basic(): BackendComponent
     {
         return ModalUtil::make(
             ComponentBuilder::make(ComponentEnum::DIV)
@@ -51,16 +57,16 @@ class MainPackage implements Component
                 ->setTheme('padding', 'button-compact')
                 ->setTheme('border-radius', 'sm')
         )
-        ->setTheme(
-            'modal', [
-                'default',
-                '2xl'
-            ]
-        )
-        ->getComponent();
+            ->setTheme(
+                'modal', [
+                    'default',
+                    '2xl',
+                ]
+            )
+            ->getComponent();
     }
 
-    public static function withHeaderAndFooter() : BackendComponent
+    public static function withHeaderAndFooter(): BackendComponent
     {
         return ModalUtil::make(
             content: ComponentBuilder::make(ComponentEnum::DIV)
@@ -93,17 +99,17 @@ class MainPackage implements Component
                         ->setTheme('border-radius', 'sm')
                 )
         )
-        ->setTheme(
-            'modal', [
-                'default',
-                '2xl'
-            ]
-        )
-        ->getComponent();
+            ->setTheme(
+                'modal', [
+                    'default',
+                    '2xl',
+                ]
+            )
+            ->getComponent();
 
     }
 
-    public  static function dialog(): BackendComponent
+    public static function dialog(): BackendComponent
     {
         return ComponentBuilder::make(ComponentEnum::COLLECTION)
             ->setContent(
@@ -114,17 +120,17 @@ class MainPackage implements Component
                     ->setTheme('border-radius', 'sm')
                     ->setAttributes([
                         'command' => 'show-modal',
-                        'commandfor'=> "my-dialog-1",
+                        'commandfor' => 'my-dialog-1',
 
                     ])
-                    
+
             )
             ->setContent(
                 ComponentBuilder::make(ComponentEnum::DIALOG)
                     ->setAttribute('id', 'my-dialog-1')
                     ->setTheme('modal', [
                         'default',
-                        'lg'
+                        'lg',
                     ])
                     ->setContent(
                         ComponentBuilder::make(ComponentEnum::DIV)
@@ -132,7 +138,7 @@ class MainPackage implements Component
                                 'top-sm',
                                 'bottom-sm',
                                 'right-md',
-                                'left-md'
+                                'left-md',
                             ])
                             ->setContents([
                                 ComponentBuilder::make(ComponentEnum::PARAGRAPH)
@@ -144,9 +150,9 @@ class MainPackage implements Component
                                     ->setTheme('padding', 'button-compact')
                                     ->setAttributes([
                                         'command' => 'close',
-                                        'commandfor'=> "my-dialog-1",
+                                        'commandfor' => 'my-dialog-1',
 
-                                    ])
+                                    ]),
                             ])
                     )
             );
