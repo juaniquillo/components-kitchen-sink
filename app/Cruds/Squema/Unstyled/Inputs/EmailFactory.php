@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\Unstyled\Inputs;
 
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
@@ -14,8 +16,8 @@ class EmailFactory
 
     const LABEL = 'Email';
 
-    public static function make() : InputInterface
-    {        
+    public static function make(): InputInterface
+    {
         $input = new DefaultInput(
             name: self::NAME,
             label: self::LABEL,
@@ -41,7 +43,7 @@ class EmailFactory
             new InputComponentRecipe(
                 attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
-                        'type' => 'email'
+                        'type' => 'email',
                     ])
             )
         );

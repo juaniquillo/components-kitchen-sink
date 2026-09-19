@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\Flux\Inputs;
 
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
@@ -14,7 +16,7 @@ class FluxNameFactory
 
     const LABEL = 'Name';
 
-    public static function make() : InputInterface
+    public static function make(): InputInterface
     {
         $input = new DefaultInput(self::NAME, self::LABEL);
 
@@ -29,7 +31,7 @@ class FluxNameFactory
     {
         $input->setRecipe(
             recipe: new LaravelValidationRulesRecipe([
-                'required'
+                'required',
             ])
         );
     }
@@ -38,7 +40,7 @@ class FluxNameFactory
     {
         $input->setRecipe(
             recipe: new InputComponentRecipe(
-                attributeBag: (new DefaultAttributeBag())
+                attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
                         'label' => self::LABEL,
                     ])

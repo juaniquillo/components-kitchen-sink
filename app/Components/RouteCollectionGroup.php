@@ -4,18 +4,23 @@ declare(strict_types=1);
 
 namespace App\Components;
 
-use App\Components\Groups\BootstrapBadge;
-use App\Components\Groups\BootstrapButton;
-use App\Components\Groups\BootstrapCard;
-use App\Components\Groups\BootstrapCarousel;
-use App\Components\Groups\BootstrapTables;
-use App\Components\Groups\FluxUIButtons;
-use App\Components\Groups\FluxUICards;
-use App\Components\Groups\FluxUIFileInputs;
-use App\Components\Groups\FluxUIModals;
-use App\Components\Groups\FluxUISkeletons;
-use App\Components\Groups\FluxUITables;
+use App\Components\Groups\Bootstrap\BootstrapBadge;
+use App\Components\Groups\Bootstrap\BootstrapButton;
+use App\Components\Groups\Bootstrap\BootstrapCard;
+use App\Components\Groups\Bootstrap\BootstrapCarousel;
+use App\Components\Groups\Bootstrap\BootstrapTables;
+use App\Components\Groups\Flux\FluxUIButtons;
+use App\Components\Groups\Flux\FluxUICards;
+use App\Components\Groups\Flux\FluxUIFileInputs;
+use App\Components\Groups\Flux\FluxUIModals;
+use App\Components\Groups\Flux\FluxUISkeletons;
+use App\Components\Groups\Flux\FluxUITables;
 use App\Components\Groups\MainPackage;
+use App\Components\Groups\Slate\SlateButtons;
+use App\Components\Groups\Slate\SlateCarousel;
+use App\Components\Groups\Slate\SlateDialog;
+use App\Components\Groups\Slate\SlateDropDownMenu;
+use App\Components\Groups\Slate\SlateTabs;
 use App\Menu\Concerns\Links;
 
 class RouteCollectionGroup
@@ -67,6 +72,18 @@ class RouteCollectionGroup
                 ]),
                 'assets' => ['resources/sass/bootstrap.scss', 'resources/js/bootstrap.js'],
             ],
+            'slate' => [
+                'name' => 'Slate',
+                'components' => ComponentCollection::make()->addComponents([
+                    new SlateButtons,
+                    new SlateDialog,
+                    new SlateTabs,
+                    new SlateCarousel,
+                    new SlateDropDownMenu,
+                ]),
+                'assets' => ['resources/css/slate.css'],
+            ],
+
         ];
     }
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Cruds\Actions\Validation;
 
+use Closure;
 use Juaniquillo\CrudAssistant\Concerns\IsRecipe;
 use Juaniquillo\CrudAssistant\Contracts\RecipeInterface;
-use Closure;
 
 final class LaravelValidationRulesRecipe implements RecipeInterface
 {

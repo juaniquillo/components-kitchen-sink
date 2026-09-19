@@ -1,9 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\Flux;
 
-use App\Components\Builders\FluxComponentBuilder;
-use App\Components\ThirdParty\Flux\FluxBackendComponent;
 use App\Cruds\Concerns\IsCrud;
 use App\Cruds\Contracts\Crud;
 use App\Cruds\Squema\Flux\Inputs\FluxEmailFactory;
@@ -16,6 +16,8 @@ use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\CrudAssistant\InputCollection;
+use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
+use Juaniquillo\FluxBackendComponents\FluxBackendComponent;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
@@ -25,8 +27,9 @@ use Juaniquillo\InputComponentAction\InputComponentAction;
 class FluxCrud implements Crud
 {
     use IsCrud;
-    
+
     public const IDENTIFIER = 'flux';
+
     public const NAME = 'Flux Crud';
 
     public static function make(?array $values = null, ?array $errors = null): InputCollection
@@ -47,23 +50,23 @@ class FluxCrud implements Crud
                 $values ?? [],
                 $errors ?? [],
             ))
-            ->setDefaultInputGroup(NoWrapSoleInputGroup::class)
-            ->setDefaultComponentBag(
-                (new DefaultComponentBag())
-                    // Input
-                    ->setInputType('input')
-                    ->setInputComponent(
-                        function(string|BackedEnum $type, ThemeManager $manager) {
-                            return new FluxBackendComponent($type, $manager);
-                        }
-                    )
-            )
-            ->setDefaultThemeBag(
-                (new DefaultThemeBag())
-                    ->setWrapperTheme([
-                        'margin' => 'top-sm',
-                    ])
-            )
+                ->setDefaultInputGroup(NoWrapSoleInputGroup::class)
+                ->setDefaultComponentBag(
+                    (new DefaultComponentBag)
+                        // Input
+                        ->setInputType('input')
+                        ->setInputComponent(
+                            function (string|BackedEnum $type, ThemeManager $manager) {
+                                return new FluxBackendComponent($type, $manager);
+                            }
+                        )
+                )
+                ->setDefaultThemeBag(
+                    (new DefaultThemeBag)
+                        ->setWrapperTheme([
+                            'margin' => 'top-sm',
+                        ])
+                )
 
         );
 
@@ -78,8 +81,8 @@ class FluxCrud implements Crud
             ->setThemes([
                 'display' => 'grid',
                 'grid' => [
-                    'gap-md'
-                ]
+                    'gap-md',
+                ],
             ])
             ->setContent(
                 ComponentBuilder::make(ComponentEnum::DIV)

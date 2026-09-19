@@ -129,6 +129,19 @@ $button = ComponentBuilder::make(ComponentEnum::BUTTON)
 // Theme classes merge into the HTML class attribute automatically
 ```
 
+Themes accumulate by default — calling `setTheme` with the same name appends rather than replaces:
+
+```php
+$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    ->setTheme('action', 'success')
+    ->setTheme('action', 'error');
+// theme['action'] = ['success', 'error']
+
+// Use overwrite: true to replace instead
+$button->setTheme('action', 'link', overwrite: true);
+// theme['action'] = 'link'
+```
+
 ## Individual Components
 
 `DivComponent` is both a utility **and** a blueprint for creating new targeted component classes that bypass the enum/builder entirely. To create a new individual component, duplicate the `DivComponent` pattern:

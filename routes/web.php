@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
@@ -15,30 +17,32 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('components', function () {
-   
+
     $links = RouteCollectionGroup::makeLinks();
 
     return view('components')
         ->with('links', $links);
-    
+
 })->name('components');
 
 Route::get('components/{group}', function ($group) {
-    
-    $group = RouteCollectionGroup::get($group);
 
-    if(!$group) {
+    $routes = new RouteCollectionGroup;
+    $group = $routes::get($group);
+
+    if (! $group) {
         return abort(404);
     }
-    
+
     return view('component-group')
         ->with('name', $group['name'])
-        ->with('group', $group);
+        ->with('group', $group)
+        ->with('links', $routes::makeLinks());
 
 })->name('component');
 
 Route::get('/cruds', function (Request $request) {
-    
+
     $oldValues = $request->old();
     $errors = $request->session()->get('errors')?->toArray();
 
@@ -48,14 +52,14 @@ Route::get('/cruds', function (Request $request) {
 
     return view('cruds')
         ->with('cruds', $cruds);
-    
+
 })->name('cruds');
 
 Route::post('/cruds', function (Request $request) {
     $identifier = $request->input('identifier');
-    
+
     $crudArray = CrudCollection::getCrudByIdentifier($identifier);
-    
+
     if (! $crudArray) {
         abort(404);
     }
@@ -81,7 +85,6 @@ Route::post('/cruds', function (Request $request) {
         ->back()
         ->with('success_'.$crudClass::IDENTIFIER, 'All good 👍');
 })->name('cruds.store');
-
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

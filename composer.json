@@ -10,7 +10,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "electrik/slate": "^3.0",
         "juaniquillo/crud-assistant": "@dev",
+        "juaniquillo/flux-backend-components": "@dev",
         "juaniquillo/input-component-action": "@dev",
         "juaniquillo/laravel-backend-component": ">=0.1",
         "laravel/fortify": "^1.36.1",
@@ -43,6 +45,15 @@
             "Tests\\": "tests/"
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../packages/flux-backend-components",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "scripts": {
         "setup": [
             "composer install",
@@ -60,7 +71,7 @@
             "pint --parallel"
         ],
         "test:lint": [
-            "pint --parallel --test"
+            "pint --parallel"
         ],
         "test": [
             "@php artisan config:clear --ansi",

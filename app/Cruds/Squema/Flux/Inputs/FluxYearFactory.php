@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\Flux\Inputs;
 
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
@@ -27,7 +29,7 @@ class FluxYearFactory
             new InputComponentRecipe(
                 componentBag: (new DefaultComponentBag)
                     ->setInputType('select'),
-                attributeBag: (new DefaultAttributeBag())
+                attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
                         'label' => self::LABEL,
                     ])
@@ -71,16 +73,16 @@ class FluxYearFactory
                 selectable: true,
                 useParentValue: true,
                 labelAsInputContent: true,
-                disableBag: (new DefaultDisableBag())
+                disableBag: (new DefaultDisableBag)
                     ->setDisableWrapper()
                     ->setDisableDefaultNameAttribute(),
                 themeBag: (new DefaultThemeBag)
                     // reset default theme
                     // for the options
                     ->setInputTheme([]),
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setInputType('select.option')
-                    // ->setInputComponent(FluxBackendComponent::class)
+                // ->setInputComponent(FluxBackendComponent::class)
             );
 
             $option->setRecipe($optionRecipe);

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Cruds\Squema\Simple\Inputs;
 
-use App\Cruds\Concerns\IsLivewireInput;
-use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
-use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
+use App\Cruds\Concerns\IsLivewireInput;
+use Juaniquillo\CrudAssistant\Contracts\InputInterface;
+use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
 
 class NameFactory
 {
@@ -21,7 +21,7 @@ class NameFactory
     {
         $input = new DefaultInput(self::NAME, self::LABEL);
 
-        if($livewireGroup) {
+        if ($livewireGroup) {
             $input->setRecipe(
                 recipe: self::manageLivewireRecipe($livewireGroup, self::NAME)
             );
@@ -39,5 +39,4 @@ class NameFactory
 
         return $input;
     }
-    
 }

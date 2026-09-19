@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Cruds\Squema\InputGroup\Inputs;
 
-use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
-use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
+use Juaniquillo\CrudAssistant\Contracts\InputInterface;
+use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
 use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
 
@@ -38,16 +38,15 @@ class NameFactory
          */
         $input->setRecipe(
             new InputComponentRecipe(
-                attributeBag: (new DefaultAttributeBag())
+                attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
                         'required' => 'required',
                         'placeholder' => 'Enter your name',
                     ]
-                ),
+                    ),
             )
         );
 
         return $input;
     }
-    
 }

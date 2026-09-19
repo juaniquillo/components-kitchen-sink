@@ -58,7 +58,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 ## Searching Documentation (IMPORTANT)
 
-- Always use `search-docs` before making code changes. Do not skip this step. It returns version-specific docs based on installed packages automatically.
+- Use `search-docs` before changes that depend on Laravel ecosystem APIs, behavior, configuration, or version-specific syntax. Skip it for copy-only edits and other changes where package documentation is irrelevant. Reuse sufficient results already in context instead of searching again.
 - Pass a `packages` array to scope results when you know which packages are relevant.
 - Use multiple broad, topic-based queries: `['rate limiting', 'routing rate limiting', 'routing']`. Expect the most relevant results first.
 - Do not add package names to queries because package info is already shared. Use `test resource table`, not `filament 4 test resource table`.
@@ -73,7 +73,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Project Rules
 
 - This project contains committed, area-grouped rules in `.ai/rules` when that directory exists (settled decisions, non-obvious traps, standing constraints). Framework and package guidelines that only apply to specific paths (testing, frontend, components) also live there, under `.ai/rules/boost` — this is not just recorded decisions, it is load-bearing guidance you have not seen inline. Before you enter plan mode or create/edit any file, you MUST first: open @.ai/rules/index.md (it maps file globs to rule files), read every rule file whose globs cover the path(s) in scope, and run `grep -rin 'keyword' .ai/rules` to catch what a path match alone misses. Do not write code until you have read and are following every matching rule. If `.ai/rules` does not exist, continue without it.
-- Record durable rules with `record-rule` so the next agent or teammate inherits them instead of working them out again. Pass a `glob` (e.g. `app/Http/Controllers/**`), a short `title`, and a few-line `note`. Always use `record-rule`, never your native memory or notes tool — native memory is personal and session-scoped; only `.ai/rules` is shared with the team and persists in the repo.
+- Record a rule with `record-rule` only when the user explicitly asks for one. Instructions for the work at hand are not rules, no matter how emphatic: "remove this typo", "use X here" are work to do, not rules to record. Never record a rule on your own initiative, as a byproduct of a change, or to summarize what you just did. When the user does ask, pass a `glob` (e.g. `app/Http/Controllers/**`), a short `title`, and a few-line `note`. Use `record-rule` rather than your native memory or notes tool, because native memory is personal and session-scoped, while only `.ai/rules` is shared with the team and persists in the repo.
 
 ## Artisan
 
@@ -94,7 +94,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Always use curly braces for control structures, even for single-line bodies.
 - Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
 - Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
-- Follow existing application Enum naming conventions.
+- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
 
@@ -103,6 +103,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 # Deployment
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
+- Activate the `deploying-to-cloud` skill whenever deploying to Laravel Cloud, configuring Cloud environments or resources, using the Cloud CLI, or troubleshooting Cloud deployments.
 
 === herd rules ===
 
@@ -115,8 +116,11 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # Test Enforcement
 
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+- Add or update tests for behavior and logic changes when a test provides meaningful regression coverage.
+- Pure copy, styling, and layout-only changes do not require new or updated tests.
+- When test coverage applies, run the affected tests and ensure they pass.
+- Test the changed behavior and its important failure modes, but do not add tests beyond them.
+- Read the `testing-best-practices` skill before writing tests.
 
 === laravel/core rules ===
 
@@ -152,7 +156,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # Livewire
 
-- Livewire allow to build dynamic, reactive interfaces in PHP without writing JavaScript.
+- Livewire allows you to build dynamic, reactive interfaces in PHP without writing JavaScript.
 - You can use Alpine.js for client-side interactions instead of JavaScript frameworks.
 - Keep state server-side so the UI reflects it. Validate and authorize in actions as you would in HTTP requests.
 
@@ -165,18 +169,25 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 === pest/core rules ===
 
-## Pest
+# Pest
 
-- This project uses Pest for testing. Create tests: `php artisan make:test --pest {name}`.
-- The `{name}` argument should not include the test suite directory. Use `php artisan make:test --pest SomeFeatureTest` instead of `php artisan make:test --pest Feature/SomeFeatureTest`.
-- Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
-- Do NOT delete tests without approval.
+- This project uses Pest. Create tests with `php artisan make:test --pest {name}`.
+- Do not include the test suite directory in `{name}`. Use `SomeFeatureTest`, not `Feature/SomeFeatureTest`.
+- Read the `testing-best-practices` skill for guidance on coverage, naming, structure, dependency isolation, and review.
+- Do not delete tests or test files without approval. They are part of the application.
+
+## Running Tests
+
+- Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
+- Rerun a test after each change to it.
+- Run `vendor/bin/pest` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
+- After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
 
 === juaniquillo/laravel-backend-component/core rules ===
 
 ## Laravel Backend Component
 
-This package lets you build dynamic, class-based HTML components in PHP. Instead of writing Blade HTML directly, you compose component trees via PHP objects and render them with:
+This package lets you build dynamic, dynamic HTML components in PHP. Instead of writing Blade HTML directly, you compose component trees via PHP objects and render them with:
 
 ```php
 {{ $component }}
@@ -194,6 +205,9 @@ use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
 $button = ComponentBuilder::make(ComponentEnum::BUTTON);
 $div    = ComponentBuilder::make(ComponentEnum::DIV);
+// Or directly,second param controls theme resolution:
+$div = new MainBackendComponent('div');                        // package themes
+$div = new MainBackendComponent('div', new LocalThemeManager); // app-local themes
 ```
 
 ### Content management
@@ -244,6 +258,19 @@ $button = ComponentBuilder::make(ComponentEnum::BUTTON)
     ->setThemes(['action' => 'success', 'size' => 'lg']); // batch
 ```
 
+Themes accumulate by default,calling `setTheme` with the same name appends rather than replaces:
+
+```php
+$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    ->setTheme('action', 'success')
+    ->setTheme('action', 'error');
+// theme['action'] = ['success', 'error']
+
+// Use overwrite: true to replace instead
+$button->setTheme('action', 'link', overwrite: true);
+// theme['action'] = 'link'
+```
+
 ### Individual components
 
 `DivComponent` is both a utility **and** a blueprint for creating new targeted component classes that bypass the enum/builder entirely. To create a new individual component, duplicate the `DivComponent` pattern:
@@ -264,7 +291,7 @@ $div->setAttribute('class', 'my-class');
 $div->setContent('Hello');
 ```
 
-Currently only `DivComponent` exists in this category — add more as needed.
+Currently only `DivComponent` exists in this category,add more as needed.
 
 ### Table utilities
 
@@ -289,7 +316,7 @@ $table = TableUtil::make(
 
 ### Modal utility
 
-ModalUtil builds a complete modal tree with Alpine.js interactivity — no separate blade template or slots needed:
+ModalUtil builds a complete modal tree with Alpine.js interactivity,no separate blade template or slots needed:
 
 ```php
 use Juaniquillo\BackendComponents\Utils\ModalUtil;
@@ -361,9 +388,9 @@ Self-closing tags (input, img, col) use `/>` instead.
 
 For apps consuming the package, three builders control which `resources/views/` directory resolves components and themes:
 
-- **`ComponentBuilder`** — package views for both components and themes
-- **`LocalComponentBuilder`** — app views for both components and themes
-- **`LocalThemeComponentBuilder`** — package views for components, app views for themes
+- **`ComponentBuilder`**,package views for both components and themes
+- **`LocalComponentBuilder`**,app views for both components and themes
+- **`LocalThemeComponentBuilder`**,package views for components, app views for themes
 
 ```php
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
@@ -384,5 +411,23 @@ $component   = ComponentBuilder::make(ComponentEnum::BUTTON)->useLocal();
 $array = $component->toArray();
 $restored = ComponentFactory::fromArray($array);
 ```
+
+### Cached components
+
+`CachedBackendComponent` caches its rendered HTML output to disk via PSR-16:
+
+```php
+use Juaniquillo\BackendComponents\Components\CachedBackendComponent;
+
+$button = new CachedBackendComponent(ComponentEnum::BUTTON);
+$html = $button->getCachedHtml();   // renders + caches
+$html = $button->getCachedHtml();   // served from cache
+$button->clearCache();              // invalidates
+
+$button->setCacheDirectory('/custom/path'); // override default
+$button->disableCache();                    // bypass cache
+```
+
+Default cache directory: `cache/backend-components/`. Livewire components bypass caching. Cache key: `md5(json_encode($toArray()))`. Best suited for static content like documentation, navigation, or footer blocks,avoid caching dynamic or user-specific content unless you handle invalidation.
 
 </laravel-boost-guidelines>

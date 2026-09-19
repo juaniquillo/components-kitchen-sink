@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/form-group.js',
                 'resources/sass/bootstrap.scss',
                 'resources/js/bootstrap.js',
+                'resources/css/slate.css', 
             ],
             refresh: true,
         }),

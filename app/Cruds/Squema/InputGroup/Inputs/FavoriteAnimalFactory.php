@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\InputGroup\Inputs;
 
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
@@ -26,7 +28,6 @@ class FavoriteAnimalFactory
 
     const LABEL = 'Favorite animal';
 
-
     public static function make(): InputInterface
     {
         $input = new DefaultInput(self::NAME, self::LABEL);
@@ -45,8 +46,8 @@ class FavoriteAnimalFactory
     {
         $input->setRecipe(
             new InputComponentRecipe(
-                inputGroup: new DefaultInputGroup(),
-                componentBag: (new DefaultComponentBag())
+                inputGroup: new DefaultInputGroup,
+                componentBag: (new DefaultComponentBag)
                     ->setLabelType(ComponentEnum::LEGEND)
                     ->setInputType(ComponentEnum::DIV),
                 disableBag: (new DefaultDisableBag)
@@ -73,7 +74,6 @@ class FavoriteAnimalFactory
         );
     }
 
-    
     public static function validation(InputInterface $input): void
     {
         $input->setRecipe(
@@ -82,15 +82,14 @@ class FavoriteAnimalFactory
                     'required',
                     Rule::in(
                         values: array_column(
-                            self::radioArray(), 
+                            self::radioArray(),
                             column_key: 'name')
-                        ),
+                    ),
                 ]
             )
         );
     }
 
-    
     public static function radioArray(): array
     {
         return [
@@ -113,11 +112,11 @@ class FavoriteAnimalFactory
     {
         $radioBoxes = [];
         $inputAttributes = [
-            'name' => self::NAME, 
-            'required' => 'required'
+            'name' => self::NAME,
+            'required' => 'required',
         ];
-        
-        foreach(self::radioArray() as $radio) {
+
+        foreach (self::radioArray() as $radio) {
 
             $input = new DefaultInput($radio['name'], $radio['label']);
 
@@ -126,18 +125,18 @@ class FavoriteAnimalFactory
                     // Set input value
                     inputValue: $radio['value'] ?? $radio['name'],
                     // Set input name with the same name and the required attribute
-                    attributeBag: (new DefaultAttributeBag())
+                    attributeBag: (new DefaultAttributeBag)
                         ->setInputAttributes($inputAttributes),
-                    // Set a div as the wrapper 
-                    componentBag: (new DefaultComponentBag())
-                        ->setWrapperComponent(function(string|BackedEnum $name, ThemeManager $themeManager){
+                    // Set a div as the wrapper
+                    componentBag: (new DefaultComponentBag)
+                        ->setWrapperComponent(function (string|BackedEnum $name, ThemeManager $themeManager) {
                             return new MainBackendComponent(ComponentEnum::DIV, $themeManager);
                         })
                         ->setInputType(ComponentEnum::RADIO_INPUT),
                     inputGroup: new InputLabelErrorGroup,
                     // Disable individual input error. Not needed with
                     // An input group without error component
-                    disableBag: (new DefaultDisableBag())
+                    disableBag: (new DefaultDisableBag)
                         ->setDisableError(),
                     // Set group tailwind classes
                     themeBag: self::radioGroupThemeBag(),
@@ -168,5 +167,4 @@ class FavoriteAnimalFactory
             ])
             ->setLabelTheme([]);
     }
-
 }

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Cruds\Squema\Unstyled;
+declare(strict_types=1);
 
+namespace App\Cruds\Squema\Unstyled;
 
 use App\Cruds\Concerns\IsCrud;
 use App\Cruds\Contracts\Crud;
@@ -21,6 +22,7 @@ class UnstyledCrud implements Crud
     use IsCrud;
 
     public const IDENTIFIER = 'unstyled';
+
     public const NAME = 'Unstyled Crud';
 
     public static function make(?string $group = null): InputCollection
@@ -40,17 +42,17 @@ class UnstyledCrud implements Crud
                 $values ?? [],
                 $errors ?? [],
             ))
-            ->setDefaultThemeBag(
-                (new DefaultThemeBag())
-                    ->setInputTheme([
-                        'color' => 'default',
-                    ])
-            )
+                ->setDefaultThemeBag(
+                    (new DefaultThemeBag)
+                        ->setInputTheme([
+                            'color' => 'default',
+                        ])
+                )
         );
 
         /** @var InputComponentOutput $output */
         $inputs = $output->inputs;
-       
+
         $form = ComponentBuilder::make(ComponentEnum::FORM)
             ->setContents($inputs->toArray())
             ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER, '#'.self::IDENTIFIER]))

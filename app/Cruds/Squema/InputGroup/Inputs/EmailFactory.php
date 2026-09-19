@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\InputGroup\Inputs;
 
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
@@ -15,7 +17,6 @@ class EmailFactory
     const NAME = 'email_wc';
 
     const LABEL = 'Email';
-
 
     public static function make(): InputInterface
     {
@@ -39,12 +40,12 @@ class EmailFactory
          */
         $input->setRecipe(
             new InputComponentRecipe(
-                attributeBag: (new DefaultAttributeBag())
+                attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
                         'required' => 'required',
                         'placeholder' => 'Enter your Email',
                     ]),
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setInputType(ComponentEnum::EMAIL_INPUT)
             )
         );

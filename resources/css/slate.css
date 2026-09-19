@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+@import '../../vendor/electrik/slate/resources/css/slate.css';
+
+@import "./shared.css";

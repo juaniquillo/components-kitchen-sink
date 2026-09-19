@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds;
 
 use App\Cruds\Squema\Flux\FluxCrud;
@@ -9,7 +11,7 @@ use App\Cruds\Squema\Unstyled\UnstyledCrud;
 
 class CrudCollection
 {
-    public static function list(?array $values = null, ?array $errors = null) : array
+    public static function list(?array $values = null, ?array $errors = null): array
     {
         return [
             UnstyledCrud::IDENTIFIER => [

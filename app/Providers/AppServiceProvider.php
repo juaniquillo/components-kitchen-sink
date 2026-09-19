@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Livewire\Blaze\Blaze;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,8 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if(class_exists('\Livewire\Blaze\Blaze')) {
-            \Livewire\Blaze\Blaze::optimize()->in(base_path('vendor/juaniquillo/laravel-backend-component/resources/components'));
+        if (class_exists('\Livewire\Blaze\Blaze')) {
+            Blaze::optimize()->in(base_path('vendor/juaniquillo/laravel-backend-component/resources/components'));
         }
     }
 }

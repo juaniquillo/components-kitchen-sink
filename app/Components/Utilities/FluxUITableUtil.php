@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Components\Utilities;
 
-use App\Components\ThirdParty\Flux\FluxBackendComponent;
-use App\Components\ThirdParty\Flux\FluxComponentEnum;
 use BackedEnum;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Themes\LocalThemeManager;
 use Juaniquillo\BackendComponents\Utils\CellBag;
+use Juaniquillo\FluxBackendComponents\FluxBackendComponent;
+use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
 use function Juaniquillo\BackendComponents\isCellBag;
 use function Juaniquillo\BackendComponents\isComponent;
@@ -58,7 +58,7 @@ final class FluxUITableUtil
     public function __construct(
         private array $head,
         private array $body,
-        private ThemeManager $themeManager = new LocalThemeManager(),
+        private ThemeManager $themeManager = new LocalThemeManager,
     ) {}
 
     /**

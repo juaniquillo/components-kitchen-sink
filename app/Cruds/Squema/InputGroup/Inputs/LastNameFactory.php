@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\InputGroup\Inputs;
 
 use App\Cruds\Actions\Validation\LaravelValidationRulesRecipe;
@@ -10,11 +12,9 @@ use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
 
 class LastNameFactory
 {
-    
     const NAME = 'last_name_wc';
 
     const LABEL = 'Last Name';
-
 
     public static function make(): InputInterface
     {
@@ -38,9 +38,9 @@ class LastNameFactory
          */
         $input->setRecipe(
             new InputComponentRecipe(
-                attributeBag: (new DefaultAttributeBag())
+                attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
-                        'placeholder' => 'Enter your last name'
+                        'placeholder' => 'Enter your last name',
                     ])
             )
         );

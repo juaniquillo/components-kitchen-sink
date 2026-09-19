@@ -7,11 +7,10 @@
 <x-layouts.default :page-title="$pageTitle" :replace-assets="$assets">
     
     <div>
-        <div class="text-center ">
-            <a class="text-blue-500 underline" href="{{ route('components') }}">Back to components</a>
-        </div>
-
+        
         <h1 class="mt-sm text-4xl font-bold text-center">{{ $name }}</h1>
+
+        {{ $links }}
 
         <div class="component-container mt-sm">
             @foreach ($componentGroup->list() as $components)

@@ -20,6 +20,7 @@ use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
 class CitiesFactory
 {
     use IsLivewireInput;
+
     const NAME = 'cities';
 
     const LABEL = 'Choose City';
@@ -32,20 +33,20 @@ class CitiesFactory
 
         $attributeBag = new DefaultAttributeBag;
 
-        if($livewireGroup) {
+        if ($livewireGroup) {
             self::getLivewireAttributeBag(
                 $livewireGroup,
                 self::NAME,
                 $attributeBag
             );
         }
-        
+
         $input->setRecipe(
             new InputComponentRecipe(
                 attributeBag: $attributeBag,
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setInputType(ComponentEnum::SELECT),
-                disableBag: (new DefaultDisableBag())
+                disableBag: (new DefaultDisableBag)
                     ->setDisableInputValue()
             )
         );
@@ -67,14 +68,14 @@ class CitiesFactory
                 selectable: true,
                 useParentValue: true,
                 labelAsInputContent: true,
-                disableBag: (new DefaultDisableBag())
+                disableBag: (new DefaultDisableBag)
                     ->setDisableWrapper()
                     ->setDisableDefaultNameAttribute(),
                 themeBag: (new DefaultThemeBag)
                     // reset default theme
                     // for the options
                     ->setInputTheme([]),
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setInputType(ComponentEnum::OPTION)
             );
 

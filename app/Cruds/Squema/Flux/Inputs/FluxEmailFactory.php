@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\Flux\Inputs;
 
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
@@ -13,7 +15,7 @@ class FluxEmailFactory
 
     const LABEL = 'Email';
 
-    public static function make() : InputInterface
+    public static function make(): InputInterface
     {
         $input = new DefaultInput(self::NAME, self::LABEL);
 

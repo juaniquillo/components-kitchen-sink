@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Components;
 
 use App\Components\Contracts\Component;
@@ -24,7 +26,7 @@ class ComponentCollection
     /** @var array<int, Component> */
     public function addComponents(array $components): static
     {
-        foreach($components as $component) {
+        foreach ($components as $component) {
             $this->addComponent($component);
         }
 

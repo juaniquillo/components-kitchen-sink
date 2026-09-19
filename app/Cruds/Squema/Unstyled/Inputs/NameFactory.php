@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Cruds\Squema\Unstyled\Inputs;
 
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
@@ -11,7 +13,7 @@ class NameFactory
 
     const LABEL = 'Name';
 
-    public static function make() : InputInterface
+    public static function make(): InputInterface
     {
         $input = new DefaultInput(
             name: self::NAME,

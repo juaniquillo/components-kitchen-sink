@@ -28,7 +28,7 @@ use Juaniquillo\InputComponentAction\InputComponentAction;
 class SimpleCrud implements Crud
 {
     use IsCrud;
-    
+
     const NAME = 'Simple Themed Crud';
 
     const IDENTIFIER = 'simple_crud';
@@ -55,27 +55,27 @@ class SimpleCrud implements Crud
                 $values ?? [],
                 $errors ?? [],
             ))
-            ->setDefaultThemeBag(
-                (new DefaultThemeBag)
-                    ->setWrapperTheme([
-                        'margin' => 'top-sm',
-                    ])
-                    ->setInputTheme(Inputs::inputs())
-                    ->setLabelTheme(Inputs::label())
-                    ->setErrorTheme([
-                        'color' => [
-                            'error',
-                            'error-dark',
-                        ],
-                        'padding' => 'top-xs',
-                    ])
-            )
-            ->setDefaultComponentBag(
-                (new DefaultComponentBag())
-                ->setInputComponent(function(\BackedEnum|string $type, ThemeManager $themeManager){
-                    return new MainBackendComponent($type, $themeManager);
-                })
-            )
+                ->setDefaultThemeBag(
+                    (new DefaultThemeBag)
+                        ->setWrapperTheme([
+                            'margin' => 'top-sm',
+                        ])
+                        ->setInputTheme(Inputs::inputs())
+                        ->setLabelTheme(Inputs::label())
+                        ->setErrorTheme([
+                            'color' => [
+                                'error',
+                                'error-dark',
+                            ],
+                            'padding' => 'top-xs',
+                        ])
+                )
+                ->setDefaultComponentBag(
+                    (new DefaultComponentBag)
+                        ->setInputComponent(function (\BackedEnum|string $type, ThemeManager $themeManager) {
+                            return new MainBackendComponent($type, $themeManager);
+                        })
+                )
         );
 
         /** @var InputComponentOutput $output */

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Cruds\Themes;
 
 use BackedEnum;
-use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Closure;
+use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 
 class Inputs
 {

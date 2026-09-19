@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Menu\Concerns;
 
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
@@ -8,11 +10,11 @@ use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
 trait Links
 {
-    public static function makeLinks() : CompoundComponent
+    public static function makeLinks(): CompoundComponent
     {
         $listItems = [];
 
-        foreach (self::items() as  $link) {
+        foreach (self::items() as $link) {
             $listItems[] = self::getLinksListItem($link);
         }
 
@@ -20,38 +22,22 @@ trait Links
     }
 
     /** @param array<int, CompoundComponent> */
-    public  static function getLinksList(array $items): CompoundComponent
+    public static function getLinksList(array $items): CompoundComponent
     {
         return ComponentBuilder::make(ComponentEnum::DIV)
             ->setContents($items)
-            ->setThemes([
-                'display' => 'flex',
-                'margin' => 'top-md',
-                'flex' => [
-                    'justify-center',
-                    'items-center',
-                    'gap-md'
-                ],
-            ]);
+            ->setAttribute('class', 'mt-sm display-flex flex-center flex-gap-sm');
     }
 
-    public  static function getLinksListItem($link): CompoundComponent
+    public static function getLinksListItem(array $link): CompoundComponent
     {
         return ComponentBuilder::make(ComponentEnum::LINK)
             ->setAttribute('href', $link['route'])
             ->setContent($link['name'])
-            ->setThemes([
-                'action' => 'link',
-                'display' => 'block',
-                'padding' => 'sm',
-                'background' => 'success',
-                'border' => 'solid',
-                'border-radius' => 'default',
-                'font' => 'bold',
-            ]);
-            
+            ->setAttribute('class', 'text-blue-500 underline hover:no-underline font-bold text-lg');
+
     }
-    
+
     /** @return array<array{name: string, route: string}> */
     public static function items(): array
     {

@@ -12,7 +12,6 @@ use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
-use Psy\Output\Theme;
 
 class AvatarFactory
 {
@@ -28,7 +27,7 @@ class AvatarFactory
 
         $attributeBag = new DefaultAttributeBag;
 
-        if($livewireGroup) {
+        if ($livewireGroup) {
             self::getLivewireAttributeBag(
                 $livewireGroup,
                 self::NAME,
@@ -38,10 +37,10 @@ class AvatarFactory
 
         $input->setRecipe(
             new InputComponentRecipe(
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setInputType(ComponentEnum::FILE_INPUT),
                 attributeBag: $attributeBag,
-                themeBag: (new DefaultThemeBag())
+                themeBag: (new DefaultThemeBag)
                     ->setInputTheme([
                         'inputs' => 'file-primary',
                         'display' => 'block',

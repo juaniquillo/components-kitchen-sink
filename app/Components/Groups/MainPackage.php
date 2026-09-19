@@ -119,6 +119,7 @@ class MainPackage implements Component
                     ->setTheme('action', 'default')
                     ->setTheme('padding', 'button-compact')
                     ->setTheme('border-radius', 'sm')
+                    ->setTheme('color', 'light')
                     ->setAttributes([
                         'command' => 'show-modal',
                         'commandfor' => 'my-dialog-1',

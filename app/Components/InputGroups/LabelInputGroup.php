@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Components\InputGroups;
 
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
@@ -12,8 +14,8 @@ use Juaniquillo\InputComponentAction\Utilities\Support;
 
 class LabelInputGroup implements InputGroup
 {
-    use HasWrapper,
-        HasLabel,
+    use HasLabel,
+        HasWrapper,
         IsInputGroup;
 
     public function getGroup(): BackendComponent|ContentComponent

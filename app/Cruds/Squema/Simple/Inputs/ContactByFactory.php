@@ -62,7 +62,7 @@ class ContactByFactory
     {
         $input->setRecipe(
             new InputComponentRecipe(
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setWrapperType(ComponentEnum::FIELDSET)
                     ->setInputType(ComponentEnum::DIV)
                     ->setLabelType(ComponentEnum::LEGEND),
@@ -89,8 +89,8 @@ class ContactByFactory
                 rules: [
                     'required',
                     Rule::in(
-                        values: array_column(self::radioArray(), 
-                        column_key: 'name')),
+                        values: array_column(self::radioArray(),
+                            column_key: 'name')),
                 ]
             )
         );
@@ -106,19 +106,19 @@ class ContactByFactory
         /**
          * wire:model attribute for all inputs
          */
-        if($livewireGroup) {
+        if ($livewireGroup) {
             $inputAttributes = [
                 ...self::getLivewireDirective(group: $livewireGroup, name: self::NAME),
             ];
         }
 
-        $attributes = $attributes ?? ['name' => self::NAME,];
+        $attributes = $attributes ?? ['name' => self::NAME];
 
         foreach (self::radioArray() as $optionArray) {
             $option = new DefaultInput(name: $optionArray['name'], label: $optionArray['label']);
 
-            if($livewireGroup) {
-               
+            if ($livewireGroup) {
+
                 $inputAttributes = [
                     ...$inputAttributes,
                     /**
@@ -126,7 +126,7 @@ class ContactByFactory
                      */
                     ...self::getLivewireId(group: $livewireGroup, name: $optionArray['name']),
                 ];
-                
+
                 /**
                  * label for attribute
                  */
@@ -137,7 +137,7 @@ class ContactByFactory
             }
 
             $optionRecipe = new InputComponentRecipe(
-                componentBag: (new DefaultComponentBag())
+                componentBag: (new DefaultComponentBag)
                     ->setInputType(ComponentEnum::RADIO_INPUT),
                 inputValue: $optionArray['value'] ?? $optionArray['name'],
                 checkable: true,
@@ -178,5 +178,4 @@ class ContactByFactory
         return $radio;
 
     }
-
 }
