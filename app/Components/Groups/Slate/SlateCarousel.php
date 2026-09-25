@@ -34,6 +34,8 @@ class SlateCarousel implements Component
             ->setAttributes([
                 'alt' => $alt,
                 'src' => 'https://placehold.co/400x200/',
+                'width' => 400,
+                'height' => 200,
             ]);
     }
 

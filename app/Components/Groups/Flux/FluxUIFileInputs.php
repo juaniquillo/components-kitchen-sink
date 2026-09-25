@@ -84,7 +84,7 @@ class FluxUIFileInputs implements Component
         return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_FILE)
             ->setAttributes([
                 'name' => 'documents',
-                'multiple' => true,
+                'multiple' => 1,
             ]);
     }
 

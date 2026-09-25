@@ -20,6 +20,7 @@ use App\Components\Groups\Slate\SlateButtons;
 use App\Components\Groups\Slate\SlateCarousel;
 use App\Components\Groups\Slate\SlateDialog;
 use App\Components\Groups\Slate\SlateDropDownMenu;
+use App\Components\Groups\Slate\SlateTables;
 use App\Components\Groups\Slate\SlateTabs;
 use App\Menu\Concerns\Links;
 
@@ -75,11 +76,12 @@ class RouteCollectionGroup
             'slate' => [
                 'name' => 'Slate',
                 'components' => ComponentCollection::make()->addComponents([
-                    new SlateButtons,
                     new SlateDialog,
                     new SlateTabs,
-                    new SlateCarousel,
                     new SlateDropDownMenu,
+                    new SlateButtons,
+                    new SlateCarousel,
+                    new SlateTables,
                 ]),
                 'assets' => ['resources/css/slate.css'],
             ],

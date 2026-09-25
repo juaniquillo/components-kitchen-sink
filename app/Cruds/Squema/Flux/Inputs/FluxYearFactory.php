@@ -50,11 +50,11 @@ class FluxYearFactory
                 'value' => '',
             ],
             [
-                'name' => 1990,
+                'name' => '1990',
                 'label' => '1990',
             ],
             [
-                'name' => 2000,
+                'name' => '2000',
                 'label' => '2000',
             ],
         ];

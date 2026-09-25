@@ -10,6 +10,7 @@ use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Utils\CellBag;
+use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
 use Juaniquillo\FluxBackendComponents\Builders\FluxLocalThemeComponentBuilder;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 use Juaniquillo\FluxBackendComponents\Utils\FluxUITableUtil;
@@ -60,6 +61,14 @@ class FluxUITables implements Component
             ->setTheme('table', 'container');
     }
 
+    public  static function badge(string $content, string $color = 'lime'): BackendComponent
+    {
+        return FluxComponentBuilder::make(FluxComponentEnum::BADGE)
+            ->setContent($content)
+            ->setAttribute('color', $color)
+            ->setAttribute('size', 'sm');
+    }
+
     public static function basic(): BackendComponent
     {
         return FluxUITableUtil::make(
@@ -75,16 +84,17 @@ class FluxUITables implements Component
     public static function striped(): BackendComponent
     {
         return FluxUITableUtil::make(
-            head: ['Name', 'Email', 'Role', 'City'],
+            head: ['Name', 'Email', 'Role', 'City', 'Approved'],
             body: [
-                ['Alice', 'alice@example.com', 'Admin', 'New York'],
-                ['Bob', 'bob@example.com', 'Editor', 'New Jersey'],
-                ['Charlie', 'charlie@example.com', 'Viewer', 'Miami'],
-                ['Diana', 'diana@example.com', 'Admin', 'California'],
-                ['Eve', 'eve@example.com', 'Viewer', 'New York'],
+                ['Alice', 'alice@example.com', 'Admin', 'New York', self::badge('Yes')],
+                ['Bob', 'bob@example.com', 'Editor', 'New Jersey', self::badge('Yes')],
+                ['Charlie', 'charlie@example.com', 'Viewer', 'Miami', self::badge('No', 'rose')],
+                ['Diana', 'diana@example.com', 'Admin', 'California', self::badge('Yes')],
+                ['Eve', 'eve@example.com', 'Viewer', 'New York', self::badge('No', 'rose')],
             ],
         )
             ->setTrThemes(['table' => ['striped']])
+            ->setTableAttributes(['bleed' => 'bleed'])
             ->getComponent();
     }
 
