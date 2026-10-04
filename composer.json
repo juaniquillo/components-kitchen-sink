@@ -12,7 +12,7 @@
         "php": "^8.3",
         "electrik/slate": "^3.0",
         "juaniquillo/crud-assistant": "@dev",
-        "juaniquillo/flux-backend-components": "@dev",
+        "juaniquillo/flux-backend-components": "^0.2.2",
         "juaniquillo/input-component-action": "@dev",
         "juaniquillo/laravel-backend-component": ">=0.1",
         "juaniquillo/slate-backend-components": "^0.1.1",
@@ -46,15 +46,6 @@
             "Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../packages/flux-backend-components",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
     "scripts": {
         "setup": [
             "composer install",

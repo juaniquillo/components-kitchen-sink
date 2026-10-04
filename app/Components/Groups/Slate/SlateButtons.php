@@ -6,8 +6,9 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use App\Components\ThirdParty\Slate\SlateBackendComponent;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateButtons implements Component
 {
@@ -35,81 +36,63 @@ class SlateButtons implements Component
 
     public static function defaultButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('Simple Button');
-
-        return $button;
     }
 
     public static function secondaryButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('Secondary Button')
             ->setAttribute('variant', 'secondary');
-
-        return $button;
     }
 
     public static function outlineButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('Outline Button')
             ->setAttribute('variant', 'outline');
-
-        return $button;
     }
 
     public static function ghostButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('Ghost Button')
             ->setAttribute('variant', 'ghost');
-
-        return $button;
     }
 
     public static function destructiveButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('Destructive Button')
             ->setAttribute('variant', 'destructive');
-
-        return $button;
     }
 
     public static function linkButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('Link Button')
             ->setAttribute('variant', 'link');
-
-        return $button;
     }
 
     public static function xsButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('XS Button')
             ->setAttribute('size', 'xs');
-
-        return $button;
     }
 
     public static function smButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('SM Button')
             ->setAttribute('size', 'sm');
-
-        return $button;
     }
 
     public static function lgButton(): BackendComponent
     {
-        $button = SlateBackendComponent::make('button')
+        return SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
             ->setContent('LG Button')
             ->setAttribute('size', 'lg');
-
-        return $button;
     }
 }

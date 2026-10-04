@@ -6,10 +6,11 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use App\Components\ThirdParty\Slate\SlateBackendComponent;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateCarousel implements Component
 {
@@ -41,26 +42,26 @@ class SlateCarousel implements Component
 
     public static function simple(): BackendComponent
     {
-        $carousel = SlateBackendComponent::make('carousel');
+        $carousel = SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL);
 
         $carousel->setContent(
-            SlateBackendComponent::make('carousel-content')
+            SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_CONTENT)
                 ->setContents([
-                    SlateBackendComponent::make('carousel-item')
+                    SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_ITEM)
                         ->setContent(
-                            SlateBackendComponent::make('card')
+                            SlateComponentBuilder::make(SlateComponentEnum::CARD)
                                 ->setAttribute('class', 'p-6 text-center')
                                 ->setContent('Slide 1')
                         ),
-                    SlateBackendComponent::make('carousel-item')
+                    SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_ITEM)
                         ->setContent(
-                            SlateBackendComponent::make('card')
+                            SlateComponentBuilder::make(SlateComponentEnum::CARD)
                                 ->setAttribute('class', 'p-6 text-center')
                                 ->setContent('Slide 2')
                         ),
-                    SlateBackendComponent::make('carousel-item')
+                    SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_ITEM)
                         ->setContent(
-                            SlateBackendComponent::make('card')
+                            SlateComponentBuilder::make(SlateComponentEnum::CARD)
                                 ->setAttribute('class', 'p-6 text-center')
                                 ->setContent('Slide 3')
                         ),
@@ -68,8 +69,8 @@ class SlateCarousel implements Component
         );
 
         $carousel->setContents([
-            SlateBackendComponent::make('carousel-previous'),
-            SlateBackendComponent::make('carousel-next'),
+            SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_PREVIOUS),
+            SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_NEXT),
         ]);
 
         return $carousel;
@@ -77,26 +78,26 @@ class SlateCarousel implements Component
 
     public static function withImages(): BackendComponent
     {
-        $carousel = SlateBackendComponent::make('carousel');
+        $carousel = SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL);
 
         $carousel->setContent(
-            SlateBackendComponent::make('carousel-content')
+            SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_CONTENT)
                 ->setContents([
-                    SlateBackendComponent::make('carousel-item')
+                    SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_ITEM)
                         ->setContent(
                             ComponentBuilder::make(ComponentEnum::DIV)
                                 ->setTheme('border-radius', 'sm')
                                 ->setTheme('overflow', 'hidden')
                                 ->setContent(self::placeholder())
                         ),
-                    SlateBackendComponent::make('carousel-item')
+                    SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_ITEM)
                         ->setContent(
                             ComponentBuilder::make(ComponentEnum::DIV)
                                 ->setTheme('border-radius', 'sm')
                                 ->setTheme('overflow', 'hidden')
                                 ->setContent(self::placeholder())
                         ),
-                    SlateBackendComponent::make('carousel-item')
+                    SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_ITEM)
                         ->setContent(
                             ComponentBuilder::make(ComponentEnum::DIV)
                                 ->setTheme('border-radius', 'sm')
@@ -107,8 +108,8 @@ class SlateCarousel implements Component
         );
 
         $carousel->setContents([
-            SlateBackendComponent::make('carousel-previous'),
-            SlateBackendComponent::make('carousel-next'),
+            SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_PREVIOUS),
+            SlateComponentBuilder::make(SlateComponentEnum::CAROUSEL_NEXT),
         ]);
 
         return $carousel;

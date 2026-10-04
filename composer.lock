@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e62963d5fe0d539417804799f80cc2c4",
+    "content-hash": "e931cb7697939864768edfeefa1b95a9",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1335,11 +1335,17 @@
         },
         {
             "name": "juaniquillo/flux-backend-components",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "../../packages/flux-backend-components",
+            "version": "v0.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/juaniquillo/flux-backend-components.git",
                 "reference": "21a067c590e004b4c036e5a0a363006aabcdba47"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/juaniquillo/flux-backend-components/zipball/21a067c590e004b4c036e5a0a363006aabcdba47",
+                "reference": "21a067c590e004b4c036e5a0a363006aabcdba47",
+                "shasum": ""
             },
             "require": {
                 "illuminate/support": "^12.0||^13.0",
@@ -1372,68 +1378,7 @@
                     "Juaniquillo\\FluxBackendComponents\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Juaniquillo\\FluxBackendComponents\\Tests\\": "tests/",
-                    "Workbench\\App\\": "workbench/app/",
-                    "Workbench\\Database\\Factories\\": "workbench/database/factories/",
-                    "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
-                }
-            },
-            "scripts": {
-                "post-autoload-dump": [
-                    "@clear",
-                    "@prepare"
-                ],
-                "prepare": [
-                    "@php vendor/bin/testbench package:discover --ansi"
-                ],
-                "build": [
-                    "@php vendor/bin/testbench workbench:build --ansi"
-                ],
-                "serve": [
-                    "Composer\\Config::disableProcessTimeout",
-                    "@build",
-                    "@php vendor/bin/testbench serve --ansi"
-                ],
-                "icons:enum": [
-                    "@php bin/generate-flux-icon-enum.php"
-                ],
-                "lint": [
-                    "vendor/bin/pint --parallel"
-                ],
-                "lint:check": [
-                    "vendor/bin/pint --parallel --test"
-                ],
-                "analyse": [
-                    "vendor/bin/phpstan analyse --memory-limit=1G"
-                ],
-                "rector": [
-                    "vendor/bin/rector process"
-                ],
-                "rector:check": [
-                    "vendor/bin/rector process --dry-run"
-                ],
-                "test:larastan": [
-                    "vendor/bin/phpstan analyse --memory-limit=1G"
-                ],
-                "test:types": [
-                    "vendor/bin/pest --type-coverage --min=100"
-                ],
-                "test:unit": [
-                    "@php bin/pest.php"
-                ],
-                "qa": [
-                    "@test:larastan",
-                    "@rector:check",
-                    "@lint:check",
-                    "@test:types",
-                    "@test:unit"
-                ],
-                "clear": [
-                    "@php vendor/bin/testbench package:purge-skeleton --ansi"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1447,14 +1392,15 @@
             "description": "Shared backend components for Flux",
             "homepage": "https://github.com/juaniquillo/flux-backend-components",
             "keywords": [
+                "Juaniquillo",
                 "flux-backend-components",
-                "juaniquillo",
                 "laravel"
             ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/juaniquillo/flux-backend-components/issues",
+                "source": "https://github.com/juaniquillo/flux-backend-components/tree/v0.2.2"
+            },
+            "time": "2026-10-01T22:13:16+00:00"
         },
         {
             "name": "juaniquillo/input-component-action",
@@ -11710,7 +11656,6 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "juaniquillo/crud-assistant": 20,
-        "juaniquillo/flux-backend-components": 20,
         "juaniquillo/input-component-action": 20
     },
     "prefer-stable": true,

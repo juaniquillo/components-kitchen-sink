@@ -6,8 +6,10 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use App\Components\ThirdParty\Slate\SlateBackendComponent;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
+use Juaniquillo\SlateBackendComponents\Utils\SlateOverlayUtil;
 
 class SlateDialog implements Component
 {
@@ -28,57 +30,34 @@ class SlateDialog implements Component
 
     public static function simple(): BackendComponent
     {
-        $dialog = SlateBackendComponent::make('dialog');
-
-        $dialog->setContent(
-            SlateBackendComponent::make('dialog-trigger')
-                ->setContent(
-                    SlateBackendComponent::make('button')
-                        ->setContent('Open')
-                )
-        );
-
-        $dialog->setContent(
-            SlateBackendComponent::make('dialog-content')
-                ->setAttribute('title', 'Cure Dialog')
-                ->setContent(
-                    'Yo, I\'m here'
-                )
-        );
-
-        return $dialog;
+        return SlateOverlayUtil::make(
+            root: SlateComponentEnum::DIALOG,
+            content: 'Yo, I\'m here',
+            trigger: SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+                ->setContent('Open'),
+            title: 'Cure Dialog',
+        )->getComponent();
     }
 
     public static function confirm(): BackendComponent
     {
-        $dialog = SlateBackendComponent::make('dialog');
-
-        $dialog->setContent(
-            SlateBackendComponent::make('dialog-trigger')
-                ->setContent(
-                    SlateBackendComponent::make('button')
-                        ->setAttribute('variant', 'outline')
-                        ->setContent('Open')
-                )
-        );
-
-        $dialog->setContent(
-            SlateBackendComponent::make('dialog-content')
-                ->setAttribute('title', 'Are you sure?')
-                ->setAttribute('description', 'This action cannot be undone.')
-                ->setAttribute('show-close-button', 'false')
-                ->setContent(
-                    SlateBackendComponent::make('dialog-footer')
-                        ->setContent(
-                            SlateBackendComponent::make('dialog-close')
-                                ->setContent(
-                                    SlateBackendComponent::make('button')
-                                        ->setContent('Cancel')
-                                )
-                        )
-                )
-        );
-
-        return $dialog;
+        return SlateOverlayUtil::make(
+            root: SlateComponentEnum::DIALOG,
+            content: [],
+            trigger: SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+                ->setAttribute('variant', 'outline')
+                ->setContent('Open'),
+            title: 'Are you sure?',
+            description: 'This action cannot be undone.',
+            footer: [
+                SlateComponentBuilder::make(SlateComponentEnum::DIALOG_CLOSE)
+                    ->setContent(
+                        SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+                            ->setContent('Cancel')
+                    ),
+            ],
+        )
+            ->setShowCloseButton(false)
+            ->getComponent();
     }
 }

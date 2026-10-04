@@ -6,10 +6,11 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use App\Components\ThirdParty\Slate\SlateBackendComponent;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateTabs implements Component
 {
@@ -31,23 +32,23 @@ class SlateTabs implements Component
 
     public static function simple(): BackendComponent
     {
-        $tabs = SlateBackendComponent::make('tabs')
+        $tabs = SlateComponentBuilder::make(SlateComponentEnum::TABS)
             ->setAttribute('default-value', 'account');
 
         $tabs->setContents([
-            SlateBackendComponent::make('tabs-list')
+            SlateComponentBuilder::make(SlateComponentEnum::TABS_LIST)
                 ->setContents([
-                    SlateBackendComponent::make('tabs-trigger')
+                    SlateComponentBuilder::make(SlateComponentEnum::TABS_TRIGGER)
                         ->setAttribute('value', 'account')
                         ->setContent('Account'),
-                    SlateBackendComponent::make('tabs-trigger')
+                    SlateComponentBuilder::make(SlateComponentEnum::TABS_TRIGGER)
                         ->setAttribute('value', 'password')
                         ->setContent('Password'),
                 ]),
 
         ]);
         $tabs->setContent(
-            SlateBackendComponent::make('tabs-content')
+            SlateComponentBuilder::make(SlateComponentEnum::TABS_CONTENT)
                 ->setAttribute('value', 'account')
                 ->setContent(
                     ComponentBuilder::make(ComponentEnum::DIV)
@@ -57,7 +58,7 @@ class SlateTabs implements Component
         );
 
         $tabs->setContent(
-            SlateBackendComponent::make('tabs-content')
+            SlateComponentBuilder::make(SlateComponentEnum::TABS_CONTENT)
                 ->setAttribute('value', 'password')
                 ->setContent(
                     ComponentBuilder::make(ComponentEnum::DIV)
