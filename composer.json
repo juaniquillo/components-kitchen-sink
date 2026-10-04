@@ -15,6 +15,7 @@
         "juaniquillo/flux-backend-components": "@dev",
         "juaniquillo/input-component-action": "@dev",
         "juaniquillo/laravel-backend-component": ">=0.1",
+        "juaniquillo/slate-backend-components": "^0.1.1",
         "laravel/fortify": "^1.36.1",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",

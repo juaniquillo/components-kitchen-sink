@@ -22,6 +22,7 @@
         "livewire-development",
         "tailwindcss-development",
         "backend-component",
-        "blaze-optimize"
+        "blaze-optimize",
+        "flux-backend-development"
     ]
 }
