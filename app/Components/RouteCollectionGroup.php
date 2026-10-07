@@ -16,6 +16,7 @@ use App\Components\Groups\Flux\FluxUIModals;
 use App\Components\Groups\Flux\FluxUISkeletons;
 use App\Components\Groups\Flux\FluxUITables;
 use App\Components\Groups\MainPackage;
+use App\Components\Groups\Slate\SlateAccordion;
 use App\Components\Groups\Slate\SlateButtons;
 use App\Components\Groups\Slate\SlateCarousel;
 use App\Components\Groups\Slate\SlateDialog;
@@ -82,6 +83,7 @@ class RouteCollectionGroup
                     new SlateButtons,
                     new SlateCarousel,
                     new SlateTables,
+                    new SlateAccordion,
                 ]),
                 'assets' => ['resources/css/slate.css'],
             ],
