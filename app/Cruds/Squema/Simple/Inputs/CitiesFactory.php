@@ -6,9 +6,9 @@ namespace App\Cruds\Squema\Simple\Inputs;
 
 use App\Cruds\Concerns\IsLivewireInput;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
 use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
@@ -54,7 +54,7 @@ class CitiesFactory
         return $input;
     }
 
-    public static function options(): InputCollection
+    public static function options(): InputCollectionInterface
     {
         $options = [];
 

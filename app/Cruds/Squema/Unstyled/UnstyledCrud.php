@@ -11,8 +11,8 @@ use App\Cruds\Squema\Unstyled\Inputs\NameFactory;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
 use Juaniquillo\InputComponentAction\InputComponentAction;
@@ -25,7 +25,7 @@ class UnstyledCrud implements Crud
 
     public const NAME = 'Unstyled Crud';
 
-    public static function make(?string $group = null): InputCollection
+    public static function make(?string $group = null): InputCollectionInterface
     {
         return CrudAssistant::make([
             NameFactory::make(),

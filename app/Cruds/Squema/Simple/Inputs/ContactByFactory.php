@@ -112,7 +112,7 @@ class ContactByFactory
             ];
         }
 
-        $attributes = $attributes ?? ['name' => self::NAME];
+        $attributes = ['name' => self::NAME];
 
         foreach (self::radioArray() as $optionArray) {
             $option = new DefaultInput(name: $optionArray['name'], label: $optionArray['label']);

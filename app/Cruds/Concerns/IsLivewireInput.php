@@ -18,7 +18,7 @@ trait IsLivewireInput
         );
     }
 
-    public static function getLivewireAttributeBag(string $group, array|string $name, AttributeBag|LabelAttributes|null $bag = null): AttributeBag
+    public static function getLivewireAttributeBag(string $group, array|string $name, (AttributeBag&LabelAttributes)|null $bag = null): AttributeBag
     {
         $directiveAndId = self::getLivewireDirectiveAndId($group, $name);
 
@@ -84,7 +84,7 @@ trait IsLivewireInput
         }
 
         return [
-            'name' => $newName ?? $name,
+            'name' => $newName,
         ];
     }
 

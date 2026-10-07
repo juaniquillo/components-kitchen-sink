@@ -42,7 +42,7 @@ Components are organized into groups registered in `App\Components\RouteCollecti
 
 #### Third-Party Slate Components
 
-`App\Components\ThirdParty\Slate\SlateBackendComponent` adapts the package's `BackendComponent` contract to render Slate's anonymous Blade components. It hardcodes the `slate::` view context and resolves each component through `backend-component::_utilities.resolve-third-party-component`, which delegates to `<x-dynamic-component>`. The Slate group also registers its own stylesheet (`resources/css/slate.css`) as a per-group asset.
+The Slate group is built with `juaniquillo/slate-backend-components`, which adapts the `BackendComponent` contract to render Slate's anonymous Blade components. Components are composed with the `SlateComponentEnum` (over 200 cases) and `SlateComponentBuilder`, using helpers like `SlateOverlayUtil` (dialogs), `SlateTabsUtil` (tabs), and `SlateUITableUtil` (tables). Each `SlateBackendComponent` resolves through `backend-component::_utilities.resolve-third-party-component`, which delegates to `<x-dynamic-component>`. The Slate group also registers its own stylesheet (`resources/css/slate.css`) as a per-group asset.
 
 ### Form Patterns
 
@@ -113,7 +113,7 @@ php artisan pest --compact
 
 This project experiments with the `juaniquillo/laravel-backend-component` package. Key integration points:
 
-- **`BackendComponent` interface** - Implemented by `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) and `SlateBackendComponent`
+- **`BackendComponent` interface** - Implemented by `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) and `SlateBackendComponent` (from `juaniquillo/slate-backend-components`)
 - **`ComponentBuilder`** - Fluent builder for creating component trees
 - **`ComponentEnum`** - Enumeration of all available component types
 - **Theme system** - Default theme manager with configurable themes, plus app-level Tailwind theme files
@@ -134,7 +134,7 @@ To create new backend components:
 Existing adapters serve as reference implementations:
 
 - `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) - Flux-styled backend components using `FluxComponentEnum` and `FluxComponentBuilder`
-- `SlateBackendComponent` - Third-party resolver that maps component names to `slate::*` views through `x-dynamic-component`
+- `SlateBackendComponent` (from `juaniquillo/slate-backend-components`) - Resolves `SlateComponentEnum` cases to `slate::*` views through `x-dynamic-component`
 
 ## License
 

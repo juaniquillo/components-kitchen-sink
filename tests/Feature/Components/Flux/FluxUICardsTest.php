@@ -48,8 +48,7 @@ it('renders a small card with compact padding', function () {
     $html = (string) $this->blade('{{ $card }}', ['card' => FluxUICards::small()]);
 
     expect($html)->toContain('data-flux-card')
-        ->toContain('p-4')
-        ->toContain('rounded-lg')
+        ->toContain('data-flux-card-size="sm"')
         ->toContain('Small card')
         ->toContain('Compact padding variant');
 });

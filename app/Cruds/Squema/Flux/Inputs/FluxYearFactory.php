@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Cruds\Squema\Flux\Inputs;
 
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
 use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
@@ -60,7 +60,7 @@ class FluxYearFactory
         ];
     }
 
-    public static function options(): InputCollection
+    public static function options(): InputCollectionInterface
     {
         $options = [];
 

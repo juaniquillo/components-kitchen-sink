@@ -9,8 +9,7 @@ use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
-use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
+use Juaniquillo\SlateBackendComponents\Utils\SlateTabsUtil;
 
 class SlateTabs implements Component
 {
@@ -32,41 +31,22 @@ class SlateTabs implements Component
 
     public static function simple(): BackendComponent
     {
-        $tabs = SlateComponentBuilder::make(SlateComponentEnum::TABS)
-            ->setAttribute('default-value', 'account');
-
-        $tabs->setContents([
-            SlateComponentBuilder::make(SlateComponentEnum::TABS_LIST)
-                ->setContents([
-                    SlateComponentBuilder::make(SlateComponentEnum::TABS_TRIGGER)
-                        ->setAttribute('value', 'account')
-                        ->setContent('Account'),
-                    SlateComponentBuilder::make(SlateComponentEnum::TABS_TRIGGER)
-                        ->setAttribute('value', 'password')
-                        ->setContent('Password'),
-                ]),
-
-        ]);
-        $tabs->setContent(
-            SlateComponentBuilder::make(SlateComponentEnum::TABS_CONTENT)
-                ->setAttribute('value', 'account')
-                ->setContent(
-                    ComponentBuilder::make(ComponentEnum::DIV)
+        return SlateTabsUtil::make(
+            tabs: [
+                'account' => [
+                    'label' => 'Account',
+                    'content' => ComponentBuilder::make(ComponentEnum::DIV)
                         ->setTheme('text', 'center')
-                        ->setContent('This is account')
-                )
-        );
-
-        $tabs->setContent(
-            SlateComponentBuilder::make(SlateComponentEnum::TABS_CONTENT)
-                ->setAttribute('value', 'password')
-                ->setContent(
-                    ComponentBuilder::make(ComponentEnum::DIV)
+                        ->setContent('This is account'),
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'content' => ComponentBuilder::make(ComponentEnum::DIV)
                         ->setTheme('text', 'center')
-                        ->setContent('This is password')
-                )
-        );
-
-        return $tabs;
+                        ->setContent('This is password'),
+                ],
+            ],
+            defaultValue: null,
+        )->getComponent()->setAttribute('default-value', 'account');
     }
 }

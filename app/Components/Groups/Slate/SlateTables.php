@@ -7,7 +7,8 @@ namespace App\Components\Groups\Slate;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\BackendComponents\Contracts\ContentComponent;
+use Juaniquillo\SlateBackendComponents\SlateBackendComponent;
 use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 use Juaniquillo\SlateBackendComponents\Utils\SlateUITableUtil;
 
@@ -40,19 +41,21 @@ class SlateTables implements Component
             ],
         )->getComponent();
 
-        $table->setContent(
-            SlateComponentBuilder::make(SlateComponentEnum::TABLE_FOOTER)
-                ->setContents([
-                    SlateComponentBuilder::make(SlateComponentEnum::TABLE_ROW)
-                        ->setContents([
-                            SlateComponentBuilder::make(SlateComponentEnum::TABLE_CELL)
-                                ->setAttribute('colspan', 3)
-                                ->setContent('Total'),
-                            SlateComponentBuilder::make(SlateComponentEnum::TABLE_CELL)
-                                ->setContent('$750.00'),
-                        ]),
-                ])
-        );
+        if ($table instanceof ContentComponent) {
+            $table->setContent(
+                (new SlateBackendComponent(SlateComponentEnum::TABLE_FOOTER))
+                    ->setContents([
+                        (new SlateBackendComponent(SlateComponentEnum::TABLE_ROW))
+                            ->setContents([
+                                (new SlateBackendComponent(SlateComponentEnum::TABLE_CELL))
+                                    ->setAttribute('colspan', 3)
+                                    ->setContent('Total'),
+                                (new SlateBackendComponent(SlateComponentEnum::TABLE_CELL))
+                                    ->setContent('$750.00'),
+                            ]),
+                    ])
+            );
+        }
 
         return $table;
     }

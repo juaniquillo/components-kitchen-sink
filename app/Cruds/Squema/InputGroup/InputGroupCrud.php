@@ -17,8 +17,8 @@ use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\MainBackendComponent;
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
@@ -32,7 +32,7 @@ class InputGroupCrud implements Crud
 
     public const NAME = 'Input Group WC';
 
-    public static function make(): InputCollection
+    public static function make(): InputCollectionInterface
     {
         return CrudAssistant::make([
             NameFactory::make(),

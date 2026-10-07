@@ -6,14 +6,14 @@ namespace App\Components;
 
 use App\Components\Contracts\Component;
 
-class ComponentCollection
+final class ComponentCollection
 {
     /** @var array<int, Component> */
     private array $collection = [];
 
     public static function make(): static
     {
-        return new static;
+        return new self;
     }
 
     public function addComponent(Component $component): static
@@ -23,7 +23,6 @@ class ComponentCollection
         return $this;
     }
 
-    /** @var array<int, Component> */
     public function addComponents(array $components): static
     {
         foreach ($components as $component) {

@@ -14,8 +14,8 @@ use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
 use Juaniquillo\FluxBackendComponents\FluxBackendComponent;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
@@ -32,7 +32,7 @@ class FluxCrud implements Crud
 
     public const NAME = 'Flux Crud';
 
-    public static function make(?array $values = null, ?array $errors = null): InputCollection
+    public static function make(?array $values = null, ?array $errors = null): InputCollectionInterface
     {
         return CrudAssistant::make([
             FluxNameFactory::make(),

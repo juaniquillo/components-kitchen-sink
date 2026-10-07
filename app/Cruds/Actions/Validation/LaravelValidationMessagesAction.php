@@ -8,6 +8,7 @@ use Juaniquillo\CrudAssistant\Action;
 use Juaniquillo\CrudAssistant\Contracts\ActionInterface;
 use Juaniquillo\CrudAssistant\Contracts\DataContainerInterface;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
+use Juaniquillo\CrudAssistant\InputCollection;
 
 /**
  * Laravel validation messages action.
@@ -19,7 +20,7 @@ class LaravelValidationMessagesAction extends Action implements ActionInterface
      *
      * @return DataContainerInterface
      */
-    public function execute(InputInterface $input)
+    public function execute(InputCollection|InputInterface|\IteratorAggregate $input)
     {
         $recipe = $input->getRecipe(static::class);
         $output = $this->getOutput();

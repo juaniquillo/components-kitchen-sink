@@ -53,8 +53,8 @@ class RouteCollectionGroup
             'flux' => [
                 'name' => 'Flux UI',
                 'components' => ComponentCollection::make()->addComponents([
-                    new FluxUIModals,
                     new FluxUIButtons,
+                    new FluxUIModals,
                     new FluxUISkeletons,
                     new FluxUICards,
                     new FluxUITables,

@@ -1,0 +1,18 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+        - database/factories
+        - database/seeders
+
+    tmpDir: storage/framework/cache/phpstan
+
+    parallel:
+        maximumNumberOfProcesses: 4
+
+    checkModelProperties: true
+    checkModelAppends: true
+    parseModelCastsMethod: true

@@ -21,7 +21,7 @@ trait Links
         return self::getLinksList($listItems);
     }
 
-    /** @param array<int, CompoundComponent> */
+    /** @param array<int, CompoundComponent> $items */
     public static function getLinksList(array $items): CompoundComponent
     {
         return ComponentBuilder::make(ComponentEnum::DIV)

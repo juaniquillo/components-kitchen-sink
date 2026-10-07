@@ -17,12 +17,11 @@ use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\MainBackendComponent;
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\CrudAssistant\InputCollection;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
-use Juaniquillo\InputComponentAction\Groups\InputLabelErrorGroup;
 use Juaniquillo\InputComponentAction\InputComponentAction;
 
 class SimpleCrud implements Crud
@@ -33,7 +32,7 @@ class SimpleCrud implements Crud
 
     const IDENTIFIER = 'simple_crud';
 
-    public static function make(?string $group = null): InputCollection
+    public static function make(?string $group = null): InputCollectionInterface
     {
         return CrudAssistant::make([
             NameFactory::make($group),
@@ -47,8 +46,6 @@ class SimpleCrud implements Crud
     public static function build(?array $values = null, ?array $errors = null): BackendComponent
     {
         $crud = SimpleCrud::make();
-
-        InputLabelErrorGroup::class;
 
         $output = $crud->execute(
             (new InputComponentAction(
