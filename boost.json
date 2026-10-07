@@ -23,6 +23,7 @@
         "tailwindcss-development",
         "backend-component",
         "blaze-optimize",
-        "flux-backend-development"
+        "flux-backend-development",
+        "mjml-backend-component-development"
     ]
 }
