@@ -61,7 +61,7 @@ class FluxUITables implements Component
             ->setTheme('table', 'container');
     }
 
-    public  static function badge(string $content, string $color = 'lime'): BackendComponent
+    public static function badge(string $content, string $color = 'lime'): BackendComponent
     {
         return FluxComponentBuilder::make(FluxComponentEnum::BADGE)
             ->setContent($content)

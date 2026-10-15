@@ -87,7 +87,6 @@ class RouteCollectionGroup
                 ]),
                 'assets' => ['resources/css/slate.css'],
             ],
-
         ];
     }
 

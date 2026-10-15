@@ -28,6 +28,14 @@ final class MainMenu
                 'name' => 'Cruds',
                 'route' => route('cruds'),
             ],
+            [
+                'name' => 'Emails',
+                'route' => route('emails'),
+            ],
+            [
+                'name' => 'Builder',
+                'route' => route('builder'),
+            ],
         ];
     }
 }

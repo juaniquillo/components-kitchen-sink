@@ -78,6 +78,12 @@
             "@test:lint",
             "@php artisan test"
         ],
+        "qa": [
+            "@php artisan config:clear --ansi",
+            "@test:lint",
+            "@composer analyse",
+            "@php artisan test"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

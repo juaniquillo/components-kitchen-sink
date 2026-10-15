@@ -6,6 +6,9 @@ use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
 use App\Cruds\CrudCollection;
+use App\Emails\EmailCollection;
+use App\Emails\Exceptions\MissingEmailUserException;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
@@ -48,12 +51,43 @@ Route::get('/cruds', function (Request $request) {
 
     $cruds = CrudCollection::list($oldValues, $errors);
 
-    // dd($cruds);
-
     return view('cruds')
         ->with('cruds', $cruds);
 
 })->name('cruds');
+
+Route::get('/emails', function () {
+
+    return view('emails')
+        ->with('modals', EmailCollection::presentGroup());
+
+})->name('emails');
+
+Route::get('/emails/{name}', function (string $name) {
+
+    $email = EmailCollection::getByIdentifier($name);
+
+    if (! $email) {
+        abort(404);
+    }
+
+    $mailer = $email::mailer();
+
+    $user = User::first();
+
+    if (! $user) {
+        throw new MissingEmailUserException($name);
+    }
+
+    return new $mailer($user);
+
+})->name('email.preview');
+
+Route::get('/builder', function (Request $request) {
+
+    return view('builder');
+
+})->name('builder');
 
 Route::post('/cruds', function (Request $request) {
     $identifier = $request->input('identifier');
