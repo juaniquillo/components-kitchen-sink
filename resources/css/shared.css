@@ -51,6 +51,10 @@
     gap:.8rem;
 }
 
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
 .component-box-max-width {
     max-width: none;
 }

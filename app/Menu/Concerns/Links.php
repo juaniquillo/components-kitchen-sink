@@ -26,7 +26,7 @@ trait Links
     {
         return ComponentBuilder::make(ComponentEnum::DIV)
             ->setContents($items)
-            ->setAttribute('class', 'mt-sm display-flex flex-center flex-gap-sm');
+            ->setAttribute('class', 'mt-sm display-flex flex-center flex-gap-sm flex-wrap p-sm');
     }
 
     public static function getLinksListItem(array $link): CompoundComponent

@@ -12,6 +12,7 @@ use App\Emails\Messages\WelcomeEmail;
 use App\Emails\Presenters\EmailPresenter;
 use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
 final class EmailCollection
 {
@@ -61,13 +62,15 @@ final class EmailCollection
     {
         $emails = $emails ?: self::present();
 
-        $container = ComponentBuilder::make('div')
+        $container = ComponentBuilder::make(ComponentEnum::DIV)
             ->setTheme('margin', 'top-md')
             ->setTheme('text', 'center')
+            ->setTheme('padding', 'sm')
             ->setTheme('display', 'flex')
             ->setTheme('flex', [
-                'gap-sm',
+                'gap-md',
                 'justify-center',
+                'wrap',
             ])
             ->setContents($emails);
 
