@@ -37,15 +37,7 @@ class WelcomeEmail implements EmailInterface
                     ->setContent('Welcome to the platform'),
                 MjmlComponentBuilder::preview('Welcome to our platform!'),
                 MjmlComponentBuilder::font('Inter', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'),
-                MjmlComponentBuilder::attributes([
-                    '<mj-all font-family="Inter, Arial, sans-serif" />',
-                    '<mj-text color="#334155" font-size="15px" line-height="24px" padding="8px 24px" />',
-                    '<mj-button background-color="#4f46e5" color="#ffffff" font-size="15px" font-weight="600" border-radius="8px" inner-padding="12px 28px" />',
-                    '<mj-divider border-color="#e2e8f0" border-width="1px" padding="16px 24px" />',
-                    '<mj-class name="h1" font-size="26px" line-height="34px" font-weight="700" color="#0f172a" />',
-                    '<mj-class name="h2" font-size="19px" line-height="26px" font-weight="700" color="#0f172a" />',
-                    '<mj-class name="meta" font-size="12px" line-height="18px" color="#64748b" />',
-                ]),
+                self::globalAttributes(),
             ]),
             MjmlComponentBuilder::make(MjmlComponentEnum::BODY)
                 ->setAttributes([
@@ -187,6 +179,61 @@ class WelcomeEmail implements EmailInterface
         ], [
             'background-color' => '#ffffff',
             'padding' => '0 0 24px',
+        ]);
+    }
+
+    private static function globalAttributes(string $buttonColor = '#4f46e5'): MjmlBackendComponent
+    {
+        return MjmlComponentBuilder::attributes([
+            MjmlComponentBuilder::make(MjmlComponentEnum::ALL)
+                ->setAttributes([
+                    'font-family' => 'Inter, Arial, sans-serif',
+                ]),
+            MjmlComponentBuilder::make(MjmlComponentEnum::TEXT)
+                ->setAttributes([
+                    'color' => '#334155',
+                    'font-size' => '15px',
+                    'line-height' => '24px',
+                    'padding' => '8px 24px',
+                ]),
+            MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+                ->setAttributes([
+                    'background-color' => $buttonColor,
+                    'color' => '#ffffff',
+                    'font-size' => '15px',
+                    'font-weight' => '600',
+                    'border-radius' => '8px',
+                    'inner-padding' => '12px 28px',
+                ]),
+            MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER)
+                ->setAttributes([
+                    'border-color' => '#e2e8f0',
+                    'border-width' => '1px',
+                    'padding' => '16px 24px',
+                ]),
+            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+                ->setAttributes([
+                    'name' => 'h1',
+                    'font-size' => '26px',
+                    'line-height' => '34px',
+                    'font-weight' => '700',
+                    'color' => '#0f172a',
+                ]),
+            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+                ->setAttributes([
+                    'name' => 'h2',
+                    'font-size' => '19px',
+                    'line-height' => '26px',
+                    'font-weight' => '700',
+                    'color' => '#0f172a',
+                ]),
+            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+                ->setAttributes([
+                    'name' => 'meta',
+                    'font-size' => '12px',
+                    'line-height' => '18px',
+                    'color' => '#64748b',
+                ]),
         ]);
     }
 }

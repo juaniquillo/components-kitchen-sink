@@ -130,17 +130,12 @@
                             <tr>
                               <td style="width:64px;">
                                 <a href="https://example.com" target="_blank">
-                                  <img alt="The Workbench" src="http://components-kitchen-sink.test/images/mail/yellow-lightning-bolt.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="64" height="auto" />
+                                  <img alt="The Workbench" src="{{ asset('images/mail/yellow-lightning-bolt.png') }}" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="64" height="auto" />
                                 </a>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td align="center" style="font-size:0px;padding:8px 24px;word-break:break-word;">
-                        <div style="font-family:Inter, Arial, sans-serif;font-size:12px;line-height:18px;text-align:center;color:#64748b;">Issue 42 &middot; 10 August 2026</div>
                       </td>
                     </tr>
                     <tr>
@@ -228,7 +223,7 @@
                           <tbody>
                             <tr>
                               <td style="width:170px;">
-                                <img alt="A monitor raised to eye level on a wooden riser" src="http://components-kitchen-sink.test/images/mail/newsletter.jpg" style="border:0;border-radius:8px;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="170" height="auto" />
+                                <img alt="A monitor raised to eye level on a wooden riser" src="{{ asset('images/mail/newsletter.jpg') }}" style="border:0;border-radius:8px;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="170" height="auto" />
                               </td>
                             </tr>
                           </tbody>
@@ -277,7 +272,7 @@
                           <tbody>
                             <tr>
                               <td style="width:170px;">
-                                <img alt="A split keyboard positioned at elbow height" src="http://components-kitchen-sink.test/images/mail/newsletter.jpg" style="border:0;border-radius:8px;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="170" height="auto" />
+                                <img alt="A split keyboard positioned at elbow height" src="{{ asset('images/mail/newsletter.jpg') }}" style="border:0;border-radius:8px;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="170" height="auto" />
                               </td>
                             </tr>
                           </tbody>
@@ -326,7 +321,7 @@
                           <tbody>
                             <tr>
                               <td style="width:170px;">
-                                <img alt="A desk by a window with a distant view to rest the eyes" src="http://components-kitchen-sink.test/images/mail/newsletter.jpg" style="border:0;border-radius:8px;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="170" height="auto" />
+                                <img alt="A desk by a window with a distant view to rest the eyes" src="{{ asset('images/mail/newsletter.jpg') }}" style="border:0;border-radius:8px;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="170" height="auto" />
                               </td>
                             </tr>
                           </tbody>

@@ -23,6 +23,7 @@
         "tailwindcss-development",
         "backend-component",
         "blaze-optimize",
+        "email-html-mjml",
         "flux-backend-development",
         "mjml-backend-component-development"
     ]
