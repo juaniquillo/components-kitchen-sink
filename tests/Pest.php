@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builder\Contracts\BuilderNode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -49,4 +50,18 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * A tree with a text segment in it, the way the builder stores text.
+ *
+ * @return array<string, mixed>
+ */
+function treeWithText(string $id, string $type, string $text): array
+{
+    $tree = BuilderNode::tree($id, $type);
+    $tree['nodes'][$id]['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, $text);
+
+    return $tree;
 }

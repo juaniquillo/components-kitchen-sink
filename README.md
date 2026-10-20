@@ -83,6 +83,149 @@ The pipeline: `Messages::*::build()` composes an MJML tree → `php artisan emai
 - Plain `{{ $name }}` interpolation passes through MJML compilation untouched and resolves as Blade at send time; only block tags containing `<`/`>` need protection.
 - No dark-mode overrides yet; no `SOCIAL`/`TABLE`/`WRAPPER` components — the builder enum covers document, layout (`SECTION`, `COLUMN`, `GROUP`, `HERO`, `SPACER`), content (`TEXT`, `IMAGE`, `BUTTON`, `DIVIDER`, `RAW`), and head config.
 
+### Component Builder
+
+A drag-and-drop builder for `backend-component` trees, at `/builder`. Compose a component from the base `ComponentEnum` vocabulary, then copy the PHP that reproduces it.
+
+| Panel | What it does |
+|---|---|
+| **Palette** | Every base component, grouped (Layout, Typography, Text, Media & Links, Lists, Table, Form). Click to add. |
+| **Canvas** | The real rendered output. Drag the handle to reorder a node or move it into another parent; click to select. |
+| **Drawer** | Slides in from the right with the text and attributes of the node being configured. || **Generated code** | The PHP for the current tree, with a copy button. |
+| **Saved compositions** | Save, load and delete compositions stored as flat JSON files. |
+
+#### Architecture
+
+```
+app/Builder/
+├── Components/ComponentDescriptor.php + ContentMode.php
+├── Contracts/BuilderNode.php + SavedComposition.php
+├── Registries/ComponentRegistry.php
+└── Support/AttributeGuard.php, NodeChrome.php, TreeRenderer.php,
+             TreeMutator.php, PhpCodeGenerator.php,
+             CompositionSerializer.php, CompositionRepository.php
+
+app/Livewire/Builder/BuilderCanvas.php
+```
+
+The tree is a flat map of nodes keyed by id, each holding the ids of its children (`App\Builder\Contracts\BuilderNode`). A flat map keeps the type free of recursion, makes moving a node a matter of editing two lists, and stays small on disk.
+
+`TreeRenderer` turns the tree into real `MainBackendComponent` objects, so the canvas is the genuine article — the same code the generator emits, rendered by the same views. `PhpCodeGenerator` walks the same tree to produce the PHP.
+
+#### The node chrome
+
+Every node carries a small toolbar in its top-right corner: a **drag handle**, a **configure button**, an **add content** button that opens a menu of the components that node may contain, and a **delete** button.
+
+The chrome has to live *inside* the node it belongs to — the handle must be a descendant of the sortable item, and the buttons have to travel with the node when it is dragged. That means the chrome's tag depends on the node's content model, so the markup stays valid wherever it lands:
+
+| Node | Chrome tag | Nodes with no chrome |
+|---|---|---|
+| `div`, `form`, `fieldset`, `li`, `details`, `dialog` | `<div>` | `img`, `col`, all nine form inputs |
+| `p`, `h1`–`h6`, `span`, `a`, `button`, `label`, `summary`, `td`, `th` | `<span>` | `select`, `optgroup`, `datalist`, `option` |
+| `ul`, `ol` | `<li>` | |
+| `tr` | `<td>` | |
+| `thead`, `tbody`, `tfoot` | `<tr>` | |
+| `table` | `<caption>` | |
+
+A `<div>` inside a `<p>` or a `<ul>` is hoisted out by the browser's parser, which would quietly restructure the tree — a `<span>` is the one element that fits inside every phrasing context.
+
+A component that cannot hold a chrome of its own is **wrapped** in a `<span>` that can, so the toolbar still travels with it. The wrapper is builder-only and never reaches the generated code. Four components cannot be wrapped — a `<span>` is invalid inside a `<select>`, an `<optgroup>`, a `<colgroup>` or a `<table>` — so `form.option`, `form.optgroup`, `table.col` and `table.colgroup` keep the **Configure selected** route.
+
+The chrome is never part of the tree, so the code generator never sees it. A node keeps a row free above its content for the chrome to sit in, and an empty inline element is given a box so it can be seen and grabbed; both are stripped from the generated PHP.
+
+#### Text
+
+Text is a **content entry** rather than a field on the node, so a paragraph can hold text and a link and more text in any order:
+
+```php
+ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+    ->setContents([
+        'First text',
+        ComponentBuilder::make(ComponentEnum::LINK)
+            ->setContents([
+                ' This is a link',
+            ])
+            ->setAttributes([
+                'href' => 'https://google.com',
+            ]),
+        'Second Text',
+    ]);
+```
+
+Internally a text segment is a node of its own, so it can be edited and removed like anything else. The **add content** menu has a **Text** entry at the top; picking it reveals an input where the segment is typed. The drawer lists the text segments of the node being configured.
+
+The one wrinkle: `wire:sort` reports a position among the *draggable* items, and a text segment is not draggable, so a move has to skip over them.
+
+#### Deleting
+
+Delete lives on the chrome and is confirmed by the same button twice — the first click arms it and it becomes a red **Delete?**, the second deletes. It disarms on mouse-leave or after four seconds, and the drawer closes if it was showing the node that went, or anything inside it.
+
+#### Previewing
+
+**Preview** in the canvas header opens a modal with the composition rendered *cleanly*: no chrome, no reserved row, no minimum sizes, no `wire:` attributes. That is exactly what the generated code produces, which is what makes it safe for the canvas to be distorted.
+
+#### Drag and drop
+
+Livewire 4 ships `wire:sort`, with SortableJS bundled, so no extra dependency is needed. The builder injects the sort attributes as ordinary component attributes, which the package's views render onto the element:
+
+```
+wire:sort:item  →  wire:key  →  wire:sort  →  wire:sort:group  →  wire:sort:group-id
+```
+
+The order matters: Livewire's sort binding walks the attributes in DOM order and stops at `wire:sort:group`, so `wire:sort` has to come first. A container stays a drop target even while it is empty, otherwise there would be nowhere to drop the first child into.
+
+Drag starts from the handle (`wire:sort:handle`), which keeps the rest of the node selectable and clickable.
+
+A node may be a link, and a click on a button inside a link still activates it, so the chrome swallows the default — and so does the node itself, which means clicking a link in the canvas selects it instead of navigating away. The **Preview** modal is where the real thing is seen.
+
+The handler receives the dropped item, its new position and the container it landed in, which is exactly the primitive a tree needs:
+
+```php
+public function handleSort(string $itemId, int $position, ?string $parentId): void
+{
+    $this->tree = TreeMutator::move($this->tree, $itemId, $parentId, $position);
+}
+```
+
+#### Attributes
+
+The inspector takes any attribute name, with a couple of text inputs and a list of the ones already applied. Each applied attribute can be edited in place or deleted.
+
+The name is not taken on trust. It ends up inside a Livewire expression and inside the generated HTML, and Blade escapes attribute *values* but not attribute *names*, so `App\Builder\Support\AttributeGuard` refuses:
+
+| Refused | Why |
+|---|---|
+| `on*` | Event handlers — `onclick="…"` would be a live cross site scripting hole |
+| `style` | CSS injection |
+| `wire:*` | **Privilege escalation** — a saved component could invoke any public method on the builder |
+| `x-*` | Alpine's directive syntax |
+| `data-node-id`, `data-selected` | The builder's own, and they would collide with the injected ones |
+| anything that is not a valid attribute name | A quote or a bracket in the name would let it break out of the expression it sits in |
+
+Everything else is allowed — `aria-label`, `data-*`, `itemprop`, `contenteditable`, `part`, `translate`. The guard is the single source of truth: the mutator applies it when an attribute is set, and the serializer applies it again when a saved file is read back, so a hand written file cannot smuggle one in either.
+
+The per component attribute lists are still there, but they are no longer a rule — they are the suggestions the name field offers.
+
+#### Nesting rules
+
+`ComponentRegistry` mirrors the HTML content models — a `ul` only holds `li`, a `p` only holds phrasing content, a `td` only lives in a `tr`, and a list item only lives in a list. That is not cosmetic: the browser silently hoists invalid children out of their parent, so keeping the dragged DOM valid is the same thing as keeping the rules correct.
+
+A paragraph holds a link, a span or a `strong`; a `div` holds a paragraph; there is no limit on how deep the tree may go. A `p` cannot hold a `div`, because that is not what a paragraph is for — use a `div` if you need block content.
+
+The components that hold text and the components that hold children are described separately, so a paragraph gets both a text field and an add button, while a `div` gets an add button but no reason to be typed into. Adding a text element opens the drawer on it, with the text field ready.
+
+#### Styles
+
+There are none yet. The theme system is deliberately left out of this first cut — the inspector deals with text and attributes only, and the canvas is unstyled. The plumbing to bring the package's theme vocabulary back is a separate piece of work.
+
+#### Saved compositions
+
+Compositions are stored as flat JSON files in `storage/app/private/builder/`, which is already excluded from version control by `storage/app/private/.gitignore` — no database, and no `.gitignore` change. A saved file is data, never code, and everything read back is validated against the registry before it reaches the builder, so a hand-edited file cannot smuggle in an unknown component or a disallowed attribute.
+
+#### Known limitation
+
+Tailwind scans *source files*. The chrome's classes live in `app/Builder/Support/NodeChrome.php`, so `resources/css/app.css` carries an `@source '../../app/Builder/**/*.php'` entry to pick them up. A `class` value typed into the drawer and saved as JSON will not be in the compiled CSS for the same reason — raw `class` needs a safelist or an `@source` entry.
+
 ### Form Patterns
 
 Each CRUD follows a consistent pattern:

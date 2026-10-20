@@ -1,0 +1,525 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Builder;
+
+use App\Builder\Components\ComponentDescriptor;
+use App\Builder\Contracts\BuilderNode;
+use App\Builder\Contracts\SavedComposition;
+use App\Builder\Registries\ComponentRegistry;
+use App\Builder\Support\CompositionRepository;
+use App\Builder\Support\PhpCodeGenerator;
+use App\Builder\Support\TreeMutator;
+use App\Builder\Support\TreeRenderer;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+
+/**
+ * The drag and drop component builder.
+ *
+ * The tree is the single source of truth: the canvas is rendered from it by
+ * the backend-component package, and the code panel is generated from it.
+ * Drag and drop is handled by Livewire's wire:sort, which reports the
+ * dropped item, its new position and the container it landed in.
+ *
+ * @phpstan-import-type Node from BuilderNode
+ * @phpstan-import-type Tree from BuilderNode
+ */
+class BuilderCanvas extends Component
+{
+    /**
+     * The composed tree.
+     *
+     * @var Tree
+     */
+    public array $tree;
+
+    /**
+     * The id of the node the inspector is showing.
+     */
+    public ?string $selectedId = null;
+
+    /**
+     * The id of the node the drawer is configuring.
+     */
+    public ?string $configuringId = null;
+
+    /**
+     * The name given to the composition when it is saved.
+     */
+    public string $compositionName = '';
+
+    /**
+     * The attribute name waiting to be added or updated.
+     */
+    public string $attributeName = '';
+
+    /**
+     * The attribute value waiting to be added or updated.
+     */
+    public string $attributeValue = '';
+
+    /**
+     * The attribute currently being edited, if any.
+     */
+    public ?string $editingAttribute = null;
+
+    /**
+     * How many nodes have been created, used to hand out unique ids.
+     */
+    public int $nodeCounter = 0;
+
+    public function mount(): void
+    {
+        $this->tree = BuilderNode::tree($this->nextId(), 'div');
+        $this->selectedId = $this->tree['root'];
+    }
+
+    /**
+     * Handle a node being dropped somewhere else.
+     */
+    public function handleSort(string $itemId, int $position, ?string $parentId = null): void
+    {
+        if ($parentId === null) {
+            return;
+        }
+
+        $this->tree = TreeMutator::move($this->tree, $itemId, $parentId, $position);
+        $this->selectedId = $itemId;
+    }
+
+    /**
+     * Show a node in the inspector.
+     */
+    public function select(string $nodeId): void
+    {
+        if (TreeMutator::find($this->tree, $nodeId) !== null) {
+            $this->selectedId = $nodeId;
+        }
+    }
+
+    /**
+     * Open the drawer for a node.
+     */
+    public function openConfig(string $nodeId): void
+    {
+        if (TreeMutator::find($this->tree, $nodeId) === null) {
+            return;
+        }
+
+        $this->selectedId = $nodeId;
+        $this->configuringId = $nodeId;
+
+        $this->cancelAttribute();
+    }
+
+    /**
+     * Open the drawer for the node that is currently selected.
+     *
+     * The nodes that cannot hold a chrome have no button of their own, so
+     * this is the way in for them.
+     */
+    public function configureSelected(): void
+    {
+        if ($this->selectedId !== null) {
+            $this->openConfig($this->selectedId);
+        }
+    }
+
+    /**
+     * Close the drawer.
+     */
+    public function closeConfig(): void
+    {
+        $this->configuringId = null;
+
+        $this->cancelAttribute();
+    }
+
+    /**
+     * Add the attribute waiting in the inputs, or update the one being edited.
+     */
+    public function addAttribute(): void
+    {
+        $nodeId = $this->configuringId;
+
+        if ($nodeId === null) {
+            return;
+        }
+
+        $name = trim($this->attributeName);
+
+        if ($name === '') {
+            return;
+        }
+
+        $this->tree = TreeMutator::setAttribute($this->tree, $nodeId, $name, $this->attributeValue);
+
+        $this->cancelAttribute();
+    }
+
+    /**
+     * Load an attribute back into the inputs so it can be changed.
+     */
+    public function editAttribute(string $name): void
+    {
+        $node = $this->configuring();
+
+        if ($node === null || ! array_key_exists($name, $node['attrs'])) {
+            return;
+        }
+
+        $this->attributeName = $name;
+        $this->attributeValue = $node['attrs'][$name];
+        $this->editingAttribute = $name;
+    }
+
+    /**
+     * Remove an attribute from the node being configured.
+     */
+    public function deleteAttribute(string $name): void
+    {
+        $nodeId = $this->configuringId;
+
+        if ($nodeId === null) {
+            return;
+        }
+
+        $this->tree = TreeMutator::removeAttribute($this->tree, $nodeId, $name);
+
+        if ($this->editingAttribute === $name) {
+            $this->cancelAttribute();
+        }
+    }
+
+    /**
+     * Empty the attribute inputs.
+     */
+    public function cancelAttribute(): void
+    {
+        $this->attributeName = '';
+        $this->attributeValue = '';
+        $this->editingAttribute = null;
+    }
+
+    /**
+     * Add a component to the selected node, or to the given parent.
+     */
+    public function add(string $type, ?string $parentId = null): void
+    {
+        $descriptor = ComponentRegistry::get($type);
+
+        if ($descriptor === null) {
+            return;
+        }
+
+        $parentId ??= $this->targetParent($type);
+
+        $node = BuilderNode::make($this->nextId(), $type);
+
+        $this->tree = TreeMutator::addChild($this->tree, $parentId, $node);
+
+        if (TreeMutator::find($this->tree, $node['id']) === null) {
+            return;
+        }
+
+        $this->selectedId = $node['id'];
+
+        // A text element is almost always one you are about to type into, so
+        // the drawer opens with the text field ready. A container is not.
+        if (ComponentRegistry::isTextual($type)) {
+            $this->openConfig($node['id']);
+        }
+    }
+
+    /**
+     * Remove a node.
+     */
+    public function remove(string $nodeId): void
+    {
+        // Everything below the node goes with it, so the drawer and the
+        // selection have to be cleared for those too.
+        $descendants = TreeMutator::descendantsOf($this->tree, $nodeId);
+
+        $this->tree = TreeMutator::remove($this->tree, $nodeId);
+
+        if ($this->selectedId === $nodeId || in_array($this->selectedId, $descendants, true)) {
+            $this->selectedId = $this->tree['root'];
+        }
+
+        if ($this->configuringId === $nodeId || in_array($this->configuringId, $descendants, true)) {
+            $this->closeConfig();
+        }
+    }
+
+    /**
+     * Append a text segment to a node.
+     */
+    public function addText(string $parentId, string $text): void
+    {
+        if (trim($text) === '') {
+            return;
+        }
+
+        $this->tree = TreeMutator::addText($this->tree, $parentId, $text, $this->nextId());
+    }
+
+    /**
+     * Remove a text segment.
+     */
+    public function removeText(string $segmentId): void
+    {
+        $this->tree = TreeMutator::remove($this->tree, $segmentId);
+    }
+
+    /**
+     * Copy a node.
+     */
+    public function duplicate(string $nodeId): void
+    {
+        $this->tree = TreeMutator::duplicate(
+            $this->tree,
+            $nodeId,
+            fn (string $id): string => $this->nextId(),
+        );
+    }
+
+    /**
+     * Move a node one slot up among its siblings.
+     */
+    public function moveUp(string $nodeId): void
+    {
+        $this->tree = TreeMutator::shift($this->tree, $nodeId, -1);
+    }
+
+    /**
+     * Move a node one slot down among its siblings.
+     */
+    public function moveDown(string $nodeId): void
+    {
+        $this->tree = TreeMutator::shift($this->tree, $nodeId, 1);
+    }
+
+    /**
+     * Change the text of a node.
+     */
+    public function updateText(string $nodeId, string $text): void
+    {
+        $this->tree = TreeMutator::setText($this->tree, $nodeId, $text);
+    }
+
+    /**
+     * Save the composition to disk.
+     */
+    public function save(): void
+    {
+        $name = trim($this->compositionName);
+
+        if ($name === '') {
+            $name = 'composition';
+        }
+
+        $repository = new CompositionRepository;
+
+        $repository->save($name, $this->tree);
+
+        $this->compositionName = $name;
+
+        $this->dispatch('builder-saved');
+    }
+
+    /**
+     * Load a saved composition into the canvas.
+     */
+    public function load(string $slug): void
+    {
+        $repository = new CompositionRepository;
+
+        $tree = $repository->find($slug);
+
+        if ($tree === null) {
+            return;
+        }
+
+        $this->tree = $tree;
+        $this->selectedId = $tree['root'];
+        $this->nodeCounter = count($tree['nodes']);
+    }
+
+    /**
+     * Delete a saved composition.
+     */
+    public function delete(string $slug): void
+    {
+        (new CompositionRepository)->delete($slug);
+    }
+
+    /**
+     * The rendered preview of the tree.
+     */
+    #[Computed]
+    public function preview(): string
+    {
+        return (new TreeRenderer)->render($this->tree, $this->selectedId);
+    }
+
+    /**
+     * The composition as it will really look, without any of the builder's
+     * own additions: no chrome, no reserved row, no minimum sizes.
+     */
+    #[Computed]
+    public function cleanPreview(): string
+    {
+        return (new TreeRenderer)->render($this->tree, null, clean: true);
+    }
+
+    /**
+     * The PHP that reproduces the tree.
+     */
+    #[Computed]
+    public function code(): string
+    {
+        return (new PhpCodeGenerator)->snippet($this->tree);
+    }
+
+    /**
+     * The node the inspector is showing.
+     *
+     * @return Node|null
+     */
+    #[Computed]
+    public function selected(): ?array
+    {
+        if ($this->selectedId === null) {
+            return null;
+        }
+
+        return TreeMutator::find($this->tree, $this->selectedId);
+    }
+
+    /**
+     * The descriptor of the selected node.
+     */
+    #[Computed]
+    public function selectedDescriptor(): ?ComponentDescriptor
+    {
+        $node = $this->selected();
+
+        if ($node === null) {
+            return null;
+        }
+
+        return ComponentRegistry::get($node['type']);
+    }
+
+    /**
+     * The node the drawer is configuring.
+     *
+     * @return Node|null
+     */
+    #[Computed]
+    public function configuring(): ?array
+    {
+        if ($this->configuringId === null) {
+            return null;
+        }
+
+        return TreeMutator::find($this->tree, $this->configuringId);
+    }
+
+    /**
+     * The descriptor of the node the drawer is configuring.
+     */
+    #[Computed]
+    public function configuringDescriptor(): ?ComponentDescriptor
+    {
+        $node = $this->configuring();
+
+        if ($node === null) {
+            return null;
+        }
+
+        return ComponentRegistry::get($node['type']);
+    }
+
+    /**
+     * The palette, grouped for display.
+     *
+     * @return array<string, array<string, ComponentDescriptor>>
+     */
+    #[Computed]
+    public function palette(): array
+    {
+        return ComponentRegistry::groups();
+    }
+
+    /**
+     * The text segments of the node being configured.
+     *
+     * @return array<int, array{id: string, text: string}>
+     */
+    #[Computed]
+    public function textSegments(): array
+    {
+        if ($this->configuringId === null) {
+            return [];
+        }
+
+        return TreeMutator::textSegments($this->tree, $this->configuringId);
+    }
+
+    /**
+     * The compositions saved on disk.
+     *
+     * @return array<int, SavedComposition>
+     */
+    #[Computed]
+    public function saved(): array
+    {
+        return (new CompositionRepository)->all();
+    }
+
+    /**
+     * Hand out a unique id for a new node.
+     */
+    private function nextId(): string
+    {
+        $this->nodeCounter++;
+
+        return 'n'.$this->nodeCounter;
+    }
+
+    /**
+     * Where a newly added component should go.
+     *
+     * The selected node is used when it can hold the component. When it is a
+     * leaf, the component goes next to it in its parent instead, so the
+     * palette is always usable.
+     */
+    private function targetParent(string $type): string
+    {
+        $selected = $this->selected();
+
+        if ($selected !== null) {
+            $descriptor = ComponentRegistry::get($selected['type']);
+
+            if ($descriptor !== null && $descriptor->allowsChild($type)) {
+                return $selected['id'];
+            }
+
+            $parentId = TreeMutator::parentOf($this->tree, $selected['id']);
+
+            if ($parentId !== null) {
+                $parent = TreeMutator::find($this->tree, $parentId);
+                $parentDescriptor = $parent !== null ? ComponentRegistry::get($parent['type']) : null;
+
+                if ($parentDescriptor !== null && $parentDescriptor->allowsChild($type)) {
+                    return $parentId;
+                }
+            }
+        }
+
+        return $this->tree['root'];
+    }
+}

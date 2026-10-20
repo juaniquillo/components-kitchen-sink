@@ -1,14 +1,13 @@
-@php
-    use App\Menu\MainMenu;
-    $homeLinks = MainMenu::makeLinks();
-@endphp
-
 <x-layouts.default page-title="Builder">
-    
-    <div>
-        <h1 class="text-4xl font-bold text-center">Builder</h1>
 
-        <p class="mt-6 text-center">Builder</p>
+    <div class="mb-4 text-center">
+        <h1 class="text-3xl font-bold">Component Builder</h1>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Compose a component by dragging it together, then copy the generated PHP.
+        </p>
     </div>
+
+    <livewire:builder.builder-canvas />
 
 </x-layouts.default>

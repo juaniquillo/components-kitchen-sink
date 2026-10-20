@@ -165,14 +165,43 @@
                         class="flex items-center space-x-2"
                         x-data="{
                             copied: false,
-                            async copy() {
+                            async copy(text) {
+                                let copied = false;
+
                                 try {
-                                    await navigator.clipboard.writeText('{{ $manualSetupKey }}');
-                                    this.copied = true;
-                                    setTimeout(() => this.copied = false, 1500);
+                                    // The clipboard api is only there in a
+                                    // secure context, so it is asked for
+                                    // before it is used, and the selection is
+                                    // used when it is not there or when it
+                                    // refuses.
+                                    copied = navigator.clipboard
+                                        ? await navigator.clipboard.writeText(text).then(() => true).catch(() => this.copyWithSelection(text))
+                                        : this.copyWithSelection(text);
                                 } catch (e) {
-                                    console.warn('Could not copy to clipboard');
+                                    console.warn('Could not copy to clipboard', e);
                                 }
+
+                                this.copied = copied;
+
+                                setTimeout(() => this.copied = false, 1500);
+                            },
+                            copyWithSelection(text) {
+                                const area = document.createElement('textarea');
+                                const focused = document.activeElement;
+
+                                area.value = text;
+                                area.setAttribute('readonly', '');
+                                area.style.cssText = 'position: fixed; top: 0; left: 0; opacity: 0;';
+                                document.body.appendChild(area);
+                                area.select();
+                                area.setSelectionRange(0, area.value.length);
+
+                                const copied = document.execCommand('copy');
+
+                                area.remove();
+                                focused?.focus();
+
+                                return copied;
                             }
                         }"
                     >
@@ -190,7 +219,7 @@
                                 />
 
                                 <button
-                                    @click="copy()"
+                                    @click="copy('{{ $manualSetupKey }}')"
                                     class="px-3 transition-colors border-l cursor-pointer border-stone-200 dark:border-stone-600"
                                 >
                                     <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>

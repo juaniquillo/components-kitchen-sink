@@ -70,3 +70,17 @@ test('two factor authentication disabled when confirmation abandoned between req
         'two_factor_recovery_codes' => null,
     ]);
 });
+
+test('the setup key is copied without assuming the clipboard api is there', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    $component = Livewire::test('settings.two-factor')->call('enable');
+
+    $key = $component->get('manualSetupKey');
+
+    $component->assertSee('execCommand', false)
+        ->assertDontSee('@click="copy()"', false)
+        ->assertSee('@click="copy(\''.$key.'\')"', false);
+});

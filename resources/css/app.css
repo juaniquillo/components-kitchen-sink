@@ -6,6 +6,7 @@
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @source '../views';
+@source '../../app/Builder/**/*.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
@@ -70,3 +71,33 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/*
+| Builder canvas
+| Every node the builder renders carries a data-node-id, which lets the
+| nodes be outlined on hover and highlighted while selected.
+*/
+
+[data-node-id] {
+    outline: 1px dashed transparent;
+    outline-offset: 2px;
+    transition: outline-color 120ms ease;
+}
+
+[data-node-id]:hover {
+    outline-color: rgb(148 163 184 / 0.9);
+}
+
+[data-selected='true'] {
+    outline: 2px solid rgb(79 70 229);
+    outline-offset: 2px;
+}
+
+/*
+| Alpine hides elements carrying x-cloak until it has initialised them,
+| which keeps the builder's dropdown from flashing on first paint.
+*/
+
+[x-cloak] {
+    display: none !important;
+}
