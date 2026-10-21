@@ -6,6 +6,7 @@ namespace App\Builder\Support;
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
+use App\Builder\Registries\ThemeRegistry;
 
 /**
  * Every operation the builder performs on a tree.
@@ -277,6 +278,73 @@ final class TreeMutator
         }
 
         unset($node['attrs'][$name]);
+
+        $tree['nodes'][$nodeId] = $node;
+
+        return $tree;
+    }
+
+    /**
+     * Add a theme variant to a node.
+     *
+     * A group holds a list of variants, so a node can carry more than one
+     * variant of the same group. Adding a variant the node already has
+     * leaves it alone.
+     *
+     * @param  Tree  $tree
+     * @return Tree
+     */
+    public static function addTheme(array $tree, string $nodeId, string $group, string $variant): array
+    {
+        $node = $tree['nodes'][$nodeId] ?? null;
+
+        if ($node === null) {
+            return $tree;
+        }
+
+        if (! ThemeRegistry::allowsName($group) || ! ThemeRegistry::allowsName($variant)) {
+            return $tree;
+        }
+
+        $variants = $node['theme'][$group] ?? [];
+
+        if (! in_array($variant, $variants, true)) {
+            $variants[] = $variant;
+        }
+
+        $node['theme'][$group] = $variants;
+
+        $tree['nodes'][$nodeId] = $node;
+
+        return $tree;
+    }
+
+    /**
+     * Take a theme variant off a node.
+     *
+     * The group goes when its last variant does.
+     *
+     * @param  Tree  $tree
+     * @return Tree
+     */
+    public static function removeTheme(array $tree, string $nodeId, string $group, string $variant): array
+    {
+        $node = $tree['nodes'][$nodeId] ?? null;
+
+        if ($node === null) {
+            return $tree;
+        }
+
+        $variants = array_values(array_filter(
+            $node['theme'][$group] ?? [],
+            static fn (string $applied): bool => $applied !== $variant,
+        ));
+
+        if ($variants === []) {
+            unset($node['theme'][$group]);
+        } else {
+            $node['theme'][$group] = $variants;
+        }
 
         $tree['nodes'][$nodeId] = $node;
 

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Builder\BuilderCanvas;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 it('starts with an empty div as the root', function () {
@@ -291,6 +292,166 @@ it('copies the code without assuming the clipboard api is there', function () {
     Livewire::test(BuilderCanvas::class)
         ->assertDontSee('x-on:click="navigator.clipboard', false)
         ->assertSee('execCommand', false);
+});
+
+it('saves a theme', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600 text-white')
+        ->call('saveTheme')
+        ->assertSet('themes', [
+            'action' => ['primary' => 'bg-indigo-600 text-white'],
+        ]);
+});
+
+it('refuses a theme with a name that cannot be used', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', '../etc')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->assertSet('themes', []);
+});
+
+it('applies a theme to a node', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->assertSet('tree.nodes.n2.theme', ['action' => ['primary']]);
+});
+
+it('applies several variants of one group to a node', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'padding')
+        ->set('themeVariant', 'top-sm')
+        ->set('themeClasses', 'pt-3')
+        ->call('saveTheme')
+        ->set('themeGroup', 'padding')
+        ->set('themeVariant', 'bottom-sm')
+        ->set('themeClasses', 'pb-3')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'padding', 'top-sm')
+        ->call('toggleTheme', 'n2', 'padding', 'bottom-sm')
+        ->assertSet('tree.nodes.n2.theme', ['padding' => ['top-sm', 'bottom-sm']]);
+});
+
+it('takes a theme off a node', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->call('removeNodeTheme', 'n2', 'action', 'primary')
+        ->assertSet('tree.nodes.n2.theme', []);
+});
+
+it('takes one variant off a node and leaves the others', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'padding')
+        ->set('themeVariant', 'top-sm')
+        ->set('themeClasses', 'pt-3')
+        ->call('saveTheme')
+        ->set('themeGroup', 'padding')
+        ->set('themeVariant', 'bottom-sm')
+        ->set('themeClasses', 'pb-3')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'padding', 'top-sm')
+        ->call('toggleTheme', 'n2', 'padding', 'bottom-sm')
+        ->call('removeNodeTheme', 'n2', 'padding', 'top-sm')
+        ->assertSet('tree.nodes.n2.theme', ['padding' => ['bottom-sm']]);
+});
+
+it('toggles a theme off a node when it is applied again', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->assertSet('tree.nodes.n2.theme', []);
+});
+
+it('keeps a theme that a node is still using', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->call('deleteTheme', 'action', 'primary')
+        ->assertSet('themes', [
+            'action' => ['primary' => 'bg-indigo-600'],
+        ]);
+});
+
+it('removes a theme that nothing uses', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('deleteTheme', 'action', 'primary')
+        ->assertSet('themes', []);
+});
+
+it('writes the themes into the generated code', function () {
+    $component = Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600 text-white')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary');
+
+    expect($component->instance()->code())
+        ->toContain('->setThemes([')
+        ->toContain("'action' => 'primary',")
+        ->toContain('resources/views/_themes/tailwind/action.blade.php');
+});
+
+it('brings the themes back with a saved composition', function () {
+    config()->set('builder.directory', 'builder-tests');
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->set('compositionName', 'Themed')
+        ->call('save');
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('load', 'themed')
+        ->assertSet('themes', ['action' => ['primary' => 'bg-indigo-600']])
+        ->assertSet('tree.nodes.n2.theme', ['action' => ['primary']]);
+});
+
+it('turns the runtime tailwind off and loads the page again', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('toggleTailwind')
+        ->assertRedirect(route('builder'));
+
+    expect(session('builder.tailwind_runtime'))->toBeFalse();
+});
+
+afterEach(function () {
+    foreach (Storage::disk('local')->files('builder-tests') as $file) {
+        Storage::disk('local')->delete($file);
+    }
 });
 
 it('renders a clean preview without any of the builders additions', function () {

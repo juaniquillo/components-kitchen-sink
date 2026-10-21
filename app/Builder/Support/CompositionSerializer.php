@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Builder\Support;
 
+use App\Builder\Components\ComponentDescriptor;
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
+use App\Builder\Registries\ThemeRegistry;
 
 /**
  * Reads and writes the on-disk format for a saved composition.
@@ -24,16 +26,32 @@ final class CompositionSerializer
      * Wrap a tree in the envelope that gets written to disk.
      *
      * @param  Tree  $tree
-     * @return array{version: int, name: string, saved_at: string, tree: Tree}
+     * @param  array<string, array<string, string>>  $themes
+     * @return array{version: int, name: string, saved_at: string, tree: Tree, themes: array<string, array<string, string>>}
      */
-    public function envelope(string $name, array $tree): array
+    public function envelope(string $name, array $tree, array $themes = []): array
     {
         return [
             'version' => (int) config('builder.version', 1),
             'name' => $name,
             'saved_at' => now()->format('Y-m-d\TH:i:s.uP'),
             'tree' => $tree,
+            'themes' => $themes,
         ];
+    }
+
+    /**
+     * Pull the themes back out of an envelope, discarding anything invalid.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public function themes(mixed $envelope): array
+    {
+        if (! is_array($envelope)) {
+            return [];
+        }
+
+        return ThemeRegistry::sanitize($envelope['themes'] ?? []);
     }
 
     /**
@@ -47,15 +65,16 @@ final class CompositionSerializer
             return null;
         }
 
-        return $this->sanitize($envelope['tree']);
+        return $this->sanitize($envelope['tree'], $this->themes($envelope));
     }
 
     /**
      * Validate a tree, dropping anything the builder would not accept.
      *
+     * @param  array<string, array<string, string>>  $themes
      * @return Tree|null
      */
-    public function sanitize(mixed $tree): ?array
+    public function sanitize(mixed $tree, array $themes = []): ?array
     {
         if (! is_array($tree) || ! isset($tree['root'], $tree['nodes'])) {
             return null;
@@ -72,7 +91,7 @@ final class CompositionSerializer
                 continue;
             }
 
-            $sanitized = $this->sanitizeNode($id, $node);
+            $sanitized = $this->sanitizeNode($id, $node, $themes);
 
             if ($sanitized !== null) {
                 $nodes[$id] = $sanitized;
@@ -95,9 +114,10 @@ final class CompositionSerializer
     /**
      * Validate a single node.
      *
+     * @param  array<string, array<string, string>>  $themes
      * @return Node|null
      */
-    private function sanitizeNode(string $id, mixed $node): ?array
+    private function sanitizeNode(string $id, mixed $node, array $themes): ?array
     {
         if (! is_array($node) || ! isset($node['type']) || ! is_string($node['type'])) {
             return null;
@@ -116,6 +136,7 @@ final class CompositionSerializer
                 'text' => $text ?? '',
                 'attrs' => [],
                 'children' => [],
+                'theme' => [],
             ];
         }
 
@@ -131,7 +152,55 @@ final class CompositionSerializer
             'text' => $text,
             'attrs' => $this->sanitizeAttributes($node['attrs'] ?? []),
             'children' => $this->sanitizeChildren($node['children'] ?? []),
+            'theme' => $this->sanitizeReferences($node['theme'] ?? [], $themes),
         ];
+    }
+
+    /**
+     * Keep only the theme references that point at a theme that is there.
+     *
+     * A reference names a group and the variants of it. Both are checked,
+     * and so is every variant, because a saved file is data and could have
+     * been written by hand.
+     *
+     * A group used to hold a single variant, so a file written before a
+     * group could hold several is still read: the single variant becomes a
+     * list of one.
+     *
+     * @param  array<string, array<string, string>>  $themes
+     * @return array<string, array<int, string>>
+     */
+    private function sanitizeReferences(mixed $references, array $themes): array
+    {
+        if (! is_array($references)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($references as $group => $variants) {
+            if (! is_string($group)) {
+                continue;
+            }
+
+            if (! ThemeRegistry::allowsName($group)) {
+                continue;
+            }
+
+            foreach ((array) $variants as $variant) {
+                if (! is_string($variant) || ! ThemeRegistry::allowsName($variant)) {
+                    continue;
+                }
+
+                if (! isset($themes[$group][$variant])) {
+                    continue;
+                }
+
+                $result[$group][] = $variant;
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -199,12 +268,18 @@ final class CompositionSerializer
         foreach ($nodes as $id => $node) {
             $children = [];
 
+            $descriptor = ComponentRegistry::get($node['type']);
+
             foreach ($node['children'] as $childId) {
                 if (! isset($nodes[$childId]) || $childId === $id) {
                     continue;
                 }
 
                 if (in_array($childId, $this->ancestorsOf($nodes, $id), true)) {
+                    continue;
+                }
+
+                if (! $this->allowsChild($descriptor, $nodes[$childId]['type'])) {
                     continue;
                 }
 
@@ -227,6 +302,27 @@ final class CompositionSerializer
         }
 
         return $pruned;
+    }
+
+    /**
+     * Whether a parent may hold the given child.
+     *
+     * A component the parent does not accept would be taken out of it by the
+     * browser, and the tree would come apart. A text segment is content and
+     * not a component, so the parser never moves it: it only has to be
+     * somewhere that holds content at all.
+     */
+    private function allowsChild(?ComponentDescriptor $descriptor, string $childType): bool
+    {
+        if ($descriptor === null) {
+            return true;
+        }
+
+        if ($childType === BuilderNode::TYPE_TEXT) {
+            return $descriptor->acceptsContent();
+        }
+
+        return $descriptor->allowsChild($childType);
     }
 
     /**

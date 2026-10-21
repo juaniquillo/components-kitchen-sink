@@ -8,6 +8,7 @@ use App\Builder\Components\ComponentDescriptor;
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Contracts\SavedComposition;
 use App\Builder\Registries\ComponentRegistry;
+use App\Builder\Registries\ThemeRegistry;
 use App\Builder\Support\CompositionRepository;
 use App\Builder\Support\PhpCodeGenerator;
 use App\Builder\Support\TreeMutator;
@@ -34,6 +35,31 @@ class BuilderCanvas extends Component
      * @var Tree
      */
     public array $tree;
+
+    /**
+     * The themes the user has defined, by group and variant.
+     *
+     * A node holds a reference to a theme rather than a copy of its classes,
+     * so one theme can be used by as many components as the user likes.
+     *
+     * @var array<string, array<string, string>>
+     */
+    public array $themes = [];
+
+    /**
+     * The group of the theme waiting to be added or changed.
+     */
+    public string $themeGroup = '';
+
+    /**
+     * The variant of the theme waiting to be added or changed.
+     */
+    public string $themeVariant = '';
+
+    /**
+     * The classes of the theme waiting to be added or changed.
+     */
+    public string $themeClasses = '';
 
     /**
      * The id of the node the inspector is showing.
@@ -74,6 +100,150 @@ class BuilderCanvas extends Component
     {
         $this->tree = BuilderNode::tree($this->nextId(), 'div');
         $this->selectedId = $this->tree['root'];
+    }
+
+    /**
+     * Add a theme, or change the one being edited.
+     */
+    public function saveTheme(): void
+    {
+        $group = trim($this->themeGroup);
+        $variant = trim($this->themeVariant);
+
+        if (! ThemeRegistry::allowsName($group) || ! ThemeRegistry::allowsName($variant)) {
+            return;
+        }
+
+        $registry = (new ThemeRegistry($this->themes))->with($group, $variant, $this->themeClasses);
+
+        if ($registry->classes($group, $variant) === '') {
+            return;
+        }
+
+        $this->themes = $registry->groups();
+
+        $this->clearThemeInputs();
+    }
+
+    /**
+     * Change the classes of a theme.
+     */
+    public function updateThemeClasses(string $group, string $variant, string $classes): void
+    {
+        if (! $this->themeExists($group, $variant)) {
+            return;
+        }
+
+        $this->themes = (new ThemeRegistry($this->themes))
+            ->with($group, $variant, $classes)
+            ->groups();
+    }
+
+    /**
+     * Remove a theme.
+     *
+     * A theme that is still used by a node is kept, because the generated
+     * code would point at a variant that is not there any more.
+     */
+    public function deleteTheme(string $group, string $variant): void
+    {
+        if ($this->themeUsage($group, $variant) > 0) {
+            return;
+        }
+
+        $this->themes = (new ThemeRegistry($this->themes))->without($group, $variant)->groups();
+    }
+
+    /**
+     * Empty the theme inputs.
+     */
+    private function clearThemeInputs(): void
+    {
+        $this->themeGroup = '';
+        $this->themeVariant = '';
+        $this->themeClasses = '';
+    }
+
+    /**
+     * Add a theme variant to a node, or take it off again.
+     *
+     * A group holds a list of variants, so a node can carry several of the
+     * same group. Toggling is what the chips in the drawer do.
+     */
+    public function toggleTheme(string $nodeId, string $group, string $variant): void
+    {
+        if (! $this->themeExists($group, $variant)) {
+            return;
+        }
+
+        if ($this->nodeUsesTheme($nodeId, $group, $variant)) {
+            $this->tree = TreeMutator::removeTheme($this->tree, $nodeId, $group, $variant);
+
+            return;
+        }
+
+        $this->tree = TreeMutator::addTheme($this->tree, $nodeId, $group, $variant);
+    }
+
+    /**
+     * Take a theme variant off a node.
+     */
+    public function removeNodeTheme(string $nodeId, string $group, string $variant): void
+    {
+        $this->tree = TreeMutator::removeTheme($this->tree, $nodeId, $group, $variant);
+    }
+
+    /**
+     * Whether a node carries a variant of a group.
+     */
+    public function nodeUsesTheme(string $nodeId, string $group, string $variant): bool
+    {
+        $node = TreeMutator::find($this->tree, $nodeId);
+
+        if ($node === null) {
+            return false;
+        }
+
+        return in_array($variant, $node['theme'][$group] ?? [], true);
+    }
+
+    /**
+     * How many nodes use a theme.
+     */
+    public function themeUsage(string $group, string $variant): int
+    {
+        $count = 0;
+
+        foreach ($this->tree['nodes'] as $node) {
+            if (in_array($variant, $node['theme'][$group] ?? [], true)) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * Turn the runtime Tailwind on or off.
+     *
+     * The runtime Tailwind is a script in the head of the page, so the
+     * choice has to be made before the page is loaded: the session carries
+     * it and the page is loaded again.
+     */
+    public function toggleTailwind(): void
+    {
+        session()->put('builder.tailwind_runtime', ! $this->tailwindRuntime());
+
+        $this->redirect(route('builder'));
+    }
+
+    /**
+     * Whether the canvas is styled by the runtime Tailwind.
+     */
+    #[Computed]
+    public function tailwindRuntime(): bool
+    {
+        return (bool) session('builder.tailwind_runtime', true);
     }
 
     /**
@@ -322,7 +492,7 @@ class BuilderCanvas extends Component
 
         $repository = new CompositionRepository;
 
-        $repository->save($name, $this->tree);
+        $repository->save($name, $this->tree, $this->themes);
 
         $this->compositionName = $name;
 
@@ -334,17 +504,16 @@ class BuilderCanvas extends Component
      */
     public function load(string $slug): void
     {
-        $repository = new CompositionRepository;
+        $found = (new CompositionRepository)->findWithThemes($slug);
 
-        $tree = $repository->find($slug);
-
-        if ($tree === null) {
+        if ($found === null) {
             return;
         }
 
-        $this->tree = $tree;
-        $this->selectedId = $tree['root'];
-        $this->nodeCounter = count($tree['nodes']);
+        $this->tree = $found['tree'];
+        $this->themes = $found['themes'];
+        $this->selectedId = $this->tree['root'];
+        $this->nodeCounter = count($this->tree['nodes']);
     }
 
     /**
@@ -361,7 +530,7 @@ class BuilderCanvas extends Component
     #[Computed]
     public function preview(): string
     {
-        return (new TreeRenderer)->render($this->tree, $this->selectedId);
+        return (new TreeRenderer($this->themes))->render($this->tree, $this->selectedId);
     }
 
     /**
@@ -371,7 +540,7 @@ class BuilderCanvas extends Component
     #[Computed]
     public function cleanPreview(): string
     {
-        return (new TreeRenderer)->render($this->tree, null, clean: true);
+        return (new TreeRenderer($this->themes))->render($this->tree, null, clean: true);
     }
 
     /**
@@ -380,7 +549,52 @@ class BuilderCanvas extends Component
     #[Computed]
     public function code(): string
     {
-        return (new PhpCodeGenerator)->snippet($this->tree);
+        return (new PhpCodeGenerator($this->themes))->snippet($this->tree);
+    }
+
+    /**
+     * Every theme that has been defined, flattened for a picker.
+     *
+     * @return array<int, array{group: string, variant: string, classes: string}>
+     */
+    #[Computed]
+    public function themeVariants(): array
+    {
+        return (new ThemeRegistry($this->themes))->variants();
+    }
+
+    /**
+     * The themes applied to the node the drawer is configuring.
+     *
+     * @return array<int, array{group: string, variant: string, classes: string, missing: bool}>
+     */
+    #[Computed]
+    public function configuringThemes(): array
+    {
+        $node = $this->configuring();
+
+        if ($node === null) {
+            return [];
+        }
+
+        $registry = new ThemeRegistry($this->themes);
+
+        $themes = [];
+
+        foreach ($node['theme'] as $group => $variants) {
+            foreach ($variants as $variant) {
+                $classes = $registry->classes($group, $variant);
+
+                $themes[] = [
+                    'group' => $group,
+                    'variant' => $variant,
+                    'classes' => $classes,
+                    'missing' => $classes === '',
+                ];
+            }
+        }
+
+        return $themes;
     }
 
     /**
@@ -478,6 +692,14 @@ class BuilderCanvas extends Component
     public function saved(): array
     {
         return (new CompositionRepository)->all();
+    }
+
+    /**
+     * Whether a theme is in the registry.
+     */
+    private function themeExists(string $group, string $variant): bool
+    {
+        return (new ThemeRegistry($this->themes))->has($group, $variant);
     }
 
     /**

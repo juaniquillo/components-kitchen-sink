@@ -16,6 +16,68 @@ it('generates a builder chain for the root component', function () {
         ->toBe('ComponentBuilder::make(ComponentEnum::DIV)');
 });
 
+it('writes a theme as a setThemes call', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['action' => ['primary']];
+
+    $generator = new PhpCodeGenerator(['action' => ['primary' => 'bg-indigo-600 text-white']]);
+
+    expect($generator->expression($tree, 'n2'))
+        ->toContain('->setThemes([')
+        ->toContain("'action' => 'primary',");
+});
+
+it('writes several variants of one group as a list', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['padding' => ['top-sm', 'bottom-sm']];
+
+    $generator = new PhpCodeGenerator(['padding' => ['top-sm' => 'pt-3', 'bottom-sm' => 'pb-3']]);
+
+    $expression = $generator->expression($tree, 'n2');
+
+    expect($expression)->toContain('->setThemes([')
+        ->toContain("'padding' => [")
+        ->toContain("'top-sm',")
+        ->toContain("'bottom-sm',");
+});
+
+it('shows the theme file the code needs', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['action' => ['primary']];
+
+    $generator = new PhpCodeGenerator(['action' => ['primary' => 'bg-indigo-600 text-white']]);
+
+    $snippet = $generator->snippet($tree);
+
+    expect($snippet)->toContain('resources/views/_themes/tailwind/action.blade.php')
+        ->toContain("'primary' => 'bg-indigo-600 text-white',")
+        ->toContain('LocalThemeComponentBuilder as ComponentBuilder');
+});
+
+it('keeps the plain builder when there is no theme', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+
+    $snippet = (new PhpCodeGenerator)->snippet($tree);
+
+    expect($snippet)->toContain('use Juaniquillo\BackendComponents\Builders\ComponentBuilder;')
+        ->not->toContain('setThemes')
+        ->not->toContain('Theme files');
+});
+
+it('leaves a theme that no node uses out of the snippet', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+
+    $generator = new PhpCodeGenerator(['action' => ['primary' => 'bg-indigo-600']]);
+
+    expect($generator->snippet($tree))->not->toContain('action.blade.php');
+});
+
 it('generates attributes, text and children', function () {
     $tree = treeWithText('n1', 'div', 'Hello');
     $tree['nodes']['n1']['attrs'] = ['id' => 'hero'];

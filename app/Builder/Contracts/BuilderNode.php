@@ -23,6 +23,7 @@ namespace App\Builder\Contracts;
  *     text: string|null,
  *     attrs: array<string, string>,
  *     children: array<int, string>,
+ *     theme: array<string, array<int, string>>,
  * }
  * @phpstan-type Tree array{
  *     root: string,
@@ -52,6 +53,7 @@ final class BuilderNode
             'text' => $text,
             'attrs' => [],
             'children' => [],
+            'theme' => [],
         ];
     }
 

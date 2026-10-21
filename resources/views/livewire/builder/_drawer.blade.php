@@ -73,6 +73,65 @@
             @endif
 
             <div>
+                <label class="mb-1 block text-[11px] font-medium text-slate-500">Themes</label>
+
+                @if ($this->configuringThemes !== [])
+                    <ul class="mb-2 space-y-1">
+                        @foreach ($this->configuringThemes as $theme)
+                            <li class="flex items-center justify-between gap-2 text-[11px]">
+                                <span class="min-w-0 truncate">
+                                    <span class="font-medium text-slate-700 dark:text-slate-200">
+                                        {{ $theme['group'] }} / {{ $theme['variant'] }}
+                                    </span>
+
+                                    @if ($theme['missing'])
+                                        <span class="text-red-500">(missing)</span>
+                                    @endif
+                                </span>
+
+                                <button
+                                    type="button"
+                                    wire:click="removeNodeTheme('{{ $node['id'] }}', '{{ $theme['group'] }}', '{{ $theme['variant'] }}')"
+                                    class="shrink-0 rounded border border-red-200 px-1.5 py-0.5 text-[10px] text-red-600 hover:bg-red-50 dark:border-red-900"
+                                >
+                                    Remove
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                @if ($themes !== [])
+                    @foreach ($themes as $group => $variants)
+                        <div class="mb-2 last:mb-0">
+                            <p class="mb-1 text-[10px] text-slate-400">{{ $group }}</p>
+
+                            <div class="flex flex-wrap gap-1">
+                                @foreach ($variants as $variant => $classes)
+                                    <button
+                                        type="button"
+                                        wire:click="toggleTheme('{{ $node['id'] }}', '{{ $group }}', '{{ $variant }}')"
+                                        title="{{ $classes }}"
+                                        @class([
+                                            'rounded border px-2 py-0.5 text-[10px]',
+                                            'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' => $this->nodeUsesTheme($node['id'], $group, $variant),
+                                            'border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300' => ! $this->nodeUsesTheme($node['id'], $group, $variant),
+                                        ])
+                                    >
+                                        {{ $variant }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <p class="text-[11px] text-slate-400">
+                        No themes yet. Add one in the themes panel.
+                    </p>
+                @endif
+            </div>
+
+            <div>
                 <label class="mb-1 block text-[11px] font-medium text-slate-500">Attributes</label>
 
                 <div class="flex items-end gap-1">

@@ -93,6 +93,20 @@ it('allows block elements inside a div', function () {
         ->and($div->allowsChild('lists.ul'))->toBeTrue();
 });
 
+it('keeps an element from holding one of its own kind', function () {
+    // A button cannot hold a button, and a link cannot hold a link: the
+    // browser takes the inner one out of the outer one, so the tree the
+    // builder holds would no longer be the tree in the page.
+    expect(ComponentRegistry::get('inline.button')->allowsChild('inline.button'))->toBeFalse()
+        ->and(ComponentRegistry::get('inline.link')->allowsChild('inline.link'))->toBeFalse();
+});
+
+it('still lets a button hold other phrasing content', function () {
+    expect(ComponentRegistry::get('inline.button')->allowsChild('inline.span'))->toBeTrue()
+        ->and(ComponentRegistry::get('inline.button')->allowsChild('inline.link'))->toBeTrue()
+        ->and(ComponentRegistry::get('inline.link')->allowsChild('inline.span'))->toBeTrue();
+});
+
 it('suggests the attributes that suit a component', function () {
     $div = ComponentRegistry::get('div');
     $link = ComponentRegistry::get('inline.link');

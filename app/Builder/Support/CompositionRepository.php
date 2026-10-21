@@ -86,11 +86,49 @@ final class CompositionRepository
     }
 
     /**
+     * The tree and the themes of a saved composition.
+     *
+     * @return array{tree: Tree, themes: array<string, array<string, string>>}|null
+     */
+    public function findWithThemes(string $slug): ?array
+    {
+        $slug = $this->normalise($slug);
+
+        if ($slug === null) {
+            return null;
+        }
+
+        $path = $this->path($slug);
+
+        if (! $this->disk()->exists($path)) {
+            return null;
+        }
+
+        $envelope = $this->read($path);
+
+        if ($envelope === null) {
+            return null;
+        }
+
+        $tree = $this->serializer->tree($envelope);
+
+        if ($tree === null) {
+            return null;
+        }
+
+        return [
+            'tree' => $tree,
+            'themes' => $this->serializer->themes($envelope),
+        ];
+    }
+
+    /**
      * Write a composition to disk.
      *
      * @param  Tree  $tree
+     * @param  array<string, array<string, string>>  $themes
      */
-    public function save(string $name, array $tree): SavedComposition
+    public function save(string $name, array $tree, array $themes = []): SavedComposition
     {
         $slug = $this->normalise($name);
 
@@ -98,7 +136,7 @@ final class CompositionRepository
             throw new RuntimeException('The composition name could not be turned into a file name.');
         }
 
-        $envelope = $this->serializer->envelope($name, $tree);
+        $envelope = $this->serializer->envelope($name, $tree, $themes);
 
         $contents = json_encode($envelope, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 

@@ -1,3 +1,6 @@
+@php
+    use function Juaniquillo\BackendComponents\processThemes;
+@endphp
 <section class="rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800">
     <div class="mb-2 flex items-center justify-between gap-2">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Canvas</h2>
@@ -9,9 +12,17 @@
 
             <button
                 type="button"
+                wire:click="toggleTailwind"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                {{ $this->tailwindRuntime ? 'Runtime Tailwind: on' : 'Runtime Tailwind: off' }}
+            </button>
+
+            <button
+                type="button"
                 wire:click="configureSelected"
                 @disabled($selectedId === null)
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
             >
                 Configure selected
             </button>
@@ -29,7 +40,7 @@
     </div>
 </section>
 
-<flux:modal name="builder-preview">
+<flux:modal name="builder-preview" class="{{ processThemes(['modal' => '2xl']) }}">
     <flux:heading size="sm">Preview</flux:heading>
 
     <div class="max-w-xl overflow-auto rounded-lg border border-slate-200 p-6 dark:border-slate-700">

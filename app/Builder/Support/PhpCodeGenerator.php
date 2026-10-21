@@ -29,18 +29,127 @@ final class PhpCodeGenerator
     private const INDENT = '    ';
 
     /**
+     * @param  array<string, array<string, string>>  $themes  The themes, by group and variant.
+     */
+    public function __construct(private readonly array $themes = []) {}
+
+    /**
      * A complete, pasteable snippet including the imports.
      *
      * @param  Tree  $tree
      */
     public function snippet(array $tree): string
     {
-        return implode("\n", [
-            'use Juaniquillo\BackendComponents\Builders\ComponentBuilder;',
+        $lines = [
+            $this->componentImport($tree),
             'use Juaniquillo\BackendComponents\Enums\ComponentEnum;',
-            '',
-            '$component = '.$this->expression($tree, $tree['root']).';',
-        ]);
+        ];
+
+        $files = $this->themeFiles($tree);
+
+        if ($files !== '') {
+            $lines[] = '';
+            $lines[] = $files;
+        }
+
+        $lines[] = '';
+        $lines[] = '$component = '.$this->expression($tree, $tree['root']).';';
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * The import the components are built with.
+     *
+     * A theme is a file in the project the code is pasted into, and the
+     * local theme manager is the one that looks there. The components still
+     * come from the package, so the local builder is used and its import is
+     * aliased to keep the snippet readable.
+     *
+     * @param  Tree  $tree
+     */
+    private function componentImport(array $tree): string
+    {
+        if (! $this->usesThemes($tree)) {
+            return 'use Juaniquillo\BackendComponents\Builders\ComponentBuilder;';
+        }
+
+        return 'use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder as ComponentBuilder;';
+    }
+
+    /**
+     * Whether any node in the tree carries a theme.
+     *
+     * @param  Tree  $tree
+     */
+    private function usesThemes(array $tree): bool
+    {
+        foreach ($tree['nodes'] as $node) {
+            if ($node['theme'] !== []) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The theme files the code needs.
+     *
+     * A theme is a group of variants and a group is a file, so the file
+     * holds the variants of the group. Only the groups the tree uses are
+     * shown, so the snippet holds what the code actually needs.
+     *
+     * @param  Tree  $tree
+     */
+    private function themeFiles(array $tree): string
+    {
+        $groups = $this->usedGroups($tree);
+
+        if ($groups === []) {
+            return '';
+        }
+
+        $lines = ['/*', '| Theme files', '|'];
+
+        foreach ($groups as $group) {
+            $lines[] = '| resources/views/_themes/tailwind/'.$group.'.blade.php';
+            $lines[] = '|';
+            $lines[] = '| return [';
+
+            foreach ($this->themes[$group] ?? [] as $variant => $classes) {
+                $lines[] = '|     '.$this->literal($variant).' => '.$this->literal($classes).',';
+            }
+
+            $lines[] = '| ];';
+            $lines[] = '|';
+        }
+
+        $lines[] = '*/';
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * The groups the tree uses, in the order the registry holds them.
+     *
+     * @param  Tree  $tree
+     * @return array<int, string>
+     */
+    private function usedGroups(array $tree): array
+    {
+        $used = [];
+
+        foreach ($tree['nodes'] as $node) {
+            foreach (array_keys($node['theme']) as $group) {
+                $used[$group] = true;
+            }
+        }
+
+        return array_values(array_filter(
+            array_keys($this->themes),
+            static fn (string $group): bool => isset($used[$group]),
+        ));
     }
 
     /**
@@ -69,6 +178,15 @@ final class PhpCodeGenerator
             $lines[] = '->setAttributes([';
             foreach ($attributes as $name => $value) {
                 $lines[] = self::INDENT."'".$name."' => ".$this->literal($value).',';
+            }
+            $lines[] = '])';
+        }
+
+        $themes = $this->nodeThemes($node);
+        if ($themes !== []) {
+            $lines[] = '->setThemes([';
+            foreach ($themes as $group => $variants) {
+                $lines = array_merge($lines, $this->themeGroup($group, $variants));
             }
             $lines[] = '])';
         }
@@ -124,6 +242,44 @@ final class PhpCodeGenerator
         }
 
         return str_replace("\n", "\n".self::INDENT, $this->expression($tree, $nodeId));
+    }
+
+    /**
+     * The themes of a node, by group.
+     *
+     * @param  Node  $node
+     * @return array<string, array<int, string>>
+     */
+    private function nodeThemes(array $node): array
+    {
+        return $node['theme'];
+    }
+
+    /**
+     * The lines a theme group takes in a setThemes call.
+     *
+     * A group with a single variant is written as a plain string, and a group
+     * with several is written as a list, which is the shape the package
+     * takes.
+     *
+     * @param  array<int, string>  $variants
+     * @return array<int, string>
+     */
+    private function themeGroup(string $group, array $variants): array
+    {
+        if (count($variants) === 1) {
+            return [self::INDENT.$this->literal($group).' => '.$this->literal($variants[0]).','];
+        }
+
+        $lines = [self::INDENT.$this->literal($group).' => ['];
+
+        foreach ($variants as $variant) {
+            $lines[] = self::INDENT.self::INDENT.$this->literal($variant).',';
+        }
+
+        $lines[] = self::INDENT.'],';
+
+        return $lines;
     }
 
     /**

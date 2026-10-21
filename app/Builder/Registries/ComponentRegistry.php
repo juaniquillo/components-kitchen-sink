@@ -162,7 +162,22 @@ final class ComponentRegistry
         'inline.italic',
         'inline.small',
         'inline.link',
+        'inline.button',
         'form.label',
+    ];
+
+    /**
+     * Elements that may not hold an element of their own kind.
+     *
+     * A button cannot hold a button, and a link cannot hold a link: the
+     * browser takes the inner one out of the outer one, and the tree the
+     * builder holds is no longer the tree in the page.
+     *
+     * @var array<int, string>
+     */
+    private const NO_SELF_NESTING = [
+        'inline.button',
+        'inline.link',
     ];
 
     /**
@@ -284,6 +299,13 @@ final class ComponentRegistry
             array $children,
             array $attributes,
         ) use (&$definitions): void {
+            if (in_array($type, self::NO_SELF_NESTING, true)) {
+                $children = array_values(array_filter(
+                    $children,
+                    static fn (string $child): bool => $child !== $type,
+                ));
+            }
+
             $definitions[] = [
                 'type' => $type,
                 'label' => $label,

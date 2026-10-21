@@ -32,8 +32,77 @@ it('saves a composition as a json file', function () {
         ->toHaveKey('name')
         ->toHaveKey('saved_at')
         ->toHaveKey('tree')
+        ->toHaveKey('themes')
         ->and($contents['name'])->toBe('Hero section')
         ->and($contents['tree']['root'])->toBe('n1');
+});
+
+it('keeps the themes with the composition', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['action' => ['primary']];
+
+    $themes = ['action' => ['primary' => 'bg-indigo-600 text-white']];
+
+    $this->repository->save('Themed', $tree, $themes);
+
+    $found = $this->repository->findWithThemes('themed');
+
+    expect($found)->not->toBeNull()
+        ->and($found['themes'])->toBe($themes)
+        ->and($found['tree']['nodes']['n2']['theme'])->toBe(['action' => ['primary']]);
+});
+
+it('keeps several variants of one group', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['padding' => ['top-sm', 'bottom-sm']];
+
+    $themes = ['padding' => ['top-sm' => 'pt-3', 'bottom-sm' => 'pb-3']];
+
+    $this->repository->save('Themed', $tree, $themes);
+
+    $found = $this->repository->findWithThemes('themed');
+
+    expect($found['tree']['nodes']['n2']['theme'])->toBe(['padding' => ['top-sm', 'bottom-sm']]);
+});
+
+it('reads a group that held a single variant back as a list', function () {
+    // A group used to hold a single variant, so a file written before a
+    // group could hold several still has to be read.
+    Storage::disk('local')->put('builder-tests/themed.json', json_encode([
+        'version' => 1,
+        'name' => 'Themed',
+        'saved_at' => now()->toIso8601String(),
+        'themes' => ['action' => ['primary' => 'bg-indigo-600']],
+        'tree' => [
+            'root' => 'n1',
+            'nodes' => [
+                'n1' => [
+                    'id' => 'n1',
+                    'type' => 'div',
+                    'text' => null,
+                    'attrs' => [],
+                    'children' => ['n2'],
+                    'theme' => [],
+                ],
+                'n2' => [
+                    'id' => 'n2',
+                    'type' => 'inline.button',
+                    'text' => null,
+                    'attrs' => [],
+                    'children' => [],
+                    'theme' => ['action' => 'primary'],
+                ],
+            ],
+        ],
+    ]));
+
+    $found = $this->repository->findWithThemes('themed');
+
+    expect($found['tree']['nodes']['n2']['theme'])->toBe(['action' => ['primary']]);
 });
 
 it('reads a composition back', function () {
@@ -44,6 +113,73 @@ it('reads a composition back', function () {
     $this->repository->save('Hero', $tree);
 
     expect($this->repository->find('hero'))->toBe($tree);
+});
+
+it('reads a text segment back', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'paragraph');
+    $tree['nodes']['n2']['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, 'Hello world');
+
+    $this->repository->save('Hero', $tree);
+
+    $found = $this->repository->find('hero');
+
+    expect($found['nodes']['n2']['children'])->toBe(['t1'])
+        ->and($found['nodes'])->toHaveKey('t1')
+        ->and($found['nodes']['t1']['type'])->toBe(BuilderNode::TYPE_TEXT)
+        ->and($found['nodes']['t1']['text'])->toBe('Hello world');
+});
+
+it('reads a text segment back from a container that only takes children', function () {
+    // A text segment is content and not a component, so it is kept even where
+    // the content model does not offer text.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'lists.ul');
+    $tree['nodes']['n2']['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, 'Item');
+
+    $this->repository->save('List', $tree);
+
+    $found = $this->repository->find('list');
+
+    expect($found['nodes']['n2']['children'])->toBe(['t1'])
+        ->and($found['nodes'])->toHaveKey('t1')
+        ->and($found['nodes']['t1']['text'])->toBe('Item');
+});
+
+it('drops a text segment from a component that holds nothing', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'form.text');
+    $tree['nodes']['n2']['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, 'Nope');
+
+    $this->repository->save('Input', $tree);
+
+    $found = $this->repository->find('input');
+
+    expect($found['nodes']['n2']['children'])->toBe([])
+        ->and($found['nodes'])->not->toHaveKey('t1');
+});
+
+it('drops a component the parent does not accept', function () {
+    // A button inside a button would be taken out of it by the browser, so
+    // the tree would come apart.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'inline.button');
+
+    $this->repository->save('Buttons', $tree);
+
+    $found = $this->repository->find('buttons');
+
+    expect($found['nodes']['n2']['children'])->toBe([])
+        ->and($found['nodes'])->not->toHaveKey('n3');
 });
 
 it('lists the saved compositions newest first', function () {
@@ -149,5 +285,5 @@ it('discards a theme variant that does not exist', function () {
     $tree = $this->repository->find('themed');
 
     expect($tree)->not->toBeNull()
-        ->and($tree['nodes']['n1'])->not->toHaveKey('theme');
+        ->and($tree['nodes']['n1']['theme'])->toBe([]);
 });

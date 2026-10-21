@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\TreeRenderer;
+use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
+use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
 it('renders a node with the text it holds', function () {
     $tree = treeWithText('n1', 'paragraph', 'Hello');
@@ -95,7 +97,7 @@ it('wraps a component that cannot hold a chrome, so it still gets a toolbar', fu
     $html = (new TreeRenderer)->render($tree);
 
     // The wrapper is the sortable item, and the component sits inside it.
-    expect($html)->toContain('bw-void')
+    expect($html)->toContain('bw-wrap')
         ->toContain('wire:sort:item="n2"')
         ->toContain('wire:sort:handle')
         ->toContain('<input');
@@ -112,7 +114,7 @@ it('does not wrap a component where a span would be invalid', function () {
 
     // The select can be wrapped, but a span inside it would be pulled out
     // by the parser, so the option is left as it is.
-    expect(substr_count($html, 'bw-void'))->toBe(1)
+    expect(substr_count($html, 'bw-wrap'))->toBe(1)
         ->and($html)->toContain('wire:sort:item="n3"');
 });
 
@@ -143,6 +145,121 @@ it('marks the selected node', function () {
     $tree = BuilderNode::tree('n1', 'div');
 
     $html = (new TreeRenderer)->render($tree, 'n1');
+
+    expect($html)->toContain('data-selected="true"');
+});
+
+it('puts the classes of a theme on the node', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['action' => ['primary']];
+
+    $html = (new TreeRenderer(['action' => ['primary' => 'bg-indigo-600 text-white']]))->render($tree);
+
+    expect($html)->toContain('bg-indigo-600 text-white');
+});
+
+it('puts the classes of every variant of a group on the node', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['padding' => ['top-sm', 'bottom-sm']];
+
+    $html = (new TreeRenderer(['padding' => ['top-sm' => 'pt-3', 'bottom-sm' => 'pb-3']]))->render($tree);
+
+    expect($html)->toContain('pt-3')
+        ->toContain('pb-3');
+});
+
+it('puts the same classes on the node as the package does', function () {
+    // The canvas resolves the themes itself, so it has to agree with what
+    // the package does with the theme file the generated code points at.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['padding' => ['top-sm', 'bottom-sm']];
+
+    $preview = (new TreeRenderer(['padding' => ['top-sm' => 'pt-3', 'bottom-sm' => 'pb-3']]))
+        ->render($tree, null, clean: true);
+
+    $button = LocalThemeComponentBuilder::make(ComponentEnum::BUTTON)
+        ->setThemes(['padding' => ['top-sm', 'bottom-sm']]);
+
+    $rendered = (string) $this->blade('{{ $button }}', ['button' => $button]);
+
+    preg_match('/class="([^"]*)"/', $rendered, $matches);
+
+    expect($matches[1])->toContain('pt-3')
+        ->toContain('pb-3')
+        ->and($preview)->toContain($matches[1]);
+});
+
+it('puts the classes of a theme on the clean preview as well', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['action' => ['primary']];
+
+    $html = (new TreeRenderer(['action' => ['primary' => 'bg-indigo-600 text-white']]))->render($tree, null, clean: true);
+
+    expect($html)->toContain('bg-indigo-600 text-white');
+});
+
+it('leaves a node alone when the theme is not in the registry', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+    $tree['nodes']['n2']['theme'] = ['action' => ['primary']];
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->not->toContain('bg-indigo-600');
+});
+
+it('keeps the chrome of a button node out of the button', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    $dom = new DOMDocument;
+    $dom->loadHTML($html, LIBXML_NOERROR);
+
+    $xpath = new DOMXPath($dom);
+
+    $chrome = $xpath->query('//*[@*[name()="wire:key"]="chrome-n2"]')->item(0);
+    $button = $xpath->query('//*[@*[name()="data-node-id"]="n2"]')->item(0);
+
+    // The chrome's controls are buttons, and a button cannot hold a button:
+    // the browser takes the inner ones out of the chrome, and the chrome's
+    // Alpine scope is lost with them.
+    expect($chrome)->not->toBeNull()
+        ->and($button)->not->toBeNull()
+        ->and($chrome->parentNode)->not->toBe($button)
+        ->and($button->getElementsByTagName('button')->length)->toBe(0)
+        ->and($xpath->query('.//button', $chrome)->length)->toBeGreaterThan(0);
+});
+
+it('gives an empty button node a box to be seen in', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    // The button sits inside a wrapper now, so it needs a box of its own.
+    expect($html)->toContain('min-width: 4rem')
+        ->toContain('min-height: 1.5rem');
+});
+
+it('marks a wrapped node as selected', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
+
+    $html = (new TreeRenderer)->render($tree, 'n2');
 
     expect($html)->toContain('data-selected="true"');
 });

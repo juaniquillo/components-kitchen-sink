@@ -26,6 +26,11 @@ use Juaniquillo\BackendComponents\MainBackendComponent;
 final class TreeRenderer
 {
     /**
+     * @param  array<string, array<string, string>>  $themes  The themes, by group and variant.
+     */
+    public function __construct(private readonly array $themes = []) {}
+
+    /**
      * The group every container belongs to, so nodes can be dragged between them.
      */
     public const GROUP = 'builder';
@@ -117,17 +122,29 @@ final class TreeRenderer
         $wrapper->setAttributes([
             'wire:sort:item' => $node['id'],
             'wire:key' => $node['id'],
-            'class' => 'bw-void',
+            'class' => 'bw-wrap',
             'style' => 'position: relative; display: inline-block; padding-top: 1.75rem;',
         ]);
 
         $inner = new MainBackendComponent($node['type']);
 
-        $inner->setAttributes([
-            ...$node['attrs'],
+        $innerAttributes = [
+            ...$this->themedAttributes($node),
             'data-node-id' => $node['id'],
             'wire:click.stop' => "select('".$node['id']."')",
-        ]);
+        ];
+
+        if ($selectedId === $node['id']) {
+            $innerAttributes['data-selected'] = 'true';
+        }
+
+        $style = $this->style($node);
+
+        if ($style !== null && ! isset($innerAttributes['style'])) {
+            $innerAttributes['style'] = $style;
+        }
+
+        $inner->setAttributes($innerAttributes);
 
         $inner->setContents($this->contents($tree, $node, $selectedId, $clean, null));
 
@@ -184,7 +201,7 @@ final class TreeRenderer
     private function attributes(array $tree, array $node, ?string $selectedId, bool $clean): array
     {
         if ($clean) {
-            return $node['attrs'];
+            return $this->themedAttributes($node);
         }
 
         $attributes = [];
@@ -223,7 +240,54 @@ final class TreeRenderer
             $attributes['style'] = $style;
         }
 
-        return array_merge($attributes, $node['attrs']);
+        return array_merge($attributes, $this->themedAttributes($node));
+    }
+
+    /**
+     * The attributes of a node with the classes of its themes merged in.
+     *
+     * The theme classes come after the ones the user typed, which is the
+     * order the package merges them in.
+     *
+     * @param  Node  $node
+     * @return array<string, string>
+     */
+    private function themedAttributes(array $node): array
+    {
+        $attributes = $node['attrs'];
+
+        $classes = $this->themeClasses($node);
+
+        if ($classes === '') {
+            return $attributes;
+        }
+
+        $attributes['class'] = trim(($attributes['class'] ?? '').' '.$classes);
+
+        return $attributes;
+    }
+
+    /**
+     * The classes of the themes applied to a node.
+     *
+     * A group holds a list of variants, and every one of them contributes
+     * its classes, in the order they were applied. A theme that is not in
+     * the registry is skipped: it may have been removed after the node was
+     * given it.
+     *
+     * @param  Node  $node
+     */
+    private function themeClasses(array $node): string
+    {
+        $classes = [];
+
+        foreach ($node['theme'] as $group => $variants) {
+            foreach ($variants as $variant) {
+                $classes[] = $this->themes[$group][$variant] ?? '';
+            }
+        }
+
+        return trim(implode(' ', array_filter($classes)));
     }
 
     /**
@@ -233,32 +297,52 @@ final class TreeRenderer
      */
     private function style(array $node): ?string
     {
-        $style = '';
-
-        if ($this->canHoldChrome($node)) {
-            // The chrome is positioned against the node it belongs to, and
-            // the node keeps a row free for it so the chrome never lands on
-            // the content or on a neighbouring node's chrome.
-            $style .= 'position: relative; padding-top: 1.75rem;';
-        }
-
-        // An empty inline element has no box at all, so it is given one to
-        // make it visible and to give its toolbar something to sit against.
-        if (ComponentRegistry::isInline($node['type']) && $node['children'] === []) {
-            $style .= 'display: inline-block; min-width: 4rem; min-height: 1.5rem;';
-        }
+        $style = $this->chromeStyle($node).$this->boxStyle($node);
 
         return $style === '' ? null : $style;
     }
 
     /**
-     * Whether a node can hold the chrome of its own.
+     * The style that keeps the chrome of a node away from its content.
+     *
+     * @param  Node  $node
+     */
+    private function chromeStyle(array $node): string
+    {
+        if (! $this->canHoldChrome($node)) {
+            return '';
+        }
+
+        // The chrome is positioned against the node it belongs to, and the
+        // node keeps a row free for it so the chrome never lands on the
+        // content or on a neighbouring node's chrome.
+        return 'position: relative; padding-top: 1.75rem;';
+    }
+
+    /**
+     * The style that gives an element with no content a box to be seen in.
+     *
+     * @param  Node  $node
+     */
+    private function boxStyle(array $node): string
+    {
+        if (! ComponentRegistry::isInline($node['type']) || $node['children'] !== []) {
+            return '';
+        }
+
+        // An empty inline element has no box at all, so it is given one to
+        // make it visible and to give its toolbar something to sit against.
+        return 'display: inline-block; min-width: 4rem; min-height: 1.5rem;';
+    }
+
+    /**
+     * Whether a node holds the chrome of its own.
      *
      * @param  Node  $node
      */
     private function canHoldChrome(array $node): bool
     {
-        return NodeChrome::tag($node['type']) !== null;
+        return NodeChrome::canHold($node['type']);
     }
 
     /**

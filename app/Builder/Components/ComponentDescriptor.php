@@ -52,4 +52,15 @@ final readonly class ComponentDescriptor
         return $this->contentMode === ContentMode::Children
             || $this->contentMode === ContentMode::TextAndChildren;
     }
+
+    /**
+     * Whether this component holds content of any kind.
+     *
+     * A void element holds nothing at all, so it can take neither text nor
+     * children.
+     */
+    public function acceptsContent(): bool
+    {
+        return $this->acceptsText() || $this->acceptsChildren();
+    }
 }

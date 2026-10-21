@@ -99,12 +99,34 @@ final class NodeChrome
     ];
 
     /**
+     * The types whose tag cannot hold the chrome.
+     *
+     * The chrome's controls are buttons, and a button cannot hold a button:
+     * the browser takes the inner ones out of the chrome, and with them the
+     * chrome's Alpine scope goes. Such a node is wrapped instead, so the
+     * chrome rides along outside the button.
+     *
+     * @var array<int, string>
+     */
+    private const CANNOT_HOLD = [
+        'inline.button',
+    ];
+
+    /**
      * The tag the chrome uses for a component, or null when the component
      * cannot hold one of its own.
      */
     public static function tag(string $type): ?string
     {
         return self::TAGS[$type] ?? null;
+    }
+
+    /**
+     * Whether a component can hold the chrome of its own.
+     */
+    public static function canHold(string $type): bool
+    {
+        return self::tag($type) !== null && ! in_array($type, self::CANNOT_HOLD, true);
     }
 
     /**
