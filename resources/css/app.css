@@ -72,26 +72,6 @@ select:focus[data-flux-control] {
     @apply size-4;
 } */
 
-/*
-| Builder canvas
-| Every node the builder renders carries a data-node-id, which lets the
-| nodes be outlined on hover and highlighted while selected.
-*/
-
-[data-node-id] {
-    outline: 1px dashed transparent;
-    outline-offset: 2px;
-    transition: outline-color 120ms ease;
-}
-
-[data-node-id]:hover {
-    outline-color: rgb(148 163 184 / 0.9);
-}
-
-[data-selected='true'] {
-    outline: 2px solid rgb(79 70 229);
-    outline-offset: 2px;
-}
 
 /*
 | Alpine hides elements carrying x-cloak until it has initialised them,

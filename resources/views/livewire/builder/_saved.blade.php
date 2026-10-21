@@ -40,6 +40,7 @@
                             Load
                         </button>
                         <button type="button" wire:click="delete('{{ $composition->slug }}')"
+                            wire:confirm='Are you sure you want to delete this Saved composition?'
                             class="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-900">
                             Delete
                         </button>
