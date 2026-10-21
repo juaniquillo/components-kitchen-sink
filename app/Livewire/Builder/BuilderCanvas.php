@@ -186,8 +186,12 @@ class BuilderCanvas extends Component
     public function deleteTheme(string $group, string $variant): void
     {
         if ($this->themeUsage($group, $variant) > 0) {
+            $this->themeNotice = 'This theme is still used by a node, so it cannot be removed.';
+
             return;
         }
+
+        $this->themeNotice = null;
 
         $this->themes = (new ThemeRegistry($this->themes))->without($group, $variant)->groups();
     }
@@ -314,6 +318,12 @@ class BuilderCanvas extends Component
     {
         if (TreeMutator::find($this->tree, $nodeId) === null) {
             return;
+        }
+
+        // The draft belongs to the node it was typed for, so it is only kept
+        // when the same node is opened again.
+        if ($this->configuringId !== $nodeId) {
+            $this->textDraft = '';
         }
 
         $this->selectedId = $nodeId;

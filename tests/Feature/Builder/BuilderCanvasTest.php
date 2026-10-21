@@ -185,6 +185,24 @@ it('ignores the drawer text when the drawer is closed', function () {
         ->assertSet('tree.nodes.n1.children', []);
 });
 
+it('clears the text draft when another node is configured', function () {
+    // The draft belongs to the node it was typed for, so it may not end up
+    // in the next one.
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->set('textDraft', 'Hello')
+        ->call('openConfig', 'n1')
+        ->assertSet('textDraft', '');
+});
+
+it('keeps the text draft when the same node is configured again', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->set('textDraft', 'Hello')
+        ->call('openConfig', 'n2')
+        ->assertSet('textDraft', 'Hello');
+});
+
 it('adds an attribute to the node being configured', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'div')
@@ -498,6 +516,32 @@ it('removes a theme that nothing uses', function () {
         ->assertSet('themes', []);
 });
 
+it('says why a theme that is still used cannot be removed', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'inline.button')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('toggleTheme', 'n2', 'action', 'primary')
+        ->call('deleteTheme', 'action', 'primary')
+        ->assertSet('themeNotice', 'This theme is still used by a node, so it cannot be removed.')
+        ->assertSet('themes', ['action' => ['primary' => 'bg-indigo-600']]);
+});
+
+it('clears the theme notice when a theme is saved', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', '../etc')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->assertSet('themeNotice', 'A group and a variant may only hold letters, numbers, dashes and underscores.')
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->call('saveTheme')
+        ->assertSet('themeNotice', null);
+});
+
 it('writes the themes into the generated code', function () {
     $component = Livewire::test(BuilderCanvas::class)
         ->call('add', 'inline.button')
@@ -625,4 +669,22 @@ it('shows the preview inside a dialog', function () {
 it('does not bring flux into the builder', function () {
     Livewire::test(BuilderCanvas::class)
         ->assertDontSee('data-flux-modal', false);
+});
+
+it('keeps the drawer out of the stack of the panels', function () {
+    // The space between the panels is a margin on every child of the stack
+    // but the first, and the drawer is an overlay rather than a panel of the
+    // page: the margin would push it down.
+    $html = Livewire::test(BuilderCanvas::class)->html();
+
+    $dom = new DOMDocument;
+
+    // The parser of the library does not know the html5 tags and says so,
+    // but it keeps them all the same.
+    @$dom->loadHTML($html);
+
+    $aside = (new DOMXPath($dom))->query('//aside[@aria-label]')->item(0);
+
+    expect($aside)->not->toBeNull()
+        ->and($aside->parentNode->getAttribute('class'))->not->toContain('space-y-4');
 });
