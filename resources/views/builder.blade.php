@@ -52,6 +52,8 @@
         </p>
     </div>
 
-    <livewire:builder.builder-canvas />
+    <div class="mb-4">
+        <livewire:builder.builder-canvas />
+    </div>
 
 </x-layouts.default>
