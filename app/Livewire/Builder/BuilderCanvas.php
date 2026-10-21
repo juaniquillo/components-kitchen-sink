@@ -390,7 +390,9 @@ class BuilderCanvas extends Component
 
         $this->tree = TreeMutator::addChild($this->tree, $parentId, $node);
 
-        if (TreeMutator::find($this->tree, $node['id']) === null) {
+        // The child is only added when the parent takes it, so the parent is
+        // the one to ask about it.
+        if (! in_array($node['id'], $this->tree['nodes'][$parentId]['children'] ?? [], true)) {
             return;
         }
 
@@ -513,7 +515,11 @@ class BuilderCanvas extends Component
         $this->tree = $found['tree'];
         $this->themes = $found['themes'];
         $this->selectedId = $this->tree['root'];
-        $this->nodeCounter = count($this->tree['nodes']);
+        $this->nodeCounter = $this->highestNodeId();
+
+        // The drawer was showing a node of the composition that was on the
+        // canvas, and that node is not necessarily in this one.
+        $this->closeConfig();
     }
 
     /**
@@ -704,12 +710,39 @@ class BuilderCanvas extends Component
 
     /**
      * Hand out a unique id for a new node.
+     *
+     * An id that the tree is already using is skipped, so a new node can
+     * never take the place of one that is there.
      */
     private function nextId(): string
     {
-        $this->nodeCounter++;
+        do {
+            $this->nodeCounter++;
 
-        return 'n'.$this->nodeCounter;
+            $id = 'n'.$this->nodeCounter;
+        } while (isset($this->tree['nodes'][$id]));
+
+        return $id;
+    }
+
+    /**
+     * The highest number the ids of the tree hold.
+     *
+     * The ids of a saved composition have gaps in them, because a node that
+     * was deleted leaves its id behind, so the number of the nodes is not
+     * enough to know where the next id can start.
+     */
+    private function highestNodeId(): int
+    {
+        $highest = 0;
+
+        foreach (array_keys($this->tree['nodes']) as $id) {
+            if (preg_match('/^n(\d+)$/', $id, $matches) === 1) {
+                $highest = max($highest, (int) $matches[1]);
+            }
+        }
+
+        return $highest;
     }
 
     /**

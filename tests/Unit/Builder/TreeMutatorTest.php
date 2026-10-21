@@ -44,6 +44,15 @@ it('refuses a child the parent may not contain', function () {
         ->and($tree['nodes'])->not->toHaveKey('n5');
 });
 
+it('refuses a child whose id is already in the tree', function () {
+    // The id would be held by two nodes at once, and the tree would come
+    // apart.
+    $tree = TreeMutator::addChild($this->tree, 'n2', BuilderNode::make('n4', 'paragraph'));
+
+    expect($tree['nodes']['n2']['children'])->toBe(['n4'])
+        ->and($tree['nodes']['n4']['type'])->toBe('paragraph');
+});
+
 it('moves a node into another parent', function () {
     $tree = TreeMutator::move($this->tree, 'n3', 'n2', 0);
 

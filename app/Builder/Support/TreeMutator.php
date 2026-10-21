@@ -40,6 +40,12 @@ final class TreeMutator
             return $tree;
         }
 
+        // A node that is already in the tree is not replaced: the id would
+        // be held by two nodes at once, and the tree would come apart.
+        if (isset($tree['nodes'][$child['id']])) {
+            return $tree;
+        }
+
         $tree['nodes'][$child['id']] = $child;
 
         $siblings = array_values(array_filter(
@@ -372,8 +378,12 @@ final class TreeMutator
         $copy = self::copyWithNewIds($tree, $nodeId, $idFactory, $copied);
         $copied[$copy['id']] = $copy;
 
+        // Everything below the copy goes into the tree first, so the copy
+        // itself can be added as a child of its parent.
         foreach ($copied as $id => $copiedNode) {
-            $tree['nodes'][$id] = $copiedNode;
+            if ($id !== $copy['id']) {
+                $tree['nodes'][$id] = $copiedNode;
+            }
         }
 
         $position = self::positionOf($tree, $nodeId);

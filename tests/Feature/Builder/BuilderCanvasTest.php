@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Builder\Contracts\BuilderNode;
+use App\Builder\Support\CompositionRepository;
 use App\Livewire\Builder\BuilderCanvas;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -440,6 +442,49 @@ it('brings the themes back with a saved composition', function () {
         ->assertSet('tree.nodes.n2.theme', ['action' => ['primary']]);
 });
 
+it('gives a new component an id that the loaded composition is not using', function () {
+    config()->set('builder.directory', 'builder-tests');
+
+    // The ids of a saved composition have gaps in them, because a node that
+    // was deleted leaves its id behind. There are seven nodes here and the
+    // highest id is eight, so the count of the nodes is not enough to know
+    // where the next id can start.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'paragraph');
+    $tree['nodes']['n2']['children'] = ['n4', 'n6', 'n7'];
+    $tree['nodes']['n4'] = BuilderNode::make('n4', 'inline.span');
+    $tree['nodes']['n4']['children'] = ['n5'];
+    $tree['nodes']['n5'] = BuilderNode::make('n5', BuilderNode::TYPE_TEXT, 'My Span');
+    $tree['nodes']['n6'] = BuilderNode::make('n6', 'inline.img');
+    $tree['nodes']['n7'] = BuilderNode::make('n7', 'inline.button');
+    $tree['nodes']['n7']['children'] = ['n8'];
+    $tree['nodes']['n8'] = BuilderNode::make('n8', BuilderNode::TYPE_TEXT, 'My Button');
+
+    (new CompositionRepository)->save('Gapped', $tree);
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('load', 'gapped')
+        ->call('add', 'paragraph')
+        ->assertSet('tree.nodes.n5.text', 'My Span')
+        ->assertSet('tree.nodes.n8.text', 'My Button')
+        ->assertSet('tree.nodes.n9.type', 'paragraph')
+        ->assertSet('tree.nodes.n1.children', ['n2', 'n9'])
+        ->assertSet('tree.nodes.n7.children', ['n8']);
+});
+
+it('closes the drawer when a composition is loaded', function () {
+    config()->set('builder.directory', 'builder-tests');
+
+    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->assertSet('configuringId', 'n2')
+        ->call('load', 'simple')
+        ->assertSet('configuringId', null);
+});
+
 it('turns the runtime tailwind off and loads the page again', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('toggleTailwind')
@@ -476,4 +521,18 @@ it('renders the preview with the drag and drop attributes', function () {
         ->toContain('wire:sort="handleSort"')
         ->toContain('wire:sort:group="builder"')
         ->toContain('data-node-id="n2"');
+});
+
+it('shows the preview inside a dialog', function () {
+    $component = Livewire::test(BuilderCanvas::class)
+        ->call('add', 'headers.h1');
+
+    preg_match('/<dialog.*?<\/dialog>/s', $component->html(), $matches);
+
+    expect($matches[0] ?? '')->toContain('<h1');
+});
+
+it('does not bring flux into the builder', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->assertDontSee('data-flux-modal', false);
 });
