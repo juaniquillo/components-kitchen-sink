@@ -66,7 +66,6 @@ final class NodeChrome
         'table.th' => 'span',
         'table.td' => 'span',
         'table.caption' => 'span',
-        'form.textarea' => 'span',
 
         // Lists only hold list items.
         'lists.ul' => 'li',
@@ -96,6 +95,42 @@ final class NodeChrome
         'td' => ComponentEnum::TD,
         'tr' => ComponentEnum::TR,
         'caption' => ComponentEnum::CAPTION,
+    ];
+
+    /**
+     * The types that get no chrome of their own.
+     *
+     * Every type the palette offers has to be decided on: either it has a tag
+     * in TAGS, or it is listed here. Nothing may fall between the two, which
+     * is what NO_CHROME exists to make checkable.
+     *
+     * A void element holds nothing at all, so there is nowhere to put a
+     * chrome. A textarea is RCDATA: its contents are text, not markup, so a
+     * chrome inside one would be read out as text and the controls would not
+     * work. A select, an optgroup, a datalist and an option only take options,
+     * and a colgroup and a col only take columns. The renderer wraps a node
+     * that has no chrome of its own in something that does have one, unless
+     * its parent cannot hold the wrapper.
+     *
+     * @var array<int, string>
+     */
+    public const NO_CHROME = [
+        'inline.img',
+        'form.text',
+        'form.email',
+        'form.password',
+        'form.search',
+        'form.file',
+        'form.checkbox',
+        'form.radio',
+        'form.hidden',
+        'form.textarea',
+        'form.select',
+        'form.optgroup',
+        'form.option',
+        'form.datalist',
+        'table.colgroup',
+        'table.col',
     ];
 
     /**
@@ -166,10 +201,11 @@ final class NodeChrome
         $contents[] = self::config($id);
 
         $allowed = self::allowedChildren($node);
+        $acceptsText = self::acceptsText($node);
 
-        if ($allowed !== []) {
+        if ($allowed !== [] || $acceptsText) {
             $contents[] = self::add();
-            $contents[] = self::menu($id, $allowed);
+            $contents[] = self::menu($id, $allowed, $acceptsText);
         }
 
         $contents[] = self::delete($id);
@@ -194,6 +230,16 @@ final class NodeChrome
         }
 
         return $descriptor->allowedChildren;
+    }
+
+    /**
+     * Whether a node takes text.
+     *
+     * @param  Node  $node
+     */
+    public static function acceptsText(array $node): bool
+    {
+        return ComponentRegistry::get($node['type'])?->acceptsText() ?? false;
     }
 
     /**
@@ -277,11 +323,14 @@ final class NodeChrome
      * The menu of things that can be added to a node.
      *
      * Every part of it is phrasing content, so the menu can live inside a
-     * paragraph without the parser pulling it out.
+     * paragraph without the parser pulling it out. The text entry is only
+     * offered where the node takes text, and the component list only where it
+     * takes children: a list or a table row has somewhere to put an item, but
+     * nowhere to put a run of text.
      *
      * @param  array<int, string>  $allowed
      */
-    private static function menu(string $id, array $allowed): MainBackendComponent
+    private static function menu(string $id, array $allowed, bool $acceptsText): MainBackendComponent
     {
         $menu = new MainBackendComponent(ComponentEnum::SPAN);
 
@@ -293,20 +342,59 @@ final class NodeChrome
 
         $contents = [];
 
-        $textOption = new MainBackendComponent(ComponentEnum::SPAN);
-        $textOption->setAttributes([
+        if ($acceptsText) {
+            $contents[] = self::textOption();
+        }
+
+        if ($allowed !== []) {
+            $contents[] = self::componentList($id, $allowed, $acceptsText);
+        }
+
+        if ($acceptsText) {
+            $contents[] = self::textInput($id);
+        }
+
+        $menu->setContents($contents);
+
+        return $menu;
+    }
+
+    /**
+     * The entry that switches the menu over to typing text.
+     */
+    private static function textOption(): MainBackendComponent
+    {
+        $option = new MainBackendComponent(ComponentEnum::SPAN);
+
+        $option->setAttributes([
             'x-show' => '!textMode',
             'x-on:click' => 'textMode = true; $nextTick(() => $refs.textInput.focus())',
             'class' => 'block cursor-pointer rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
         ]);
-        $textOption->setContent('Text');
-        $contents[] = $textOption;
 
+        $option->setContent('Text');
+
+        return $option;
+    }
+
+    /**
+     * The components that can be added to a node.
+     *
+     * @param  array<int, string>  $allowed
+     */
+    private static function componentList(string $id, array $allowed, bool $divided): MainBackendComponent
+    {
         $list = new MainBackendComponent(ComponentEnum::SPAN);
-        $list->setAttributes([
-            'x-show' => '!textMode',
-            'class' => 'mt-1 border-t border-slate-100 pt-1 dark:border-slate-700',
-        ]);
+
+        $attributes = ['x-show' => '!textMode'];
+
+        // The rule is only there to separate the list from the text entry
+        // above it. On its own it would be a line under nothing.
+        if ($divided) {
+            $attributes['class'] = 'mt-1 border-t border-slate-100 pt-1 dark:border-slate-700';
+        }
+
+        $list->setAttributes($attributes);
 
         $items = [];
 
@@ -329,9 +417,17 @@ final class NodeChrome
         }
 
         $list->setContents($items);
-        $contents[] = $list;
 
+        return $list;
+    }
+
+    /**
+     * The field the new text is typed into.
+     */
+    private static function textInput(string $id): MainBackendComponent
+    {
         $input = new MainBackendComponent(ComponentEnum::TEXT_INPUT);
+
         $input->setAttributes([
             'x-show' => 'textMode',
             'x-cloak' => '',
@@ -341,11 +437,8 @@ final class NodeChrome
             'placeholder' => 'Text',
             'class' => 'w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900',
         ]);
-        $contents[] = $input;
 
-        $menu->setContents($contents);
-
-        return $menu;
+        return $input;
     }
 
     /**

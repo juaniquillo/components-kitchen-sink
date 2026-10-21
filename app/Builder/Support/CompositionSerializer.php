@@ -329,19 +329,11 @@ final class CompositionSerializer
      *
      * A component the parent does not accept would be taken out of it by the
      * browser, and the tree would come apart. A text segment is content and
-     * not a component, so the parser never moves it: it only has to be
-     * somewhere that holds content at all.
+     * not a component, so it asks the parent a different question: whether it
+     * takes text at all.
      */
     private function allowsChild(?ComponentDescriptor $descriptor, string $childType): bool
     {
-        if ($descriptor === null) {
-            return true;
-        }
-
-        if ($childType === BuilderNode::TYPE_TEXT) {
-            return $descriptor->acceptsContent();
-        }
-
-        return $descriptor->allowsChild($childType);
+        return $descriptor === null || $descriptor->allowsChildType($childType);
     }
 }

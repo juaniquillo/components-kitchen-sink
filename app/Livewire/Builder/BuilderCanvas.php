@@ -9,6 +9,8 @@ use App\Builder\Contracts\BuilderNode;
 use App\Builder\Contracts\SavedComposition;
 use App\Builder\Registries\ComponentRegistry;
 use App\Builder\Registries\ThemeRegistry;
+use App\Builder\Support\AttributeGuard;
+use App\Builder\Support\ClassList;
 use App\Builder\Support\CompositionRepository;
 use App\Builder\Support\PhpCodeGenerator;
 use App\Builder\Support\TreeMutator;
@@ -92,6 +94,24 @@ class BuilderCanvas extends Component
     public ?string $editingAttribute = null;
 
     /**
+     * The text waiting to be added to the node the drawer is configuring.
+     */
+    public string $textDraft = '';
+
+    /**
+     * Why the last attribute was refused, if it was.
+     *
+     * The guard refuses a name for a reason, and a field that empties itself
+     * without saying why reads like a bug.
+     */
+    public ?string $attributeNotice = null;
+
+    /**
+     * Why the last theme was refused, if it was.
+     */
+    public ?string $themeNotice = null;
+
+    /**
      * How many nodes have been created, used to hand out unique ids.
      */
     public int $nodeCounter = 0;
@@ -111,16 +131,21 @@ class BuilderCanvas extends Component
         $variant = trim($this->themeVariant);
 
         if (! ThemeRegistry::allowsName($group) || ! ThemeRegistry::allowsName($variant)) {
+            $this->themeNotice = 'A group and a variant may only hold letters, numbers, dashes and underscores.';
+
             return;
         }
 
         $registry = (new ThemeRegistry($this->themes))->with($group, $variant, $this->themeClasses);
 
         if ($registry->classes($group, $variant) === '') {
+            $this->themeNotice = 'A theme needs at least one class.';
+
             return;
         }
 
         $this->themes = $registry->groups();
+        $this->themeNotice = null;
 
         $this->clearThemeInputs();
     }
@@ -134,8 +159,21 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $sanitized = ClassList::sanitize($classes);
+
+        // A variant with no classes left is not a variant any more, and the
+        // nodes that use it would be left pointing at nothing, so the old
+        // classes are kept and the reason is shown instead.
+        if ($sanitized === '') {
+            $this->themeNotice = 'A theme needs at least one class.';
+
+            return;
+        }
+
+        $this->themeNotice = null;
+
         $this->themes = (new ThemeRegistry($this->themes))
-            ->with($group, $variant, $classes)
+            ->with($group, $variant, $sanitized)
             ->groups();
     }
 
@@ -324,6 +362,12 @@ class BuilderCanvas extends Component
             return;
         }
 
+        if (! AttributeGuard::allows($name)) {
+            $this->attributeNotice = AttributeGuard::reason($name);
+
+            return;
+        }
+
         $this->tree = TreeMutator::setAttribute($this->tree, $nodeId, $name, $this->attributeValue);
 
         $this->cancelAttribute();
@@ -371,6 +415,7 @@ class BuilderCanvas extends Component
         $this->attributeName = '';
         $this->attributeValue = '';
         $this->editingAttribute = null;
+        $this->attributeNotice = null;
     }
 
     /**
@@ -443,6 +488,37 @@ class BuilderCanvas extends Component
     public function removeText(string $segmentId): void
     {
         $this->tree = TreeMutator::remove($this->tree, $segmentId);
+    }
+
+    /**
+     * Append a text segment to the node the drawer is configuring.
+     *
+     * The canvas's own add menu is only on the nodes that hold children, so
+     * the drawer is the way in for a component that only takes text, such as
+     * a textarea or an option. A component that takes neither refuses the
+     * segment, and the tree is left alone.
+     */
+    public function addTextToConfiguring(): void
+    {
+        if ($this->configuringId === null) {
+            return;
+        }
+
+        $text = trim($this->textDraft);
+
+        if ($text === '') {
+            return;
+        }
+
+        $id = $this->nextId();
+
+        $this->tree = TreeMutator::addText($this->tree, $this->configuringId, $text, $id);
+
+        // The segment is only added when the node takes text, so the draft is
+        // only cleared when it did.
+        if (isset($this->tree['nodes'][$id])) {
+            $this->textDraft = '';
+        }
     }
 
     /**

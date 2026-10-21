@@ -47,6 +47,10 @@
         </button>
     </div>
 
+    @if ($themeNotice !== null)
+        <p class="mt-2 text-[11px] text-red-500" role="alert">{{ $themeNotice }}</p>
+    @endif
+
     @if ($themes !== [])
         <div class="mt-3 space-y-3">
             @foreach ($themes as $group => $variants)

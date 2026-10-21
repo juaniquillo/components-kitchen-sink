@@ -164,9 +164,9 @@ it('reads a text segment back', function () {
         ->and($found['nodes']['t1']['text'])->toBe('Hello world');
 });
 
-it('reads a text segment back from a container that only takes children', function () {
-    // A text segment is content and not a component, so it is kept even where
-    // the content model does not offer text.
+it('drops a text segment from a container that only takes children', function () {
+    // A list has somewhere to put an item and nowhere to put a run of text,
+    // so a text segment saved in one is not read back.
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['children'] = ['n2'];
     $tree['nodes']['n2'] = BuilderNode::make('n2', 'lists.ul');
@@ -177,9 +177,23 @@ it('reads a text segment back from a container that only takes children', functi
 
     $found = $this->repository->find('list');
 
+    expect($found['nodes']['n2']['children'])->toBe([])
+        ->and($found['nodes'])->not->toHaveKey('t1');
+});
+
+it('keeps a text segment in a component that only takes text', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'form.textarea');
+    $tree['nodes']['n2']['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, 'Hello');
+
+    $this->repository->save('Textarea', $tree);
+
+    $found = $this->repository->find('textarea');
+
     expect($found['nodes']['n2']['children'])->toBe(['t1'])
-        ->and($found['nodes'])->toHaveKey('t1')
-        ->and($found['nodes']['t1']['text'])->toBe('Item');
+        ->and($found['nodes']['t1']['text'])->toBe('Hello');
 });
 
 it('drops a text segment from a component that holds nothing', function () {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
@@ -132,4 +133,16 @@ it('reports what each component accepts', function () {
         ->and(ComponentRegistry::get('div')->acceptsChildren())->toBeTrue()
         ->and(ComponentRegistry::get('inline.img')->acceptsText())->toBeFalse()
         ->and(ComponentRegistry::get('inline.img')->acceptsChildren())->toBeFalse();
+});
+
+it('answers for a text segment as well as for a component', function () {
+    $paragraph = ComponentRegistry::get('paragraph');
+    $list = ComponentRegistry::get('lists.ul');
+    $textarea = ComponentRegistry::get('form.textarea');
+
+    expect($paragraph->allowsChildType(BuilderNode::TYPE_TEXT))->toBeTrue()
+        ->and($list->allowsChildType(BuilderNode::TYPE_TEXT))->toBeFalse()
+        ->and($textarea->allowsChildType(BuilderNode::TYPE_TEXT))->toBeTrue()
+        ->and($textarea->allowsChildType('div'))->toBeFalse()
+        ->and($list->allowsChildType('lists.li'))->toBeTrue();
 });

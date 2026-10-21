@@ -118,6 +118,74 @@ it('will not set the text of a component', function () {
     expect($tree['nodes']['n3']['text'])->toBeNull();
 });
 
+it('accepts text in a parent that takes it', function () {
+    $tree = TreeMutator::addText($this->tree, 'n3', 'Hello', 't1');
+
+    expect($tree['nodes']['n3']['children'])->toBe(['t1'])
+        ->and($tree['nodes']['t1']['text'])->toBe('Hello');
+});
+
+it('accepts text in a component that only takes text', function () {
+    // A textarea takes no children, so the text cannot arrive as a child
+    // component. It is content, and the component takes content.
+    $tree = BuilderNode::tree('n1', 'form.textarea');
+
+    $tree = TreeMutator::addText($tree, 'n1', 'Hello', 't1');
+
+    expect($tree['nodes']['n1']['children'])->toBe(['t1'])
+        ->and($tree['nodes']['t1']['text'])->toBe('Hello');
+});
+
+it('refuses text in a parent that only takes children', function () {
+    // A list only holds items, so a run of text in one is hoisted out by the
+    // browser and the tree the builder holds is no longer the tree in the page.
+    $tree = [
+        'root' => 'n1',
+        'nodes' => [
+            'n1' => BuilderNode::make('n1', 'lists.ul'),
+            'n2' => BuilderNode::make('n2', 'lists.li'),
+        ],
+    ];
+
+    $tree['nodes']['n1']['children'] = ['n2'];
+
+    $tree = TreeMutator::addText($tree, 'n1', 'Hoisted', 't1');
+
+    expect($tree['nodes']['n1']['children'])->toBe(['n2'])
+        ->and($tree['nodes'])->not->toHaveKey('t1');
+});
+
+it('refuses text in a table row', function () {
+    // The parser foster-parents a run of text out of a table, which is the
+    // worst case: the text would not even stay next to the row.
+    $tree = [
+        'root' => 'n1',
+        'nodes' => ['n1' => BuilderNode::make('n1', 'table.tr')],
+    ];
+
+    $tree = TreeMutator::addText($tree, 'n1', 'Hoisted', 't1');
+
+    expect($tree['nodes']['n1']['children'])->toBe([])
+        ->and($tree['nodes'])->not->toHaveKey('t1');
+});
+
+it('refuses text in a component that holds nothing', function () {
+    $tree = BuilderNode::tree('n1', 'form.text');
+
+    $tree = TreeMutator::addText($tree, 'n1', 'Nope', 't1');
+
+    expect($tree['nodes']['n1']['children'])->toBe([])
+        ->and($tree['nodes'])->not->toHaveKey('t1');
+});
+
+it('refuses a text segment whose id is already in the tree', function () {
+    $tree = TreeMutator::addText($this->tree, 'n3', 'First', 't1');
+    $tree = TreeMutator::addText($tree, 'n3', 'Second', 't1');
+
+    expect($tree['nodes']['t1']['text'])->toBe('First')
+        ->and($tree['nodes']['n3']['children'])->toBe(['t1']);
+});
+
 it('lists the text segments of a node', function () {
     $tree = TreeMutator::addText($this->tree, 'n3', 'First', 't1');
     $tree = TreeMutator::addText($tree, 'n3', 'Second', 't2');

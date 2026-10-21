@@ -177,6 +177,11 @@ final class TreeMutator
     /**
      * Append a text segment to a node.
      *
+     * A text segment is content, so it may only go where the component takes
+     * text. The segments of a list, a table row or a void element are refused
+     * here: the browser would hoist the text out of its parent, and the tree
+     * the builder holds would no longer be the tree in the page.
+     *
      * @param  Tree  $tree
      * @return Tree
      */
@@ -185,6 +190,18 @@ final class TreeMutator
         $parent = $tree['nodes'][$parentId] ?? null;
 
         if ($parent === null) {
+            return $tree;
+        }
+
+        $descriptor = ComponentRegistry::get($parent['type']);
+
+        if ($descriptor === null || ! $descriptor->allowsChildType(BuilderNode::TYPE_TEXT)) {
+            return $tree;
+        }
+
+        // A text segment that is already in the tree is not replaced, for the
+        // same reason a component is not.
+        if (isset($tree['nodes'][$id])) {
             return $tree;
         }
 

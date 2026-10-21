@@ -147,6 +147,44 @@ it('ignores an empty text segment', function () {
         ->assertSet('tree.nodes.n2.children', []);
 });
 
+it('refuses a text segment in a node that does not take text', function () {
+    // A list only holds items, so a run of text in one would be hoisted out by
+    // the browser and the canvas would stop matching the tree.
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'lists.ul')
+        ->call('addText', 'n2', 'Item')
+        ->assertSet('tree.nodes.n2.children', [])
+        ->assertSet('tree.nodes', fn (array $nodes): bool => ! array_key_exists('n3', $nodes));
+});
+
+it('adds text to a component that only takes text from the drawer', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'form.textarea')
+        ->call('openConfig', 'n2')
+        ->set('textDraft', 'Hello')
+        ->call('addTextToConfiguring')
+        ->assertSet('tree.nodes.n3.type', 'text')
+        ->assertSet('tree.nodes.n3.text', 'Hello')
+        ->assertSet('tree.nodes.n2.children', ['n3'])
+        ->assertSet('textDraft', '');
+});
+
+it('refuses the drawer text in a node that does not take text', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'lists.ul')
+        ->call('openConfig', 'n2')
+        ->set('textDraft', 'Item')
+        ->call('addTextToConfiguring')
+        ->assertSet('tree.nodes.n2.children', []);
+});
+
+it('ignores the drawer text when the drawer is closed', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('textDraft', 'Hello')
+        ->call('addTextToConfiguring')
+        ->assertSet('tree.nodes.n1.children', []);
+});
+
 it('adds an attribute to the node being configured', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'div')
@@ -167,6 +205,29 @@ it('refuses an attribute the guard blocks', function () {
         ->set('attributeValue', 'alert(1)')
         ->call('addAttribute')
         ->assertSet('tree.nodes.n2.attrs', []);
+});
+
+it('says why an attribute was refused', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'div')
+        ->call('openConfig', 'n2')
+        ->set('attributeName', 'onclick')
+        ->set('attributeValue', 'alert(1)')
+        ->call('addAttribute')
+        ->assertSet('attributeNotice', 'That attribute is not allowed.');
+});
+
+it('clears the notice once an attribute is added', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'div')
+        ->call('openConfig', 'n2')
+        ->set('attributeName', 'onclick')
+        ->call('addAttribute')
+        ->set('attributeName', 'id')
+        ->set('attributeValue', 'hero')
+        ->call('addAttribute')
+        ->assertSet('attributeNotice', null)
+        ->assertSet('tree.nodes.n2.attrs', ['id' => 'hero']);
 });
 
 it('ignores an attribute with no name', function () {
@@ -314,6 +375,35 @@ it('refuses a theme with a name that cannot be used', function () {
         ->set('themeClasses', 'bg-indigo-600')
         ->call('saveTheme')
         ->assertSet('themes', []);
+});
+
+it('says why a theme was refused', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', '../etc')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->assertSet('themeNotice', 'A group and a variant may only hold letters, numbers, dashes and underscores.');
+});
+
+it('says why a theme with no classes was refused', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', '   ')
+        ->call('saveTheme')
+        ->assertSet('themeNotice', 'A theme needs at least one class.');
+});
+
+it('keeps the classes of a theme when the new ones are not classes', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('updateThemeClasses', 'action', 'primary', '???')
+        ->assertSet('themes', ['action' => ['primary' => 'bg-indigo-600']])
+        ->assertSet('themeNotice', 'A theme needs at least one class.');
 });
 
 it('applies a theme to a node', function () {

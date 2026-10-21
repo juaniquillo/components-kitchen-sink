@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
+use App\Builder\Registries\ComponentRegistry;
 use App\Builder\Support\NodeChrome;
 
 it('gives a flow container a div for its chrome', function () {
@@ -14,8 +15,7 @@ it('gives a flow container a div for its chrome', function () {
 it('gives a phrasing container a span for its chrome', function () {
     expect(NodeChrome::tag('paragraph'))->toBe('span')
         ->and(NodeChrome::tag('headers.h1'))->toBe('span')
-        ->and(NodeChrome::tag('table.td'))->toBe('span')
-        ->and(NodeChrome::tag('form.textarea'))->toBe('span');
+        ->and(NodeChrome::tag('table.td'))->toBe('span');
 });
 
 it('gives the elements that only accept one kind of child a matching tag', function () {
@@ -31,6 +31,30 @@ it('gives no chrome to the components that cannot hold one', function () {
         ->and(NodeChrome::tag('form.select'))->toBeNull()
         ->and(NodeChrome::tag('form.option'))->toBeNull()
         ->and(NodeChrome::tag('table.col'))->toBeNull();
+});
+
+it('gives a textarea no chrome of its own', function () {
+    // A textarea is RCDATA: its contents are text, not markup, so a chrome
+    // inside one would be read out as text and its buttons would not work.
+    expect(NodeChrome::tag('form.textarea'))->toBeNull();
+});
+
+it('decides on a chrome for every component the palette offers', function () {
+    // A type has to have a tag or be listed as one that has no chrome. A new
+    // palette entry that is in neither would silently lose its toolbar and be
+    // wrapped instead, with nothing to point at the omission.
+    foreach (ComponentRegistry::all() as $type => $descriptor) {
+        $hasTag = NodeChrome::tag($type) !== null;
+        $hasNoChrome = in_array($type, NodeChrome::NO_CHROME, true);
+
+        expect($hasTag !== $hasNoChrome)->toBeTrue("{$type} is not decided on");
+    }
+});
+
+it('lists only components the palette offers as having no chrome', function () {
+    foreach (NodeChrome::NO_CHROME as $type) {
+        expect(ComponentRegistry::get($type))->not->toBeNull();
+    }
 });
 
 it('builds a chrome with a handle, a configure button and an add menu', function () {
@@ -177,4 +201,31 @@ it('offers nothing to a node that cannot hold children', function () {
 it('offers nothing to a component that only takes text', function () {
     expect(NodeChrome::allowedChildren(BuilderNode::make('n1', 'form.textarea')))->toBe([])
         ->and(NodeChrome::allowedChildren(BuilderNode::make('n1', 'form.option')))->toBe([]);
+});
+
+it('does not offer text to a node that only takes children', function () {
+    // A list has somewhere to put an item and nowhere to put a run of text.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'lists.ul'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+
+    expect($menu->getContents())->toHaveCount(1);
+});
+
+it('offers text to a component that only takes text', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'form.textarea'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+    $parts = $menu->getContents();
+
+    expect($parts)->toHaveCount(2)
+        ->and($parts[0]->getContents())->toBe(['Text']);
+});
+
+it('offers both text and components to a node that takes both', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+
+    expect($menu->getContents())->toHaveCount(3);
 });

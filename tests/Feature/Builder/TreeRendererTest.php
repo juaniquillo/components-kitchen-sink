@@ -103,6 +103,17 @@ it('wraps a component that cannot hold a chrome, so it still gets a toolbar', fu
         ->toContain('<input');
 });
 
+it('wraps a textarea, whose contents are text and not markup', function () {
+    $html = (new TreeRenderer)->render(BuilderNode::tree('n1', 'form.textarea'));
+
+    // A textarea is RCDATA: a chrome inside one would be read out as text, so
+    // the toolbar has to ride outside it, on the wrapper.
+    expect($html)->toContain('bw-wrap')
+        ->toContain('bw-chrome')
+        ->toContain('<textarea')
+        ->and(strpos($html, 'bw-chrome'))->toBeGreaterThan(strpos($html, '<textarea'));
+});
+
 it('does not wrap a component where a span would be invalid', function () {
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['children'] = ['n2'];

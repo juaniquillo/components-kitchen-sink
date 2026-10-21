@@ -40,7 +40,7 @@
                     class="rounded border border-slate-200 px-2 py-1 text-xs hover:bg-slate-50 dark:border-slate-600">Duplicate</button>
             </div>
 
-            @if ($descriptor->acceptsChildren())
+            @if ($descriptor->acceptsText())
                 <div>
                     <label class="mb-1 block text-[11px] font-medium text-slate-500">Text</label>
 
@@ -65,10 +65,31 @@
                             @endforeach
                         </ul>
                     @else
-                        <p class="text-[11px] text-slate-400">
-                            No text yet. Use the + on the node to add some.
+                        <p class="mb-1 text-[11px] text-slate-400">
+                            No text yet.
                         </p>
                     @endif
+
+                    <div class="mt-1 flex items-end gap-1">
+                        <label class="flex-1">
+                            <span class="sr-only">New text</span>
+                            <input
+                                type="text"
+                                wire:model="textDraft"
+                                wire:keydown.enter="addTextToConfiguring"
+                                placeholder="Add text"
+                                class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
+                            />
+                        </label>
+
+                        <button
+                            type="button"
+                            wire:click="addTextToConfiguring"
+                            class="shrink-0 rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
+                        >
+                            Add
+                        </button>
+                    </div>
                 </div>
             @endif
 
@@ -175,6 +196,10 @@
                     >
                         Cancel
                     </button>
+                @endif
+
+                @if ($attributeNotice !== null)
+                    <p class="mt-1 text-[11px] text-red-500" role="alert">{{ $attributeNotice }}</p>
                 @endif
 
                 <datalist id="attribute-suggestions-{{ $node['id'] }}">
