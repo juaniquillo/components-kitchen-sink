@@ -41,7 +41,30 @@
                 outline-offset: 2px;
             }
 
+            /*
+            | Preview dialog
+            | The page is styled by the browser build of Tailwind, which does
+            | not know about the backdrop of a dialog.
+            */
+
+            dialog::backdrop {
+                background-color: rgb(15 23 42 / 0.5);
+            }
+
         </style>
+
+        <script>
+            /*
+            | The preview dialog is opened by the browser and not by the
+            | server, so a livewire update takes the open attribute away from
+            | it. The event tells the builder to open it again.
+            */
+            document.addEventListener('livewire:init', () => {
+                Livewire.hook('morphed', () => {
+                    window.dispatchEvent(new CustomEvent('builder:morphed'));
+                });
+            });
+        </script>
     </x-slot>
 
     <div class="mb-4 text-center">

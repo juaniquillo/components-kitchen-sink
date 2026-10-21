@@ -12,6 +12,9 @@
     <title>{{ $pageTitle ?? 'Title' }}</title>
 
     @php
+       // The local assets are the ones Vite knows about: the paths in its
+       // manifest. A remote asset is a full url and goes through
+       // :remoteAssets instead, so the two are never mixed up.
        $replaceAssets = $replaceAssets ?? [];
        $additionalAssets = $additionalAssets ?? [];
 
@@ -23,8 +26,7 @@
 
         // A remote asset has no entry in the Vite manifest, so it is loaded
         // as it is instead of going through Vite.
-        $localAssets = [];
-        $remoteAssets = $remoteAssets  ?? [];
+        $remoteAssets = $remoteAssets ?? [];
 
     @endphp
 
@@ -32,20 +34,13 @@
         @vite($assets)
     @endif
 
-    @php
-        $cssLink = $remoteAssets['css'] ?? [];
-        $jsScript = $remoteAssets['js'] ?? [];
-    @endphp
-
-    @foreach ($cssLink as $link)
-        <link rel="stylesheet" href="{{ $link }} data-navigate-track="reload"">
+    @foreach ($remoteAssets['css'] ?? [] as $link)
+        <link rel="stylesheet" href="{{ $link }}" data-navigate-track="reload">
     @endforeach
-        
-    @foreach ($jsScript as $script)
+
+    @foreach ($remoteAssets['js'] ?? [] as $script)
         <script src="{{ $script }}"></script>
     @endforeach
-        
-    
 
     @isset($head)
         {{ $head }}
@@ -56,7 +51,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-200 dark:bg-slate-700 dark:text-white">
 
-    <div class="max-w-7xl mx-auto p-sm">
+    <div class="max-w-7xl mx-auto p-6">
         <nav>
             {{ $mainMenu }}
         </nav>
