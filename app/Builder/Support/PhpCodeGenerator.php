@@ -41,7 +41,7 @@ final class PhpCodeGenerator
     public function snippet(array $tree): string
     {
         $lines = [
-            $this->componentImport($tree),
+            $this->componentImport(),
             'use Juaniquillo\BackendComponents\Enums\ComponentEnum;',
         ];
 
@@ -65,32 +65,10 @@ final class PhpCodeGenerator
      * local theme manager is the one that looks there. The components still
      * come from the package, so the local builder is used and its import is
      * aliased to keep the snippet readable.
-     *
-     * @param  Tree  $tree
      */
-    private function componentImport(array $tree): string
+    private function componentImport(): string
     {
-        if (! $this->usesThemes($tree)) {
-            return 'use Juaniquillo\BackendComponents\Builders\ComponentBuilder;';
-        }
-
         return 'use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder as ComponentBuilder;';
-    }
-
-    /**
-     * Whether any node in the tree carries a theme.
-     *
-     * @param  Tree  $tree
-     */
-    private function usesThemes(array $tree): bool
-    {
-        foreach ($tree['nodes'] as $node) {
-            if ($node['theme'] !== []) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

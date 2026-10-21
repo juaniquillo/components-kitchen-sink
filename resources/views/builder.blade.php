@@ -2,16 +2,14 @@
     use App\Builder\Support\RuntimeTailwind;
 
     // The canvas is styled by the browser build of Tailwind, which compiles
-    // the classes the user writes as they go. It is a script in the head of
-    // the page, so the choice is kept in the session and the page is loaded
-    // again when it changes.
-    $runtimeTailwind = (bool) session('builder.tailwind_runtime', true);
-
+    // the classes the user writes as they go. The custom theme and the dark
+    // variant live in the stylesheet of the application, which the browser
+    // build does not read, so they are taken from it and handed over.
     $assets = [
         'js' => ['https://cdn.tailwindcss.com']
     ];
 
-    $tailwindDeclarations = $runtimeTailwind ? RuntimeTailwind::declarations() : '';
+    $tailwindDeclarations = RuntimeTailwind::declarations();
 @endphp
 
 <x-layouts.default page-title="Builder" :remoteAssets="$assets" :disableLocalAssets="true">
@@ -63,6 +61,24 @@
                 Livewire.hook('morphed', () => {
                     window.dispatchEvent(new CustomEvent('builder:morphed'));
                 });
+            });
+        </script>
+
+        <script>
+            /*
+            | Warn before the page goes away with a composition that is not
+            | saved. The builder says on its root element whether there is
+            | work that would be lost, so there is no state to keep here.
+            */
+            window.addEventListener('beforeunload', (event) => {
+                const canvas = document.querySelector('[data-builder-canvas]');
+
+                if (! canvas || canvas.dataset.dirty !== 'true') {
+                    return;
+                }
+
+                event.preventDefault();
+                event.returnValue = '';
             });
         </script>
     </x-slot>

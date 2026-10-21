@@ -619,12 +619,63 @@ it('closes the drawer when a composition is loaded', function () {
         ->assertSet('configuringId', null);
 });
 
-it('turns the runtime tailwind off and loads the page again', function () {
+it('is clean when the page opens', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('toggleTailwind')
-        ->assertRedirect(route('builder'));
+        ->assertSee('data-dirty="false"', false);
+});
 
-    expect(session('builder.tailwind_runtime'))->toBeFalse();
+it('is dirty once the composition is changed', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->assertSee('data-dirty="true"', false);
+});
+
+it('is clean again after a save', function () {
+    config()->set('builder.directory', 'builder-tests');
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->set('compositionName', 'Hero')
+        ->call('save')
+        ->assertSee('data-dirty="false"', false);
+});
+
+it('is clean again after a composition is loaded', function () {
+    config()->set('builder.directory', 'builder-tests');
+
+    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->call('load', 'simple')
+        ->assertSee('data-dirty="false"', false);
+});
+
+it('clears the canvas and the name when it is reset', function () {
+    $component = Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->set('compositionName', 'Hero')
+        ->call('resetCanvas')
+        ->assertSet('tree.nodes', fn (array $nodes): bool => count($nodes) === 1)
+        ->assertSet('compositionName', '')
+        ->assertSet('configuringId', null)
+        ->assertSee('data-dirty="false"', false);
+
+    $tree = $component->instance()->tree;
+
+    expect($tree['nodes'][$tree['root']]['type'])->toBe('div');
+});
+
+it('keeps the themes when it is reset', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('resetCanvas')
+        ->assertSet('themes', [
+            'action' => ['primary' => 'bg-indigo-600'],
+        ]);
 });
 
 afterEach(function () {

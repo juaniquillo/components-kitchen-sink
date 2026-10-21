@@ -1,4 +1,4 @@
-<div>
+<div data-builder-canvas data-dirty="{{ $this->dirty() ? 'true' : 'false' }}">
     <div class="space-y-4">
         <div class="grid gap-4 md:grid-cols-[210px_minmax(0,1fr)]">
             @include('livewire.builder._palette')

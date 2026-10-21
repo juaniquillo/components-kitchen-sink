@@ -19,6 +19,15 @@
         >
             Save
         </button>
+
+        <button
+            type="button"
+            wire:click="resetCanvas"
+            wire:confirm="The composition on the canvas will be cleared. Are you sure?"
+            class="rounded border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+        >
+            Reset
+        </button>
     </div>
 
     @if ($this->saved !== [])

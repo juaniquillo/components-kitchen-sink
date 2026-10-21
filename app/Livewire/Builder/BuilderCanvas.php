@@ -116,10 +116,22 @@ class BuilderCanvas extends Component
      */
     public int $nodeCounter = 0;
 
+    /**
+     * A fingerprint of the composition as the last save, load or reset left
+     * it.
+     *
+     * The composition is dirty when the tree or the themes are not the ones
+     * that were left behind, and the browser is told about it, so it can warn
+     * before the page goes away.
+     */
+    public string $fingerprint = '';
+
     public function mount(): void
     {
         $this->tree = BuilderNode::tree($this->nextId(), 'div');
         $this->selectedId = $this->tree['root'];
+
+        $this->fingerprint = $this->currentFingerprint();
     }
 
     /**
@@ -266,29 +278,6 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * Turn the runtime Tailwind on or off.
-     *
-     * The runtime Tailwind is a script in the head of the page, so the
-     * choice has to be made before the page is loaded: the session carries
-     * it and the page is loaded again.
-     */
-    public function toggleTailwind(): void
-    {
-        session()->put('builder.tailwind_runtime', ! $this->tailwindRuntime());
-
-        $this->redirect(route('builder'));
-    }
-
-    /**
-     * Whether the canvas is styled by the runtime Tailwind.
-     */
-    #[Computed]
-    public function tailwindRuntime(): bool
-    {
-        return (bool) session('builder.tailwind_runtime', true);
-    }
-
-    /**
      * Handle a node being dropped somewhere else.
      */
     public function handleSort(string $itemId, int $position, ?string $parentId = null): void
@@ -351,6 +340,10 @@ class BuilderCanvas extends Component
     public function closeConfig(): void
     {
         $this->configuringId = null;
+
+        // The draft belongs to the node it was typed for, and a closed
+        // drawer has no node.
+        $this->textDraft = '';
 
         $this->cancelAttribute();
     }
@@ -584,6 +577,10 @@ class BuilderCanvas extends Component
 
         $this->compositionName = $name;
 
+        // What is on the disk is what the canvas holds, so there is nothing
+        // to warn about any more.
+        $this->fingerprint = $this->currentFingerprint();
+
         $this->dispatch('builder-saved');
     }
 
@@ -606,6 +603,25 @@ class BuilderCanvas extends Component
         // The drawer was showing a node of the composition that was on the
         // canvas, and that node is not necessarily in this one.
         $this->closeConfig();
+
+        $this->fingerprint = $this->currentFingerprint();
+    }
+
+    /**
+     * Clear the canvas and start a new composition.
+     *
+     * The themes stay: they are a palette that is reused by every
+     * composition, and not part of one.
+     */
+    public function resetCanvas(): void
+    {
+        $this->tree = BuilderNode::tree($this->nextId(), 'div');
+        $this->selectedId = $this->tree['root'];
+        $this->compositionName = '';
+
+        $this->closeConfig();
+
+        $this->fingerprint = $this->currentFingerprint();
     }
 
     /**
@@ -623,6 +639,18 @@ class BuilderCanvas extends Component
     public function preview(): string
     {
         return (new TreeRenderer($this->themes))->render($this->tree, $this->selectedId);
+    }
+
+    /**
+     * Whether the composition holds changes that are not saved.
+     *
+     * The page is told about it, so the browser can warn before it goes
+     * away with work that would be lost.
+     */
+    #[Computed]
+    public function dirty(): bool
+    {
+        return $this->fingerprint !== $this->currentFingerprint();
     }
 
     /**
@@ -809,6 +837,17 @@ class BuilderCanvas extends Component
         } while (isset($this->tree['nodes'][$id]));
 
         return $id;
+    }
+
+    /**
+     * A fingerprint of the composition as it is right now.
+     *
+     * The tree and the themes are what a composition is made of, so they are
+     * what says whether there is work that is not saved.
+     */
+    private function currentFingerprint(): string
+    {
+        return hash('xxh128', json_encode([$this->tree, $this->themes]));
     }
 
     /**

@@ -13,14 +13,6 @@
 
             <button
                 type="button"
-                wire:click="toggleTailwind"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-                {{ $this->tailwindRuntime ? 'Runtime Tailwind: on' : 'Runtime Tailwind: off' }}
-            </button>
-
-            <button
-                type="button"
                 wire:click="configureSelected"
                 @disabled($selectedId === null)
                 class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"

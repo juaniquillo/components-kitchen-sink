@@ -60,12 +60,12 @@ it('shows the theme file the code needs', function () {
         ->toContain('LocalThemeComponentBuilder as ComponentBuilder');
 });
 
-it('keeps the plain builder when there is no theme', function () {
+it('uses the local builder even when there is no theme', function () {
     $tree = BuilderNode::tree('n1', 'div');
 
     $snippet = (new PhpCodeGenerator)->snippet($tree);
 
-    expect($snippet)->toContain('use Juaniquillo\BackendComponents\Builders\ComponentBuilder;')
+    expect($snippet)->toContain('LocalThemeComponentBuilder as ComponentBuilder')
         ->not->toContain('setThemes')
         ->not->toContain('Theme files');
 });
@@ -185,7 +185,7 @@ it('produces a pasteable snippet with the imports', function () {
 
     $snippet = $this->generator->snippet($tree);
 
-    expect($snippet)->toContain('use Juaniquillo\BackendComponents\Builders\ComponentBuilder;')
+    expect($snippet)->toContain('use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder as ComponentBuilder;')
         ->toContain('use Juaniquillo\BackendComponents\Enums\ComponentEnum;')
         ->toContain('$component = ComponentBuilder::make(ComponentEnum::DIV);');
 });
