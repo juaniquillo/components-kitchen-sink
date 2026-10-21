@@ -258,7 +258,12 @@ final class CompositionSerializer
     }
 
     /**
-     * Remove links to missing nodes and break cycles.
+     * Remove links to missing nodes, break any cycles and keep every node in
+     * the hands of one parent only.
+     *
+     * A node that is held by two parents would be drawn twice, and the page
+     * would not be the tree the builder holds: the two copies carry the same
+     * id, and the browser takes the invalid nesting apart.
      *
      * @param  array<string, Node>  $nodes
      * @return array<string, Node>
@@ -275,10 +280,6 @@ final class CompositionSerializer
                     continue;
                 }
 
-                if (in_array($childId, $this->ancestorsOf($nodes, $id), true)) {
-                    continue;
-                }
-
                 if (! $this->allowsChild($descriptor, $nodes[$childId]['type'])) {
                     continue;
                 }
@@ -289,14 +290,33 @@ final class CompositionSerializer
             $nodes[$id]['children'] = $children;
         }
 
-        // A node that is not reachable from the root is not part of the tree.
-        $reachable = $this->descendantsOf($nodes, $root);
-        $reachable[] = $root;
+        // The walk from the root is what decides: the first parent to reach
+        // a node keeps it, and a node that is never reached is not part of
+        // the tree.
+        $claimed = [$root => true];
+        $queue = [$root];
+
+        while ($queue !== []) {
+            $id = array_shift($queue);
+            $children = [];
+
+            foreach ($nodes[$id]['children'] as $childId) {
+                if (isset($claimed[$childId])) {
+                    continue;
+                }
+
+                $claimed[$childId] = true;
+                $children[] = $childId;
+                $queue[] = $childId;
+            }
+
+            $nodes[$id]['children'] = $children;
+        }
 
         $pruned = [];
 
         foreach ($nodes as $id => $node) {
-            if (in_array($id, $reachable, true)) {
+            if (isset($claimed[$id])) {
                 $pruned[$id] = $node;
             }
         }
@@ -323,47 +343,5 @@ final class CompositionSerializer
         }
 
         return $descriptor->allowsChild($childType);
-    }
-
-    /**
-     * The ids above a node, used to spot cycles.
-     *
-     * @param  array<string, Node>  $nodes
-     * @return array<int, string>
-     */
-    private function ancestorsOf(array $nodes, string $nodeId): array
-    {
-        $ancestors = [];
-
-        foreach ($nodes as $id => $node) {
-            if (in_array($nodeId, $node['children'], true)) {
-                $ancestors[] = $id;
-                $ancestors = array_merge($ancestors, $this->ancestorsOf($nodes, $id));
-            }
-        }
-
-        return $ancestors;
-    }
-
-    /**
-     * The ids below a node.
-     *
-     * @param  array<string, Node>  $nodes
-     * @return array<int, string>
-     */
-    private function descendantsOf(array $nodes, string $nodeId): array
-    {
-        $descendants = [];
-
-        foreach ($nodes[$nodeId]['children'] ?? [] as $childId) {
-            if (! isset($nodes[$childId]) || in_array($childId, $descendants, true)) {
-                continue;
-            }
-
-            $descendants[] = $childId;
-            $descendants = array_merge($descendants, $this->descendantsOf($nodes, $childId));
-        }
-
-        return $descendants;
     }
 }

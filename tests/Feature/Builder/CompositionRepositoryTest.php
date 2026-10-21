@@ -115,6 +115,38 @@ it('reads a composition back', function () {
     expect($this->repository->find('hero'))->toBe($tree);
 });
 
+it('keeps a node in the hands of one parent only', function () {
+    // A file that holds the same node twice is not a tree, and the node
+    // would be drawn twice. The second parent may hold the child, so only
+    // the rule that a node has one parent can stop it.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2', 'n3'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'paragraph');
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'div');
+    $tree['nodes']['n3']['children'] = ['n2'];
+
+    $this->repository->save('Twice', $tree);
+
+    $found = $this->repository->find('twice');
+
+    expect($found['nodes']['n1']['children'])->toBe(['n2', 'n3'])
+        ->and($found['nodes']['n3']['children'])->toBe([]);
+});
+
+it('breaks a cycle in a composition', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'div');
+    $tree['nodes']['n2']['children'] = ['n1'];
+
+    $this->repository->save('Cycle', $tree);
+
+    $found = $this->repository->find('cycle');
+
+    expect($found['nodes']['n1']['children'])->toBe(['n2'])
+        ->and($found['nodes']['n2']['children'])->toBe([]);
+});
+
 it('reads a text segment back', function () {
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['children'] = ['n2'];
