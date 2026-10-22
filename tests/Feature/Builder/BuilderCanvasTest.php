@@ -339,6 +339,17 @@ it('opens the drawer for a node', function () {
         ->assertSet('selectedId', 'n2');
 });
 
+it('says on the drawer whether it is open', function () {
+    // The drawer is closed by the escape key, and the browser has to know
+    // whether there is anything to close.
+    Livewire::test(BuilderCanvas::class)
+        ->assertSee('data-open="false"', false)
+        ->call('openConfig', 'n1')
+        ->assertSee('data-open="true"', false)
+        ->call('closeConfig')
+        ->assertSee('data-open="false"', false);
+});
+
 it('closes the drawer', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'headers.h1')

@@ -4,8 +4,12 @@
 @endphp
 
 <aside
+    data-builder-drawer
+    data-open="{{ $configuringId !== null ? 'true' : 'false' }}"
     class="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-xl transition-transform duration-200 dark:border-slate-700 dark:bg-slate-900 {{ $configuringId !== null ? 'translate-x-0' : 'translate-x-full' }}"
     aria-label="Component configuration"
+    x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]')) this.$wire.closeConfig() } }"
+    x-on:keydown.escape.window="close()"
 >
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Configure</h2>

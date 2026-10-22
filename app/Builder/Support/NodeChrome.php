@@ -183,7 +183,9 @@ final class NodeChrome
             'wire:key' => 'chrome-'.$id,
             'x-data' => self::alpine($id),
             'x-on:click.outside' => 'open = false',
-            'x-on:keydown.escape.window' => 'open = false',
+            // The menu takes the escape key and keeps it from the drawer, so
+            // the drawer is only closed when there is no menu to dismiss.
+            'x-on:keydown.escape.window' => 'if (open) { open = false; $event.stopImmediatePropagation() }',
             // A node may be a link, and a click on a button inside a link
             // still activates it, so the chrome swallows the default.
             'x-on:click.prevent' => 'true',
