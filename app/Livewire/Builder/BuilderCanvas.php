@@ -12,6 +12,7 @@ use App\Builder\Registries\ThemeRegistry;
 use App\Builder\Support\AttributeGuard;
 use App\Builder\Support\ClassList;
 use App\Builder\Support\CompositionRepository;
+use App\Builder\Support\NodeChrome;
 use App\Builder\Support\PhpCodeGenerator;
 use App\Builder\Support\TreeMutator;
 use App\Builder\Support\TreeRenderer;
@@ -465,6 +466,21 @@ class BuilderCanvas extends Component
 
         $parentId ??= $this->targetParent($type);
 
+        // A table holds one head, one body, one foot and one caption, so a
+        // section the table already holds is refused with a word instead of
+        // an empty duplicate.
+        if ($this->tableHolds($parentId, $type)) {
+            $section = match ($type) {
+                'table.thead' => 'head',
+                'table.tbody' => 'body',
+                'table.tfoot' => 'foot',
+                default => 'caption',
+            };
+
+            $this->tableNotice = 'This table already has a '.$section.'.';
+
+            return;
+        }
         $node = BuilderNode::make($this->nextId(), $type);
 
         $this->tree = TreeMutator::addChild($this->tree, $parentId, $node);
@@ -476,12 +492,32 @@ class BuilderCanvas extends Component
         }
 
         $this->selectedId = $node['id'];
+        $this->tableNotice = null;
 
         // A text element is almost always one you are about to type into, so
         // the drawer opens with the text field ready. A container is not.
         if (ComponentRegistry::isTextual($type)) {
             $this->openConfig($node['id']);
         }
+    }
+
+    /**
+     * Whether a node already holds the kind of table section the type is.
+     */
+    private function tableHolds(string $parentId, string $type): bool
+    {
+        $parent = $this->tree['nodes'][$parentId] ?? null;
+
+        if ($parent === null || ! in_array($type, NodeChrome::TABLE_SECTIONS, true)) {
+            return false;
+        }
+
+        $types = array_map(
+            fn (string $childId): string => $this->tree['nodes'][$childId]['type'] ?? '',
+            $parent['children'],
+        );
+
+        return in_array($type, $types, true);
     }
 
     /**

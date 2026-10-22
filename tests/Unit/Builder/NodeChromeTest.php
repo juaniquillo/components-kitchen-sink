@@ -5,6 +5,39 @@ declare(strict_types=1);
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
 use App\Builder\Support\NodeChrome;
+use Juaniquillo\BackendComponents\MainBackendComponent;
+
+/**
+ * Every string a component tree holds as its own content.
+ *
+ * @return array<int, string>
+ */
+function contentLabels(MainBackendComponent $component): array
+{
+    $labels = [];
+
+    foreach ($component->getContents() as $child) {
+        if (is_string($child)) {
+            $labels[] = $child;
+
+            continue;
+        }
+
+        if (method_exists($child, 'getContents')) {
+            $labels = [...$labels, ...contentLabels($child)];
+
+            continue;
+        }
+
+        if (method_exists($child, 'getContent')
+            && is_string($child->getContent())
+            && $child->getContent() !== '') {
+            $labels[] = $child->getContent();
+        }
+    }
+
+    return $labels;
+}
 
 it('gives a flow container a div for its chrome', function () {
     expect(NodeChrome::tag('div'))->toBe('div')
@@ -255,6 +288,31 @@ it('only offers the components a node may contain', function () {
     $node = BuilderNode::make('n1', 'lists.ul');
 
     expect(NodeChrome::allowedChildren($node))->toBe(['lists.li']);
+});
+
+it('offers no section a table already holds in its menu', function () {
+    // The scaffold puts a head and a body in the table right away, so the
+    // parts the table already holds are not on its menu.
+    $table = BuilderNode::make('n1', 'table.table');
+    $table['children'] = ['n2', 'n3'];
+
+    $labels = contentLabels(NodeChrome::build($table, true, ['table.thead', 'table.tbody']));
+
+    expect($labels)->toContain('Table Foot')
+        ->and($labels)->toContain('Caption')
+        ->and($labels)->not->toContain('Table Head')
+        ->and($labels)->not->toContain('Table Body');
+});
+
+it('offers every section of a table that holds none', function () {
+    $table = BuilderNode::make('n1', 'table.table');
+
+    $labels = contentLabels(NodeChrome::build($table, true, []));
+
+    expect($labels)->toContain('Table Head')
+        ->and($labels)->toContain('Table Body')
+        ->and($labels)->toContain('Table Foot')
+        ->and($labels)->toContain('Caption');
 });
 
 it('offers the inline components to a paragraph', function () {

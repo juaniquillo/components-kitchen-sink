@@ -859,3 +859,37 @@ it('refuses a column while a cell of the table spans rows or columns', function 
         ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10'])
         ->assertSet('tableNotice', 'This table cannot lose a column while one of its cells spans rows or columns.');
 });
+
+it('refuses a head the table already holds', function () {
+    $component = Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->assertSet('tableNotice', null);
+
+    $before = count($component->instance()->tree['nodes']);
+
+    $component
+        ->call('add', 'table.thead', 'n2')
+        ->assertSet('tableNotice', 'This table already has a head.')
+        ->call('add', 'table.tbody', 'n2')
+        ->assertSet('tableNotice', 'This table already has a body.');
+
+    $tree = $component->instance()->tree;
+
+    expect(count($tree['nodes']))->toBe($before)
+        ->and(count(array_filter($tree['nodes'], fn ($node): bool => $node['type'] === 'table.thead')))->toBe(1);
+});
+
+it('takes a foot the table does not hold yet', function () {
+    $component = Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('add', 'table.tfoot', 'n2');
+
+    $tree = $component->instance()->tree;
+    $table = $tree['nodes']['n2'];
+
+    expect($component->instance()->tableNotice)->toBeNull()
+        ->and(count($table['children']))->toBe(3)
+        ->and($tree['nodes'][end($table['children'])]['type'])->toBe('table.tfoot');
+});

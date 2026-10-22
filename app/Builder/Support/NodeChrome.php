@@ -173,7 +173,7 @@ final class NodeChrome
      * @param  Node  $node
      * @param  bool  $draggable  Whether the node can be moved, and so needs a handle.
      */
-    public static function build(array $node, bool $draggable = true): MainBackendComponent
+    public static function build(array $node, bool $draggable = true, array $childTypes = []): MainBackendComponent
     {
         $id = $node['id'];
 
@@ -207,7 +207,7 @@ final class NodeChrome
 
         if ($allowed !== [] || $acceptsText) {
             $contents[] = self::add();
-            $contents[] = self::menu($node, $allowed, $acceptsText);
+            $contents[] = self::menu($node, $allowed, $acceptsText, $childTypes);
         }
 
         $contents[] = self::delete($id);
@@ -322,6 +322,20 @@ final class NodeChrome
     }
 
     /**
+     * The table sections a table keeps one of.
+     *
+     * A head, a body, a foot and a caption are parts a table holds once, so
+     * the menu of a table only lists the ones it does not hold yet, and the
+     * canvas refuses to add a section a table already holds.
+     */
+    public const TABLE_SECTIONS = [
+        'table.thead',
+        'table.tbody',
+        'table.tfoot',
+        'table.caption',
+    ];
+
+    /**
      * The menu of things that can be added to a node.
      *
      * Every part of it is phrasing content, so the menu can live inside a
@@ -331,8 +345,9 @@ final class NodeChrome
      * has somewhere to put an item, but nowhere to put a run of text.
      *
      * @param  array<int, string>  $allowed
+     * @param  array<int, string>  $childTypes
      */
-    private static function menu(array $node, array $allowed, bool $acceptsText): MainBackendComponent
+    private static function menu(array $node, array $allowed, bool $acceptsText, array $childTypes = []): MainBackendComponent
     {
         $menu = new MainBackendComponent(ComponentEnum::SPAN);
 
@@ -354,6 +369,10 @@ final class NodeChrome
             $contents[] = self::textOption();
         }
 
+        $allowed = $node['type'] === 'table.table'
+            ? self::withoutHeldSections($allowed, $childTypes)
+            : $allowed;
+
         if ($allowed !== []) {
             $contents[] = self::componentList($node['id'], $allowed, $acceptsText);
         }
@@ -365,6 +384,22 @@ final class NodeChrome
         $menu->setContents($contents);
 
         return $menu;
+    }
+
+    /**
+     * The allowed children of a table, without the sections it holds.
+     *
+     * @param  array<int, string>  $allowed
+     * @param  array<int, string>  $childTypes
+     * @return array<int, string>
+     */
+    private static function withoutHeldSections(array $allowed, array $childTypes): array
+    {
+        return array_values(array_filter(
+            $allowed,
+            fn (string $type): bool => ! in_array($type, self::TABLE_SECTIONS, true)
+                || ! in_array($type, $childTypes, true),
+        ));
     }
 
     /**

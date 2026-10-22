@@ -93,7 +93,7 @@ final class TreeRenderer
         // that it can be wrapped in something that can.
         $chrome = ($clean || (! $hostsOwnChrome && ! $canBeWrapped))
             ? null
-            : NodeChrome::build($node, $draggable);
+            : NodeChrome::build($node, $draggable, $this->childTypes($tree, $node));
 
         if ($chrome !== null && ! $hostsOwnChrome) {
             return $this->buildWrapped($tree, $node, $chrome, $selectedId, $clean);
@@ -105,6 +105,26 @@ final class TreeRenderer
         $component->setContents($this->contents($tree, $node, $selectedId, $clean, $chrome));
 
         return $component;
+    }
+
+    /**
+     * The types of the children a node holds, for the chrome of its menu.
+     *
+     * @param  Tree  $tree
+     * @param  Node  $node
+     * @return array<int, string>
+     */
+    private function childTypes(array $tree, array $node): array
+    {
+        $types = [];
+
+        foreach ($node['children'] as $childId) {
+            if (isset($tree['nodes'][$childId])) {
+                $types[] = $tree['nodes'][$childId]['type'];
+            }
+        }
+
+        return $types;
     }
 
     /**
