@@ -62,6 +62,8 @@ final class EmailPresenter implements EmailPresenterInterface
                             ->setTheme('iframe', 'default')
                             ->setAttributes([
                                 'src' => $previewUrl,
+                                'loading' => 'lazy',
+                                'title' => $email::name(),
                             ])
                     ),
             ]);
