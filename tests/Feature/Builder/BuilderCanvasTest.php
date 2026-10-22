@@ -750,3 +750,112 @@ it('keeps the drawer out of the stack of the panels', function () {
     expect($aside)->not->toBeNull()
         ->and($aside->parentNode->getAttribute('class'))->not->toContain('space-y-4');
 });
+
+it('offers a table in the menu of the root', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->assertSee('Add table…', false)
+        ->assertSee('tableMode(', false);
+});
+
+it('opens the table form for a node that takes a table', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->assertSet('tableModeId', 'n1')
+        ->assertSet('newTableColumns', 3)
+        ->assertSet('newTableRows', 2)
+        ->assertSee('data-open="true"', false);
+});
+
+it('refuses the table form for a node that cannot hold a table', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->call('tableMode', 'n2')
+        ->assertSet('tableModeId', null);
+});
+
+it('gives the configuration back when a node is asked about', function () {
+    // The drawer shows one thing at a time: the node a user opened on the
+    // canvas takes the place of the form the table had.
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('openConfig', 'n1')
+        ->assertSet('tableModeId', null)
+        ->assertSet('configuringId', 'n1')
+        ->assertSee('data-open="true"', false);
+});
+
+it('scaffolds a whole table under the node the form was opened for', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->assertSet('tableModeId', null)
+        ->assertSet('tableNotice', null)
+        ->assertSet('tree.nodes.n2.type', 'table.table')
+        ->assertSet('tree.nodes.n3.children', ['n4'])
+        ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10'])
+        ->assertSet('tree.nodes.n5.children', ['n12', 'n19']);
+});
+
+it('scaffolds the size the form asks for, and nothing smaller', function () {
+    // The columns and the rows are clamped between 1 and 99: whatever the
+    // browser sends, a table always comes out with at least one of each.
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->set('newTableColumns', 0)
+        ->set('newTableRows', 0)
+        ->call('scaffoldTable')
+        ->assertSet('tree.nodes.n4.children', ['n6'])
+        ->assertSet('tree.nodes.n5.children', ['n8']);
+});
+
+it('offers the table operations in the menus of the parts', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->assertSee('Row below', false)
+        ->assertSee('Delete column', false);
+});
+
+it('copies a row in the canvas below the one it was asked about', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('addRowBelow', 'n12')
+        ->assertSet('tree.nodes.n5.children', ['n12', 'n26', 'n19'])
+        ->assertSet('tree.nodes.n26.type', 'table.tr')
+        ->assertSet('tree.nodes.n27.children', []);
+});
+
+it('adds a column from a row of the canvas', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('addColumn', 'n12')
+        ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10', 'n26'])
+        ->assertSet('tree.nodes.n12.children', ['n13', 'n15', 'n17', 'n28'])
+        ->assertSet('tree.nodes.n19.children', ['n20', 'n22', 'n24', 'n30']);
+});
+
+it('removes a column from the canvas when a cell asks', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('deleteColumn', 'n15')
+        ->assertSet('tree.nodes.n4.children', ['n6', 'n10'])
+        ->assertSet('tree.nodes.n12.children', ['n13', 'n17'])
+        ->assertSet('tree.nodes.n19.children', ['n20', 'n24'])
+        ->assertSet('tableNotice', null);
+});
+
+it('refuses a column while a cell of the table spans rows or columns', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('openConfig', 'n13')
+        ->set('attributeName', 'colspan')
+        ->set('attributeValue', '2')
+        ->call('addAttribute')
+        ->call('deleteColumn', 'n15')
+        ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10'])
+        ->assertSet('tableNotice', 'This table cannot lose a column while one of its cells spans rows or columns.');
+});

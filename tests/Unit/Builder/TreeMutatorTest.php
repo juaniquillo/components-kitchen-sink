@@ -283,3 +283,151 @@ it('duplicates a node with fresh ids', function () {
         ->and($tree['nodes']['n2-copy1']['children'])->toBe(['n4-copy2'])
         ->and($tree['nodes'])->toHaveKey('n4-copy2');
 });
+
+it('scaffolds a whole table under a node', function () {
+    $tree = tableTree();
+
+    // t1 table, t2 the head, t3 the head row, t4 the body, t11 and t18 the
+    // body rows, and a cell with its text segment after each.
+    expect($tree['nodes']['n1']['children'])->toBe(['t1'])
+        ->and($tree['nodes']['t1']['children'])->toBe(['t2', 't4'])
+        ->and($tree['nodes']['t2']['children'])->toBe(['t3'])
+        ->and($tree['nodes']['t3']['children'])->toBe(['t5', 't7', 't9'])
+        ->and($tree['nodes']['t4']['children'])->toBe(['t11', 't18'])
+        ->and($tree['nodes']['t11']['children'])->toBe(['t12', 't14', 't16'])
+        ->and($tree['nodes']['t18']['children'])->toBe(['t19', 't21', 't23']);
+
+    expect($tree['nodes']['t5']['type'])->toBe('table.th')
+        ->and($tree['nodes']['t5']['text'])->toBeNull()
+        ->and($tree['nodes']['t6']['type'])->toBe(BuilderNode::TYPE_TEXT)
+        ->and($tree['nodes']['t6']['text'])->toBe('—')
+        ->and($tree['nodes']['t12']['type'])->toBe('table.td')
+        ->and($tree['nodes']['t12']['children'])->toBe(['t13'])
+        ->and($tree['nodes']['t12']['text'])->toBeNull()
+        ->and($tree['nodes']['t11']['type'])->toBe('table.tr');
+});
+
+it('refuses a table where the parent does not take one', function () {
+    $tree = $this->tree;
+
+    $scaffolded = TreeMutator::scaffoldTable(
+        $tree,
+        'n3',
+        2,
+        2,
+        fn (string $id): string => $id.'x',
+    );
+
+    expect($scaffolded['nodes']['n3']['children'])->toBe([])
+        ->and(count($scaffolded['nodes']))->toBe(count($tree['nodes']));
+});
+
+it('refuses a scaffold smaller than one row or column', function () {
+    $counter = 0;
+
+    $tree = TreeMutator::scaffoldTable(
+        $this->tree,
+        'n1',
+        0,
+        2,
+        function (string $id) use (&$counter): string {
+            $counter++;
+
+            return 't'.$counter;
+        },
+    );
+
+    expect($tree['nodes']['n1']['children'])->toBe(['n2', 'n3']);
+});
+
+it('copies a row below itself without the texts of its cells', function () {
+    $tree = tableTree();
+
+    $tree = TreeMutator::addText($tree, 't12', 'Alpha', 'x1');
+
+    $tree = TreeMutator::addRowBelow($tree, 't11', tableIdFactory());
+
+    // t25 is the copy, below its source, and t18 stays behind it: three
+    // cells, none of them with a text segment, and the segments they
+    // inherited are gone.
+    expect($tree['nodes']['t4']['children'])->toBe(['t11', 't25', 't18'])
+        ->and($tree['nodes']['t25']['children'])->toBe(['t26', 't29', 't31'])
+        ->and($tree['nodes']['t26']['children'])->toBe([])
+        ->and($tree['nodes']['t29']['children'])->toBe([])
+        ->and($tree['nodes']['t31']['children'])->toBe([]);
+
+    // The source row is exactly as it was.
+    expect($tree['nodes']['t12']['children'])->toBe(['t13', 'x1'])
+        ->and($tree['nodes']['x1']['text'])->toBe('Alpha');
+});
+
+it('keeps what a copied cell holds besides its text', function () {
+    $tree = tableTree();
+
+    $tree = TreeMutator::addChild($tree, 't12', BuilderNode::make('x1', 'inline.span'));
+    $tree = TreeMutator::addText($tree, 'x1', 'Inside', 'x2');
+
+    $tree = TreeMutator::addRowBelow($tree, 't11', tableIdFactory());
+
+    // t26 is the copy of t12, and the span that lives in the source cell is
+    // in the copy with its own text: only the direct segments are taken.
+    expect($tree['nodes']['t26']['children'])->toBe(['t28'])
+        ->and($tree['nodes']['t28']['type'])->toBe('inline.span')
+        ->and($tree['nodes']['t29']['type'])->toBe(BuilderNode::TYPE_TEXT)
+        ->and($tree['nodes']['t29']['text'])->toBe('Inside');
+});
+
+it('refuses to copy something that is not a row', function () {
+    $tree = tableTree();
+
+    $unchanged = TreeMutator::addRowBelow($tree, 't2', tableIdFactory());
+
+    expect($unchanged['nodes'])->toBe($tree['nodes']);
+});
+
+it('adds a column to every row of a table', function () {
+    $tree = TreeMutator::addColumn(tableTree(), 't11', tableIdFactory());
+
+    // t25 and its segment go into the head row, t27 and t31 into the data
+    // ones, and the placeholder is written the way a cell's text is held.
+    expect($tree['nodes']['t3']['children'])->toBe(['t5', 't7', 't9', 't25'])
+        ->and($tree['nodes']['t25']['type'])->toBe('table.th')
+        ->and($tree['nodes']['t25']['children'])->toBe(['t26'])
+        ->and($tree['nodes']['t26']['text'])->toBe('—')
+        ->and($tree['nodes']['t11']['children'])->toBe(['t12', 't14', 't16', 't27'])
+        ->and($tree['nodes']['t27']['type'])->toBe('table.td')
+        ->and($tree['nodes']['t27']['children'])->toBe(['t28'])
+        ->and($tree['nodes']['t18']['children'])->toBe(['t19', 't21', 't23', 't29']);
+});
+
+it('refuses a column when the row is not in a table', function () {
+    $unchanged = TreeMutator::addColumn($this->tree, 'n3', tableIdFactory());
+
+    expect($unchanged['nodes']['n3']['children'])->toBe($this->tree['nodes']['n3']['children']);
+});
+
+it('removes the column a cell belongs to', function () {
+    $tree = TreeMutator::deleteColumn(tableTree(), 't14');
+
+    // The second column is gone from every row, with its segments, and the
+    // cells that were behind it came forward.
+    expect($tree['nodes']['t3']['children'])->toBe(['t5', 't9'])
+        ->and($tree['nodes']['t11']['children'])->toBe(['t12', 't16'])
+        ->and($tree['nodes']['t18']['children'])->toBe(['t19', 't23'])
+        ->and($tree['nodes'])->not->toHaveKey('t7')
+        ->and($tree['nodes'])->not->toHaveKey('t14')
+        ->and($tree['nodes'])->not->toHaveKey('t21')
+        ->and($tree['nodes'])->not->toHaveKey('t15');
+});
+
+it('refuses the column of a table whose cells span rows or columns', function () {
+    $tree = tableTree();
+
+    $tree = TreeMutator::setAttribute($tree, 't16', 'colspan', '2');
+
+    $unchanged = TreeMutator::deleteColumn($tree, 't14');
+
+    expect($unchanged['nodes']['t3']['children'])->toBe($tree['nodes']['t3']['children'])
+        ->and($unchanged['nodes']['t11']['children'])->toBe($tree['nodes']['t11']['children'])
+        ->and($unchanged['nodes']['t18']['children'])->toBe($tree['nodes']['t18']['children']);
+});

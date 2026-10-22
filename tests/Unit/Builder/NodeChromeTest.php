@@ -130,17 +130,91 @@ it('offers a text entry in the menu', function () {
 
     $chrome = NodeChrome::build($node);
 
-    $contents = $chrome->getContents();
-
-    $menu = $contents[3] ?? null;
+    $menu = $chrome->getContents()[3] ?? null;
 
     $parts = method_exists($menu, 'getContents') ? $menu->getContents() : [];
 
-    $first = $parts[0] ?? null;
+    // The first part is the band of table operations the node takes.
+    $first = $parts[1] ?? null;
 
     $items = method_exists($first, 'getContents') ? $first->getContents() : [];
 
     expect($items[0] ?? null)->toBe('Text');
+});
+
+it('offers a table in the menu of a node that takes one', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+
+    $parts = $menu ? $menu->getContents() : [];
+    $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
+
+    $clicks = [];
+
+    foreach ($items as $item) {
+        if (method_exists($item, 'getAttributes')) {
+            $clicks[] = $item->getAttributes()['x-on:click'] ?? '';
+        }
+    }
+
+    expect(implode(' ', $clicks))->toContain('tableMode(')
+        ->and(implode(' ', $clicks))->toContain("'n1'");
+});
+
+it('offers no table in the menu of a node that does not take one', function () {
+    // A paragraph is phrasing content, and a table is not in it.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'paragraph'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+
+    $parts = $menu ? $menu->getContents() : [];
+    $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
+
+    $first = $items[0] ?? null;
+
+    expect($first === null || (method_exists($first, 'getContent') && $first->getContent()) !== 'Add table…')->toBeTrue();
+});
+
+it('offers the row and column operations on a row', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.tr'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+
+    $parts = $menu ? $menu->getContents() : [];
+    $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
+
+    $clicks = [];
+
+    foreach ($items as $item) {
+        if (method_exists($item, 'getAttributes')) {
+            $clicks[] = $item->getAttributes()['x-on:click'] ?? '';
+        }
+    }
+
+    expect(implode(' ', $clicks))->toContain('addRowBelow(')
+        ->toContain('addColumn(')
+        ->not->toContain('deleteColumn(');
+});
+
+it('offers deleting the column on a cell', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.td'));
+
+    $menu = $chrome->getContents()[3] ?? null;
+
+    $parts = $menu ? $menu->getContents() : [];
+    $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
+
+    $clicks = [];
+
+    foreach ($items as $item) {
+        if (method_exists($item, 'getAttributes')) {
+            $clicks[] = $item->getAttributes()['x-on:click'] ?? '';
+        }
+    }
+
+    expect(implode(' ', $clicks))->toContain('deleteColumn(')
+        ->not->toContain('addRowBelow(');
 });
 
 it('offers the components a node may contain in its menu', function () {
@@ -154,7 +228,7 @@ it('offers the components a node may contain in its menu', function () {
 
     $parts = method_exists($menu, 'getContents') ? $menu->getContents() : [];
 
-    $list = $parts[1] ?? null;
+    $list = $parts[2] ?? null;
 
     $items = method_exists($list, 'getContents') ? $list->getContents() : [];
 
@@ -227,5 +301,14 @@ it('offers both text and components to a node that takes both', function () {
 
     $menu = $chrome->getContents()[3] ?? null;
 
-    expect($menu->getContents())->toHaveCount(3);
+    expect($menu?->getContents())->toHaveCount(4);
+
+    // The band of table operations comes first, then the text entry, the
+    // component list and the field the new text is typed into.
+    $parts = $menu?->getContents() ?? [];
+
+    expect(method_exists($parts[2] ?? null, 'getContents') ? implode(' ', array_map(
+        fn ($item): string => $item->getAttributes()['x-on:click'] ?? '',
+        $parts[2]->getContents(),
+    )) : '')->toContain('add(');
 });

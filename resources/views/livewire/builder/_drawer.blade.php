@@ -1,18 +1,21 @@
 @php
     $node = $this->configuring;
     $descriptor = $this->configuringDescriptor;
+    $open = $configuringId !== null || $tableModeId !== null;
 @endphp
 
 <aside
     data-builder-drawer
-    data-open="{{ $configuringId !== null ? 'true' : 'false' }}"
-    class="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-xl transition-transform duration-200 dark:border-slate-700 dark:bg-slate-900 {{ $configuringId !== null ? 'translate-x-0' : 'translate-x-full' }}"
+    data-open="{{ $open ? 'true' : 'false' }}"
+    class="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-xl transition-transform duration-200 dark:border-slate-700 dark:bg-slate-900 {{ $open ? 'translate-x-0' : 'translate-x-full' }}"
     aria-label="Component configuration"
     x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]')) this.$wire.closeConfig() } }"
     x-on:keydown.escape.window="close()"
 >
     <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Configure</h2>
+        <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+            {{ $tableModeId !== null ? 'Add table' : 'Configure' }}
+        </h2>
 
         <button
             type="button"
@@ -23,7 +26,63 @@
         </button>
     </div>
 
-    @if ($node === null || $descriptor === null)
+    @if ($tableModeId !== null)
+        <div class="space-y-5">
+            <p class="text-[11px] text-slate-400">
+                A skeleton with a head row and the body rows goes under the
+                node <span class="font-medium text-slate-600 dark:text-slate-300">{{ $tableModeId }}</span>.
+                Every cell holds a dash until something is typed into it.
+            </p>
+
+            <div class="grid grid-cols-2 gap-2">
+                <label>
+                    <span class="mb-1 block text-[11px] font-medium text-slate-500">Columns</span>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        wire:model.number="newTableColumns"
+                        class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
+                    />
+                </label>
+
+                <label>
+                    <span class="mb-1 block text-[11px] font-medium text-slate-500">Rows</span>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        wire:model.number="newTableRows"
+                        class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
+                    />
+                </label>
+            </div>
+
+            @if ($tableNotice !== null)
+                <p class="text-[11px] text-red-500" role="alert">{{ $tableNotice }}</p>
+            @endif
+
+            <div class="flex gap-2">
+                <button
+                    type="button"
+                    wire:click="scaffoldTable"
+                    class="rounded bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
+                >
+                    Add table
+                </button>
+
+                <button
+                    type="button"
+                    wire:click="closeConfig"
+                    class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:bg-slate-50 dark:border-slate-600"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    @elseif ($node === null || $descriptor === null)
         <p class="text-xs text-slate-400">Select a node and press its configure button.</p>
     @else
         <div class="space-y-5">

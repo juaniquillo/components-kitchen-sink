@@ -20,6 +20,14 @@ use App\Builder\Registries\ThemeRegistry;
 final class TreeMutator
 {
     /**
+     * The text a table cell is given when it is created.
+     *
+     * An empty cell has no box to click on, so a placeholder is what keeps
+     * a fresh table touchable before anything is typed in it.
+     */
+    public const CELL_TEXT = '—';
+
+    /**
      * Add a child to a node.
      *
      * @param  Tree  $tree
@@ -409,6 +417,271 @@ final class TreeMutator
     }
 
     /**
+     * Copy a table row below itself, without the texts of its cells.
+     *
+     * A row that is added is wanted for its structure: the texts of the
+     * source row belong to their own column, so the direct text segments
+     * of the copy's cells are taken out and whatever else a cell holds is
+     * kept.
+     *
+     * @param  Tree  $tree
+     * @param  callable(string): string  $idFactory
+     * @return Tree
+     */
+    public static function addRowBelow(array $tree, string $rowId, callable $idFactory): array
+    {
+        $row = $tree['nodes'][$rowId] ?? null;
+
+        if ($row === null || $row['type'] !== 'table.tr') {
+            return $tree;
+        }
+
+        $parentId = self::parentOf($tree, $rowId);
+
+        if ($parentId === null) {
+            return $tree;
+        }
+
+        $siblings = $tree['nodes'][$parentId]['children'];
+
+        $tree = self::duplicate($tree, $rowId, $idFactory);
+
+        // The copy's id is the one its parent did not hold before, and when
+        // the duplication refused there is no such id.
+        $copyId = array_values(array_diff(
+            $tree['nodes'][$parentId]['children'] ?? [],
+            $siblings,
+        ))[0] ?? null;
+
+        if ($copyId === null) {
+            return $tree;
+        }
+
+        $copy = $tree['nodes'][$copyId];
+
+        foreach ($copy['children'] as $cellId) {
+            $cell = $tree['nodes'][$cellId] ?? null;
+
+            if ($cell === null || ! in_array($cell['type'], ['table.th', 'table.td'], true)) {
+                continue;
+            }
+
+            $texts = array_values(array_filter(
+                $cell['children'],
+                fn (string $childId): bool => self::isText($tree, $childId),
+            ));
+
+            if ($texts === []) {
+                continue;
+            }
+
+            $tree['nodes'][$cellId]['children'] = array_values(array_diff($cell['children'], $texts));
+
+            foreach ($texts as $textId) {
+                unset($tree['nodes'][$textId]);
+            }
+        }
+
+        return $tree;
+    }
+
+    /**
+     * Add a column at the end of every row of a table.
+     *
+     * A column is a run of cells along the rows, so the operation is
+     * anchored on a row and reaches across the table it belongs to: every
+     * row gets a cell, and the head keeps header cells while the body keeps
+     * data ones.
+     *
+     * @param  Tree  $tree
+     * @param  callable(string): string  $idFactory
+     * @return Tree
+     */
+    public static function addColumn(array $tree, string $rowId, callable $idFactory): array
+    {
+        $tableId = self::tableOfRow($tree, $rowId);
+
+        if ($tableId === null) {
+            return $tree;
+        }
+
+        foreach (self::rowsOfTable($tree, $tableId) as $row) {
+            $type = $row['inHead'] ? 'table.th' : 'table.td';
+
+            $cellId = $idFactory($row['id']);
+            $textId = $idFactory($cellId);
+
+            $cell = BuilderNode::make($cellId, $type);
+
+            $tree = self::addChild($tree, $row['id'], $cell);
+
+            // The placeholder is a segment of its own, and segments go in
+            // the way every other text of a cell does.
+            $tree = self::addText($tree, $cellId, self::CELL_TEXT, $textId);
+        }
+
+        return $tree;
+    }
+
+    /**
+     * Remove the column a cell belongs to.
+     *
+     * The cell's place among the cells of its row is the column, and the
+     * cell at the same place is taken out of every row of the table. A
+     * column is only well defined while each row keeps one cell per column,
+     * so a table with cells that span rows or columns is left alone.
+     *
+     * @param  Tree  $tree
+     * @return Tree
+     */
+    public static function deleteColumn(array $tree, string $cellId): array
+    {
+        $cell = $tree['nodes'][$cellId] ?? null;
+
+        if ($cell === null || ! in_array($cell['type'], ['table.th', 'table.td'], true)) {
+            return $tree;
+        }
+
+        $rowId = self::parentOf($tree, $cellId);
+        $row = $rowId !== null ? ($tree['nodes'][$rowId] ?? null) : null;
+
+        if ($row === null || $row['type'] !== 'table.tr') {
+            return $tree;
+        }
+
+        $tableId = self::tableOfRow($tree, $rowId);
+
+        if ($tableId === null || self::cellsSpan($tree, $tableId)) {
+            return $tree;
+        }
+
+        $position = null;
+        $cells = 0;
+
+        foreach ($row['children'] as $childId) {
+            $child = $tree['nodes'][$childId] ?? null;
+
+            if ($child === null || ! in_array($child['type'], ['table.th', 'table.td'], true)) {
+                continue;
+            }
+
+            if ($childId === $cellId) {
+                $position = $cells;
+            }
+
+            $cells++;
+        }
+
+        if ($position === null) {
+            return $tree;
+        }
+
+        foreach (self::rowsOfTable($tree, $tableId) as $rowEntry) {
+            $rowNode = $tree['nodes'][$rowEntry['id']];
+
+            $cells = array_values(array_filter(
+                $rowNode['children'],
+                fn (string $childId): bool => in_array($tree['nodes'][$childId]['type'] ?? '', ['table.th', 'table.td'], true),
+            ));
+
+            if (isset($cells[$position])) {
+                $tree = self::remove($tree, $cells[$position]);
+            }
+        }
+
+        return $tree;
+    }
+
+    /**
+     * Add a whole table under a node.
+     *
+     * A table is the one component that is not assembled part by part: the
+     * head and the body with their rows and cells are added in one go, every
+     * cell carrying the placeholder text, so the skeleton is there to be
+     * edited and not to be clicked into shape first.
+     *
+     * @param  Tree  $tree
+     * @param  callable(string): string  $idFactory
+     * @return Tree
+     */
+    public static function scaffoldTable(array $tree, string $parentId, int $columns, int $rows, callable $idFactory, string $cellText = self::CELL_TEXT): array
+    {
+        if ($columns < 1 || $rows < 1) {
+            return $tree;
+        }
+
+        $tableId = $idFactory($parentId);
+        $headSectionId = $idFactory($tableId);
+        $headRowId = $idFactory($headSectionId);
+        $bodySectionId = $idFactory($tableId);
+
+        $nodes = [];
+
+        $table = BuilderNode::make($tableId, 'table.table');
+        $headSection = BuilderNode::make($headSectionId, 'table.thead');
+        $headRow = BuilderNode::make($headRowId, 'table.tr');
+
+        for ($i = 0; $i < $columns; $i++) {
+            $cellId = $idFactory($headRowId);
+            $textId = $idFactory($cellId);
+
+            $nodes[$textId] = BuilderNode::make($textId, BuilderNode::TYPE_TEXT, $cellText);
+
+            $cell = BuilderNode::make($cellId, 'table.th');
+            $cell['children'] = [$textId];
+            $nodes[$cellId] = $cell;
+
+            $headRow['children'][] = $cellId;
+        }
+
+        $bodySection = BuilderNode::make($bodySectionId, 'table.tbody');
+
+        for ($i = 0; $i < $rows; $i++) {
+            $rowId = $idFactory($bodySectionId);
+            $row = BuilderNode::make($rowId, 'table.tr');
+            $row['children'] = [];
+
+            for ($j = 0; $j < $columns; $j++) {
+                $cellId = $idFactory($rowId);
+                $textId = $idFactory($cellId);
+
+                $nodes[$textId] = BuilderNode::make($textId, BuilderNode::TYPE_TEXT, $cellText);
+
+                $cell = BuilderNode::make($cellId, 'table.td');
+                $cell['children'] = [$textId];
+                $nodes[$cellId] = $cell;
+
+                $row['children'][] = $cellId;
+            }
+
+            $bodySection['children'][] = $rowId;
+            $nodes[$rowId] = $row;
+        }
+
+        $table['children'] = [$headSectionId, $bodySectionId];
+        $headSection['children'] = [$headRowId];
+
+        $nodes[$tableId] = $table;
+        $nodes[$headSectionId] = $headSection;
+        $nodes[$headRowId] = $headRow;
+        $nodes[$bodySectionId] = $bodySection;
+
+        // The parent is the one place the compound can be refused, because
+        // every part of the table is allowed by the one before it.
+        $tree = self::addChild($tree, $parentId, $table);
+
+        if (! isset($tree['nodes'][$tableId])) {
+            return $tree;
+        }
+
+        foreach ($nodes as $id => $node) {
+            $tree['nodes'][$id] = $node;
+        }
+
+        return $tree;
+    }
+
+    /**
      * Find a node by id.
      *
      * @param  Tree  $tree
@@ -558,5 +831,92 @@ final class TreeMutator
         }
 
         return $tree;
+    }
+
+    /**
+     * The id of the table a node of a table belongs to, or null when there
+     * is none.
+     *
+     * Cells and rows are the parts of a table wherever they sit, so the
+     * walk stops at the first table above the node.
+     *
+     * @param  Tree  $tree
+     */
+    private static function tableOfRow(array $tree, string $nodeId): ?string
+    {
+        $parentId = self::parentOf($tree, $nodeId);
+
+        while ($parentId !== null) {
+            if ($tree['nodes'][$parentId]['type'] === 'table.table') {
+                return $parentId;
+            }
+
+            $parentId = self::parentOf($tree, $parentId);
+        }
+
+        return null;
+    }
+
+    /**
+     * The rows of a table, and whether each one is in the head.
+     *
+     * A row normally sits in a section, but a table may hold a row of its
+     * own, so the direct rows are collected too.
+     *
+     * @param  Tree  $tree
+     * @return array<int, array{id: string, inHead: bool}>
+     */
+    private static function rowsOfTable(array $tree, string $tableId): array
+    {
+        $rows = [];
+
+        foreach ($tree['nodes'][$tableId]['children'] as $sectionId) {
+            $section = $tree['nodes'][$sectionId] ?? null;
+
+            if ($section === null) {
+                continue;
+            }
+
+            if ($section['type'] === 'table.tr') {
+                $rows[] = ['id' => $sectionId, 'inHead' => false];
+
+                continue;
+            }
+
+            foreach ($section['children'] as $rowId) {
+                $row = $tree['nodes'][$rowId] ?? null;
+
+                if ($row !== null && $row['type'] === 'table.tr') {
+                    $rows[] = ['id' => $rowId, 'inHead' => $section['type'] === 'table.thead'];
+                }
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Whether a cell of a table spans rows or columns.
+     *
+     * While any cell does, the columns of the table are not a run of cells
+     * the rows share, and a column operation would take the wrong cells.
+     *
+     * @param  Tree  $tree
+     */
+    private static function cellsSpan(array $tree, string $tableId): bool
+    {
+        foreach (self::descendantsOf($tree, $tableId) as $descendantId) {
+            $node = $tree['nodes'][$descendantId] ?? null;
+
+            if ($node === null || ! in_array($node['type'], ['table.th', 'table.td'], true)) {
+                continue;
+            }
+
+            if (isset($node['attrs']['colspan']) || isset($node['attrs']['rowspan'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

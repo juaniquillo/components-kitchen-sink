@@ -74,6 +74,32 @@ class BuilderCanvas extends Component
     public ?string $configuringId = null;
 
     /**
+     * The id of the node the drawer is putting a table under.
+     *
+     * A table is the one component that is not assembled part by part: the
+     * drawer asks for a size and the canvas gets the whole skeleton at once.
+     */
+    public ?string $tableModeId = null;
+
+    /**
+     * The number of columns the table form is set to.
+     */
+    public int $newTableColumns = 3;
+
+    /**
+     * The number of body rows the table form is set to.
+     */
+    public int $newTableRows = 2;
+
+    /**
+     * Why the last table operation was refused, if it was.
+     *
+     * The row and column operations reach across a table, and a table that
+     * is not lined up has to say so instead of staying quiet.
+     */
+    public ?string $tableNotice = null;
+
+    /**
      * The name given to the composition when it is saved.
      */
     public string $compositionName = '';
@@ -309,6 +335,10 @@ class BuilderCanvas extends Component
             return;
         }
 
+        // The drawer shows one thing at a time, and the table form gives way
+        // to the node that was asked about.
+        $this->tableModeId = null;
+
         // The draft belongs to the node it was typed for, so it is only kept
         // when the same node is opened again.
         if ($this->configuringId !== $nodeId) {
@@ -340,6 +370,7 @@ class BuilderCanvas extends Component
     public function closeConfig(): void
     {
         $this->configuringId = null;
+        $this->tableModeId = null;
 
         // The draft belongs to the node it was typed for, and a closed
         // drawer has no node.
@@ -534,6 +565,115 @@ class BuilderCanvas extends Component
             $nodeId,
             fn (string $id): string => $this->nextId(),
         );
+    }
+
+    /**
+     * Open the drawer with the table form, for the node a table goes under.
+     */
+    public function tableMode(string $nodeId): void
+    {
+        $node = TreeMutator::find($this->tree, $nodeId);
+
+        if ($node === null) {
+            return;
+        }
+
+        $descriptor = ComponentRegistry::get($node['type']);
+
+        if ($descriptor === null || ! $descriptor->allowsChild('table.table')) {
+            return;
+        }
+
+        $this->closeConfig();
+
+        $this->selectedId = $nodeId;
+        $this->tableNotice = null;
+        $this->newTableColumns = 3;
+        $this->newTableRows = 2;
+        $this->tableModeId = $nodeId;
+    }
+
+    /**
+     * Add the table skeleton the form is asking for.
+     */
+    public function scaffoldTable(): void
+    {
+        if ($this->tableModeId === null) {
+            return;
+        }
+
+        if (TreeMutator::find($this->tree, $this->tableModeId) === null) {
+            $this->closeConfig();
+
+            return;
+        }
+
+        $columns = max(1, min(99, $this->newTableColumns));
+        $rows = max(1, min(99, $this->newTableRows));
+
+        $count = count($this->tree['nodes']);
+
+        $this->tree = TreeMutator::scaffoldTable(
+            $this->tree,
+            $this->tableModeId,
+            $columns,
+            $rows,
+            fn (string $id): string => $this->nextId(),
+        );
+
+        // The skeleton is only added when the node takes a table, and a
+        // quiet refusal has the reason the form stayed open for.
+        if (count($this->tree['nodes']) === $count) {
+            $this->tableNotice = 'This node does not take a table.';
+
+            return;
+        }
+
+        $this->tableNotice = null;
+
+        $this->closeConfig();
+    }
+
+    /**
+     * Copy a table row below itself, without the texts of its cells.
+     */
+    public function addRowBelow(string $rowId): void
+    {
+        $this->tree = TreeMutator::addRowBelow(
+            $this->tree,
+            $rowId,
+            fn (string $id): string => $this->nextId(),
+        );
+
+        $this->tableNotice = null;
+    }
+
+    /**
+     * Add a column at the end of every row of the table the row belongs to.
+     */
+    public function addColumn(string $rowId): void
+    {
+        $this->tree = TreeMutator::addColumn(
+            $this->tree,
+            $rowId,
+            fn (string $id): string => $this->nextId(),
+        );
+
+        $this->tableNotice = null;
+    }
+
+    /**
+     * Remove the column a cell belongs to.
+     */
+    public function deleteColumn(string $cellId): void
+    {
+        $this->tree = TreeMutator::deleteColumn($this->tree, $cellId);
+
+        // The operation leaves the tree alone when the column is not well
+        // defined, and the reason is shown instead of the cell going quiet.
+        $this->tableNotice = isset($this->tree['nodes'][$cellId])
+            ? 'This table cannot lose a column while one of its cells spans rows or columns.'
+            : null;
     }
 
     /**

@@ -3,6 +3,12 @@
     x-data="{ previewOpen: false }"
     x-on:builder:morphed.window="if (previewOpen && ! $refs.preview.open) $refs.preview.showModal()"
 >
+    @if ($tableNotice !== null)
+        <p class="mb-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-600 dark:border-red-900 dark:bg-red-500/10 dark:text-red-300" role="alert">
+            {{ $tableNotice }}
+        </p>
+    @endif
+
     <div class="mb-2 flex items-center justify-between gap-2">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Canvas</h2>
 

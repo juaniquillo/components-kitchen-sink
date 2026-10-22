@@ -207,7 +207,7 @@ final class NodeChrome
 
         if ($allowed !== [] || $acceptsText) {
             $contents[] = self::add();
-            $contents[] = self::menu($id, $allowed, $acceptsText);
+            $contents[] = self::menu($node, $allowed, $acceptsText);
         }
 
         $contents[] = self::delete($id);
@@ -325,14 +325,14 @@ final class NodeChrome
      * The menu of things that can be added to a node.
      *
      * Every part of it is phrasing content, so the menu can live inside a
-     * paragraph without the parser pulling it out. The text entry is only
-     * offered where the node takes text, and the component list only where it
-     * takes children: a list or a table row has somewhere to put an item, but
-     * nowhere to put a run of text.
+     * paragraph without the parser pulling it out. The table operations come
+     * first, the text entry is only offered where the node takes text, and
+     * the component list only where it takes children: a list or a table row
+     * has somewhere to put an item, but nowhere to put a run of text.
      *
      * @param  array<int, string>  $allowed
      */
-    private static function menu(string $id, array $allowed, bool $acceptsText): MainBackendComponent
+    private static function menu(array $node, array $allowed, bool $acceptsText): MainBackendComponent
     {
         $menu = new MainBackendComponent(ComponentEnum::SPAN);
 
@@ -344,21 +344,107 @@ final class NodeChrome
 
         $contents = [];
 
+        $actions = self::actions($node);
+
+        if ($actions !== []) {
+            $contents[] = self::actionGroup($actions);
+        }
+
         if ($acceptsText) {
             $contents[] = self::textOption();
         }
 
         if ($allowed !== []) {
-            $contents[] = self::componentList($id, $allowed, $acceptsText);
+            $contents[] = self::componentList($node['id'], $allowed, $acceptsText);
         }
 
         if ($acceptsText) {
-            $contents[] = self::textInput($id);
+            $contents[] = self::textInput($node['id']);
         }
 
         $menu->setContents($contents);
 
         return $menu;
+    }
+
+    /**
+     * The table operations the menu of a node offers.
+     *
+     * A table is the one component that is not assembled part by part: the
+     * node that can hold one offers its scaffold, and the parts offer the
+     * row and column operations that finish the job. Every operation calls
+     * the canvas, where the tree is.
+     *
+     * @param  Node  $node
+     * @return array<int, array{label: string, wire: string}>
+     */
+    private static function actions(array $node): array
+    {
+        $actions = [];
+        $id = $node['id'];
+
+        if (in_array('table.table', self::allowedChildren($node), true)) {
+            $actions[] = [
+                'label' => 'Add table…',
+                'wire' => "\$wire.tableMode('".$id."')",
+            ];
+        }
+
+        if ($node['type'] === 'table.tr') {
+            $actions[] = [
+                'label' => 'Row below',
+                'wire' => "\$wire.addRowBelow('".$id."')",
+            ];
+
+            $actions[] = [
+                'label' => 'Add column',
+                'wire' => "\$wire.addColumn('".$id."')",
+            ];
+        }
+
+        if (in_array($node['type'], ['table.th', 'table.td'], true)) {
+            $actions[] = [
+                'label' => 'Delete column',
+                'wire' => "\$wire.deleteColumn('".$id."')",
+            ];
+        }
+
+        return $actions;
+    }
+
+    /**
+     * The table operations of a menu, in a band of their own.
+     *
+     * @param  array<int, array{label: string, wire: string}>  $actions
+     */
+    private static function actionGroup(array $actions): MainBackendComponent
+    {
+        $group = new MainBackendComponent(ComponentEnum::SPAN);
+
+        $group->setAttributes([
+            'x-show' => '!textMode',
+            'class' => 'mb-1 border-b border-slate-100 pb-1 dark:border-slate-700',
+        ]);
+
+        $items = [];
+
+        foreach ($actions as $action) {
+            $item = new MainBackendComponent(ComponentEnum::SPAN);
+
+            $item->setAttributes([
+                'wire:sort:ignore' => '',
+                'x-on:click' => 'open = false; '.$action['wire'],
+                'class' => 'block cursor-pointer rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-500/20',
+            ]);
+
+            $item->setContent($action['label']);
+
+            $items[] = $item;
+        }
+
+        $group->setContents($items);
+
+        return $group;
     }
 
     /**

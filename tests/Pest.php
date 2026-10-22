@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
+use App\Builder\Support\TreeMutator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -64,4 +65,48 @@ function treeWithText(string $id, string $type, string $text): array
     $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, $text);
 
     return $tree;
+}
+
+/**
+ * A tree with a scaffolded table under its root, 3 columns and 2 body rows.
+ *
+ * The ids the scaffold hands out are fixed, so tests can point at parts:
+ * the table t1, the head t2, the head row t3, the body t4; the header cells
+ * t5, t7 and t9 with their segments t6, t8 and t10; the body rows t11 and
+ * t18 with the cells t12, t14, t16 and t19, t21, t23.
+ *
+ * @return array<string, mixed>
+ */
+function tableTree(): array
+{
+    $counter = 0;
+
+    return TreeMutator::scaffoldTable(
+        BuilderNode::tree('n1', 'div'),
+        'n1',
+        3,
+        2,
+        function (string $id) use (&$counter): string {
+            $counter++;
+
+            return 't'.$counter;
+        },
+    );
+}
+
+/**
+ * A factory for the ids of a table operation, counting on from the ones the
+ * scaffold used.
+ *
+ * @return callable(string): string
+ */
+function tableIdFactory(): callable
+{
+    $counter = 24;
+
+    return function (string $id) use (&$counter): string {
+        $counter++;
+
+        return 't'.$counter;
+    };
 }
