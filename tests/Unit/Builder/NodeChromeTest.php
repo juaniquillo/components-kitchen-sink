@@ -209,6 +209,20 @@ it('offers no table in the menu of a node that does not take one', function () {
     expect($first === null || (method_exists($first, 'getContent') && $first->getContent()) !== 'Add table…')->toBeTrue();
 });
 
+it('carries the toolbar of a table section in a cell', function () {
+    // A row only holds cells, and if the chrome went straight into the row,
+    // the parser would take the toolbar out of it and leave it without its
+    // Alpine scope, so a head and a body would have no working controls.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.thead'));
+
+    $contents = $chrome->getContents();
+
+    expect(count($contents))->toBe(1)
+        ->and(NodeChrome::tag('table.thead'))->toBe('tr')
+        ->and($contents[0])->toBeInstanceOf(MainBackendComponent::class)
+        ->and(count($contents[0]->getContents()))->toBe(5);
+});
+
 it('offers the row and column operations on a row', function () {
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.tr'));
 

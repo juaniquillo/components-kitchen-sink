@@ -20,7 +20,9 @@ use Juaniquillo\BackendComponents\MainBackendComponent;
  * A <div> inside a <p> or a <ul> is hoisted out by the browser's parser,
  * which would quietly restructure the tree. A <span> is the one element that
  * fits inside every phrasing context, and a <li>, <td>, <tr> or <caption>
- * cover the elements that only accept one kind of child.
+ * cover the elements that only accept one kind of child. Even so, a row
+ * holds nothing but cells, so a chrome on a table section rides in a cell
+ * of its own inside the out-of-flow chrome row.
  *
  * The chrome is never part of the tree, so the code generator never sees it.
  *
@@ -212,7 +214,17 @@ final class NodeChrome
 
         $contents[] = self::delete($id);
 
-        $chrome->setContents($contents);
+        // A row only holds cells, and the parser would hoist the toolbar out
+        // of the chrome row and leave it without its Alpine scope, so on a
+        // table section the toolbar travels in a cell. The chrome row is out
+        // of flow, so the cell takes no space in the table.
+        if (self::tag($node['type']) === 'tr') {
+            $cell = new MainBackendComponent(self::COMPONENTS['td']);
+            $cell->setContents($contents);
+            $chrome->setContents([$cell]);
+        } else {
+            $chrome->setContents($contents);
+        }
 
         return $chrome;
     }
