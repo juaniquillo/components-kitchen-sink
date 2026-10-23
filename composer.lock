@@ -1336,21 +1336,21 @@
         },
         {
             "name": "juaniquillo/flux-backend-components",
-            "version": "v0.2.3",
+            "version": "v0.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/flux-backend-components.git",
-                "reference": "0852ea65170bf77f743eb1290193744f2b143ddd"
+                "reference": "efecd6a6a0b1a7e194ce410c135265ea87b0bcc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/flux-backend-components/zipball/0852ea65170bf77f743eb1290193744f2b143ddd",
-                "reference": "0852ea65170bf77f743eb1290193744f2b143ddd",
+                "url": "https://api.github.com/repos/juaniquillo/flux-backend-components/zipball/efecd6a6a0b1a7e194ce410c135265ea87b0bcc2",
+                "reference": "efecd6a6a0b1a7e194ce410c135265ea87b0bcc2",
                 "shasum": ""
             },
             "require": {
                 "illuminate/support": "^12.0||^13.0",
-                "juaniquillo/laravel-backend-component": "^0.9",
+                "juaniquillo/laravel-backend-component": "^0.9.1||^0.10.0",
                 "livewire/flux": "^2.0",
                 "php": "^8.3"
             },
@@ -1394,14 +1394,16 @@
             "homepage": "https://github.com/juaniquillo/flux-backend-components",
             "keywords": [
                 "Juaniquillo",
+                "flux",
                 "flux-backend-components",
-                "laravel"
+                "laravel",
+                "livewire"
             ],
             "support": {
                 "issues": "https://github.com/juaniquillo/flux-backend-components/issues",
-                "source": "https://github.com/juaniquillo/flux-backend-components/tree/v0.2.3"
+                "source": "https://github.com/juaniquillo/flux-backend-components/tree/v0.2.4"
             },
-            "time": "2026-10-04T23:51:51+00:00"
+            "time": "2026-10-23T15:31:16+00:00"
         },
         {
             "name": "juaniquillo/input-component-action",
@@ -1462,16 +1464,16 @@
         },
         {
             "name": "juaniquillo/laravel-backend-component",
-            "version": "v0.9.1",
+            "version": "v0.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/laravel-backend-component.git",
-                "reference": "d628dc4b0a324948583249bc9c6e6f5c8087ffa1"
+                "reference": "1b3505c45b5f1adc626af2d29ad871a688a6c5e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/laravel-backend-component/zipball/d628dc4b0a324948583249bc9c6e6f5c8087ffa1",
-                "reference": "d628dc4b0a324948583249bc9c6e6f5c8087ffa1",
+                "url": "https://api.github.com/repos/juaniquillo/laravel-backend-component/zipball/1b3505c45b5f1adc626af2d29ad871a688a6c5e7",
+                "reference": "1b3505c45b5f1adc626af2d29ad871a688a6c5e7",
                 "shasum": ""
             },
             "require": {
@@ -1523,7 +1525,7 @@
                 "laravel-backend-component"
             ],
             "support": {
-                "source": "https://github.com/juaniquillo/laravel-backend-component/tree/v0.9.1"
+                "source": "https://github.com/juaniquillo/laravel-backend-component/tree/v0.10.0"
             },
             "funding": [
                 {
@@ -1531,25 +1533,25 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-03T23:23:45+00:00"
+            "time": "2026-10-22T20:39:24+00:00"
         },
         {
             "name": "juaniquillo/mjml-backend-components",
-            "version": "v0.1.0",
+            "version": "v0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/mjml-backend-components.git",
-                "reference": "a647cc14d6639c8c32cdc55069112e9fd13d3fbe"
+                "reference": "e37ac2b41cf10db3f921d797bfcb409a4f6c4ad4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/mjml-backend-components/zipball/a647cc14d6639c8c32cdc55069112e9fd13d3fbe",
-                "reference": "a647cc14d6639c8c32cdc55069112e9fd13d3fbe",
+                "url": "https://api.github.com/repos/juaniquillo/mjml-backend-components/zipball/e37ac2b41cf10db3f921d797bfcb409a4f6c4ad4",
+                "reference": "e37ac2b41cf10db3f921d797bfcb409a4f6c4ad4",
                 "shasum": ""
             },
             "require": {
                 "illuminate/support": "^12.0|^13.0",
-                "juaniquillo/laravel-backend-component": "^0.9.1",
+                "juaniquillo/laravel-backend-component": "^0.9.1||^0.10.0",
                 "php": "^8.3",
                 "symfony/process": "^7.0|^8.0"
             },
@@ -1590,28 +1592,28 @@
             "description": "Backend components for MJML",
             "support": {
                 "issues": "https://github.com/juaniquillo/mjml-backend-components/issues",
-                "source": "https://github.com/juaniquillo/mjml-backend-components/tree/v0.1.0"
+                "source": "https://github.com/juaniquillo/mjml-backend-components/tree/v0.1.1"
             },
-            "time": "2026-10-16T23:17:05+00:00"
+            "time": "2026-10-23T15:45:56+00:00"
         },
         {
             "name": "juaniquillo/slate-backend-components",
-            "version": "v0.1.2",
+            "version": "v0.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/slate-backend-components.git",
-                "reference": "45a18da2faf2f85b97054d5a73ae084d59bbf0ad"
+                "reference": "b9eaf021f5c519b2015ad64c8fbbfdf12b11804a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/slate-backend-components/zipball/45a18da2faf2f85b97054d5a73ae084d59bbf0ad",
-                "reference": "45a18da2faf2f85b97054d5a73ae084d59bbf0ad",
+                "url": "https://api.github.com/repos/juaniquillo/slate-backend-components/zipball/b9eaf021f5c519b2015ad64c8fbbfdf12b11804a",
+                "reference": "b9eaf021f5c519b2015ad64c8fbbfdf12b11804a",
                 "shasum": ""
             },
             "require": {
                 "electrik/slate": "^3.0",
                 "illuminate/support": "^12.0|^13.0",
-                "juaniquillo/laravel-backend-component": "^0.9.1",
+                "juaniquillo/laravel-backend-component": "^0.9.1||^0.10.0",
                 "php": "^8.3"
             },
             "require-dev": {
@@ -1657,9 +1659,9 @@
             ],
             "support": {
                 "issues": "https://github.com/juaniquillo/slate-backend-components/issues",
-                "source": "https://github.com/juaniquillo/slate-backend-components/tree/v0.1.2"
+                "source": "https://github.com/juaniquillo/slate-backend-components/tree/v0.1.3"
             },
-            "time": "2026-10-04T23:36:16+00:00"
+            "time": "2026-10-23T15:38:22+00:00"
         },
         {
             "name": "laravel/fortify",
@@ -8494,16 +8496,16 @@
         },
         {
             "name": "composer/semver",
-            "version": "3.5.1",
+            "version": "3.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/semver.git",
-                "reference": "528948210cc46f967a4b98e83b19e76f2b504993"
+                "reference": "9dfce66f1e97360ea5e6d3e38ab14277e4cc591e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/semver/zipball/528948210cc46f967a4b98e83b19e76f2b504993",
-                "reference": "528948210cc46f967a4b98e83b19e76f2b504993",
+                "url": "https://api.github.com/repos/composer/semver/zipball/9dfce66f1e97360ea5e6d3e38ab14277e4cc591e",
+                "reference": "9dfce66f1e97360ea5e6d3e38ab14277e4cc591e",
                 "shasum": ""
             },
             "require": {
@@ -8555,7 +8557,7 @@
             "support": {
                 "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/semver/issues",
-                "source": "https://github.com/composer/semver/tree/3.5.1"
+                "source": "https://github.com/composer/semver/tree/3.5.2"
             },
             "funding": [
                 {
@@ -8567,7 +8569,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-05T13:12:12+00:00"
+            "time": "2026-10-22T15:37:26+00:00"
         },
         {
             "name": "composer/xdebug-handler",
@@ -8989,16 +8991,16 @@
         },
         {
             "name": "larastan/larastan",
-            "version": "v3.13.0",
+            "version": "v3.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/larastan/larastan.git",
-                "reference": "24ee69a7705ffc7c2cd8a3c96a5f498a4c2de5e3"
+                "reference": "043139b9829917363086d6b10f916772420a6102"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/larastan/larastan/zipball/24ee69a7705ffc7c2cd8a3c96a5f498a4c2de5e3",
-                "reference": "24ee69a7705ffc7c2cd8a3c96a5f498a4c2de5e3",
+                "url": "https://api.github.com/repos/larastan/larastan/zipball/043139b9829917363086d6b10f916772420a6102",
+                "reference": "043139b9829917363086d6b10f916772420a6102",
                 "shasum": ""
             },
             "require": {
@@ -9066,7 +9068,7 @@
             ],
             "support": {
                 "issues": "https://github.com/larastan/larastan/issues",
-                "source": "https://github.com/larastan/larastan/tree/v3.13.0"
+                "source": "https://github.com/larastan/larastan/tree/v3.13.1"
             },
             "funding": [
                 {
@@ -9074,7 +9076,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-07T14:14:28+00:00"
+            "time": "2026-10-16T23:32:31+00:00"
         },
         {
             "name": "laravel/boost",
