@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'default' => 'w-full min-h-[600px] border-0,'
+    'default' => 'w-full min-h-[600px] border-0',
 ];
