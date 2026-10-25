@@ -20,6 +20,12 @@ use Juaniquillo\BackendComponents\MainBackendComponent;
  * The package's views render attributes onto the element, which is what makes
  * every node addressable for drag and drop without any custom markup.
  *
+ * A renderer given an id scope hands out that scope to the id-like
+ * attributes the tree carries, so a tree can be rendered twice on one page
+ * — a canvas and its preview — without one copy taking the way of the
+ * other. Only a second copy is rendered with one: the code generator and
+ * the canvas keep the ids the user typed.
+ *
  * @phpstan-import-type Node from BuilderNode
  * @phpstan-import-type Tree from BuilderNode
  */
@@ -28,7 +34,7 @@ final class TreeRenderer
     /**
      * @param  array<string, array<string, string>>  $themes  The themes, by group and variant.
      */
-    public function __construct(private readonly array $themes = []) {}
+    public function __construct(private readonly array $themes = [], private readonly ?string $idScope = null) {}
 
     /**
      * The group every container belongs to, so nodes can be dragged between them.
@@ -58,6 +64,17 @@ final class TreeRenderer
         'table.colgroup',
         'table.table',
     ];
+
+    /**
+     * The attributes that name an element by id.
+     *
+     * Most of them name one element, and `headers` names the cells a table
+     * cell points at, so its value is a list that is scoped one id at a
+     * time.
+     *
+     * @var array<int, string>
+     */
+    private const ID_ATTRIBUTES = ['id', 'for', 'list', 'headers'];
 
     /**
      * Render a whole tree to HTML.
@@ -90,10 +107,19 @@ final class TreeRenderer
         $draggable = $node['id'] !== $tree['root'];
 
         // A component that cannot hold a chrome of its own is given one, so
-        // that it can be wrapped in something that can.
-        $chrome = ($clean || (! $hostsOwnChrome && ! $canBeWrapped))
+        // that it can be wrapped in something that can. A row is the other
+        // exception: its chrome is a row of its own, which the section the
+        // row belongs to renders after it.
+        $chrome = ($clean
+            || $node['type'] === 'table.tr'
+            || (! $hostsOwnChrome && ! $canBeWrapped))
             ? null
-            : NodeChrome::build($node, $draggable, $this->childTypes($tree, $node));
+            : NodeChrome::build(
+                $node,
+                $draggable,
+                $this->childTypes($tree, $node),
+                $hostsOwnChrome && $this->flowsAcross($node),
+            );
 
         if ($chrome !== null && ! $hostsOwnChrome) {
             return $this->buildWrapped($tree, $node, $chrome, $selectedId, $clean);
@@ -139,12 +165,23 @@ final class TreeRenderer
     {
         $wrapper = new MainBackendComponent(ComponentEnum::SPAN);
 
-        $wrapper->setAttributes([
+        $wrapperAttributes = [
             'wire:sort:item' => $node['id'],
             'wire:key' => $node['id'],
             'class' => 'bw-wrap',
-            'style' => 'position: relative; display: inline-block; padding-top: 1.75rem;',
-        ]);
+            // The wrapper is inline, so it can sit in the middle of a line of
+            // text like the component it wraps does.
+            'style' => 'display: inline-block;',
+        ];
+
+        // The chrome of the wrapped node hangs on the wrapper, so the
+        // selection is visible to it as well. The inner element keeps its
+        // own marker for the outline and the drawer.
+        if ($selectedId === $node['id']) {
+            $wrapperAttributes['data-selected'] = 'true';
+        }
+
+        $wrapper->setAttributes($wrapperAttributes);
 
         $inner = new MainBackendComponent($node['type']);
 
@@ -160,15 +197,19 @@ final class TreeRenderer
 
         $style = $this->style($node);
 
-        if ($style !== null && ! isset($innerAttributes['style'])) {
-            $innerAttributes['style'] = $style;
+        if ($style !== null) {
+            $existing = $node['attrs']['style'] ?? '';
+
+            $innerAttributes['style'] = $existing === ''
+                ? $style
+                : rtrim(rtrim($existing, '; '), '; ').'; '.$style;
         }
 
         $inner->setAttributes($innerAttributes);
 
         $inner->setContents($this->contents($tree, $node, $selectedId, $clean, null));
 
-        $wrapper->setContents([$inner, $chrome]);
+        $wrapper->setContents([$chrome, $inner]);
 
         return $wrapper;
     }
@@ -203,6 +244,18 @@ final class TreeRenderer
             }
 
             $contents[] = $this->build($tree, $childId, $selectedId, $clean, $node['type']);
+
+            // A row's chrome cannot live in the row: a row holds nothing
+            // but cells, and a chrome cell in the flow of a row would take
+            // a column of the table. So the row is followed by a chrome row
+            // of its own.
+            if ($child['type'] === 'table.tr' && ! $clean) {
+                $contents[] = NodeChrome::build(
+                    $child,
+                    $childId !== $tree['root'],
+                    $this->childTypes($tree, $child),
+                );
+            }
         }
 
         return $contents;
@@ -254,13 +307,22 @@ final class TreeRenderer
             $attributes['wire:sort:handle'] = '';
         }
 
+        $attributes = array_merge($attributes, $this->themedAttributes($node));
+
         $style = $this->style($node);
 
         if ($style !== null) {
-            $attributes['style'] = $style;
+            // A style on the node's own attributes stays first, and the
+            // builder's is appended, so the positioning the chrome needs
+            // never rewrites what the node already says.
+            $existing = $node['attrs']['style'] ?? '';
+
+            $attributes['style'] = $existing === ''
+                ? $style
+                : rtrim(rtrim($existing, '; '), '; ').'; '.$style;
         }
 
-        return array_merge($attributes, $this->themedAttributes($node));
+        return $attributes;
     }
 
     /**
@@ -274,7 +336,7 @@ final class TreeRenderer
      */
     private function themedAttributes(array $node): array
     {
-        $attributes = $node['attrs'];
+        $attributes = $this->scopedAttributes($node['attrs']);
 
         $classes = $this->themeClasses($node);
 
@@ -285,6 +347,53 @@ final class TreeRenderer
         $attributes['class'] = trim(($attributes['class'] ?? '').' '.$classes);
 
         return $attributes;
+    }
+
+    /**
+     * The attributes of a node, with the id-like ones under the renderer's
+     * scope.
+     *
+     * When a tree is rendered twice on one page — a canvas and its preview
+     * — the ids of the second copy would take the way of the first: a label
+     * points at the first element with its `for`, which would be the copy
+     * that came before it. The renderer that carries a scope prefixes the
+     * value of every id-like attribute with it. An empty value is left
+     * alone: there is nothing to scope.
+     *
+     * @param  array<string, string>  $attributes
+     * @return array<string, string>
+     */
+    private function scopedAttributes(array $attributes): array
+    {
+        if ($this->idScope === null) {
+            return $attributes;
+        }
+
+        $scoped = [];
+
+        foreach ($attributes as $name => $value) {
+            if (in_array($name, self::ID_ATTRIBUTES, true) && trim($value) !== '') {
+                $ids = $name === 'headers'
+                    ? array_map($this->scopedId(...), preg_split('/\s+/', trim($value), -1, PREG_SPLIT_NO_EMPTY) ?: [])
+                    : [$this->scopedId(trim($value))];
+
+                $scoped[$name] = implode(' ', $ids);
+
+                continue;
+            }
+
+            $scoped[$name] = $value;
+        }
+
+        return $scoped;
+    }
+
+    /**
+     * One id under the renderer's scope.
+     */
+    private function scopedId(string $id): string
+    {
+        return $this->idScope.$id;
     }
 
     /**
@@ -313,30 +422,65 @@ final class TreeRenderer
     /**
      * The style the builder adds to a node in the canvas.
      *
+     * A node whose own display would make its chrome part of a row or a
+     * grid — a flex, a grid, columns — is positioned, so its floating
+     * chrome has something to anchor to. An empty inline element still
+     * needs a box to be seen in.
+     *
      * @param  Node  $node
      */
     private function style(array $node): ?string
     {
-        $style = $this->chromeStyle($node).$this->boxStyle($node);
+        $style = $this->boxStyle($node);
+
+        if ($this->flowsAcross($node) && $this->canHoldChrome($node)) {
+            $style = 'position: relative; '.trim($style);
+        }
 
         return $style === '' ? null : $style;
     }
 
     /**
-     * The style that keeps the chrome of a node away from its content.
+     * Whether a node lays its children out across its own row.
+     *
+     * The classes of the node's own attributes and themes decide where its
+     * first child — with the chrome generally that first child — lands. A
+     * flex row, a grid or a column layout puts every child in its own
+     * track flowing across the node, so a chrome in the flow would become
+     * a part of that row or grid instead of sitting above the content.
+     * Such a cluster is covered by the tokens below, and a flex that
+     * stacks its children stays a flow that a bar fits into.
      *
      * @param  Node  $node
      */
-    private function chromeStyle(array $node): string
+    private function flowsAcross(array $node): bool
     {
-        if (! $this->canHoldChrome($node)) {
-            return '';
+        $classes = trim(($node['attrs']['class'] ?? '').' '.$this->themeClasses($node));
+
+        if ($classes === '') {
+            return false;
         }
 
-        // The chrome is positioned against the node it belongs to, and the
-        // node keeps a row free for it so the chrome never lands on the
-        // content or on a neighbouring node's chrome.
-        return 'position: relative; padding-top: 1.75rem;';
+        $tokens = preg_split('/\s+/', $classes, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        $across = [
+            'flex',
+            'inline-flex',
+            'grid',
+            'inline-grid',
+            'columns',
+        ];
+
+        // The multi column layout names its column count, so the token has
+        // to match the prefix as well.
+        $spreads = (bool) array_intersect($tokens, $across) || (bool) array_filter(
+            $tokens,
+            fn (string $token): bool => str_starts_with($token, 'columns-'),
+        );
+
+        $stacks = (bool) array_intersect($tokens, ['flex-col', 'flex-col-reverse']);
+
+        return $spreads && ! $stacks;
     }
 
     /**

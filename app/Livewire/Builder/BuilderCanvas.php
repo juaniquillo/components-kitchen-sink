@@ -832,11 +832,15 @@ class BuilderCanvas extends Component
     /**
      * The composition as it will really look, without any of the builder's
      * own additions: no chrome, no reserved row, no minimum sizes.
+     *
+     * The ids it holds are scoped, so the copy on the canvas does not take
+     * their way: both are on the page at once, and a label points at the
+     * first element that carries its `for`.
      */
     #[Computed]
     public function cleanPreview(): string
     {
-        return (new TreeRenderer($this->themes))->render($this->tree, null, clean: true);
+        return (new TreeRenderer($this->themes, 'bw-preview-'))->render($this->tree, null, clean: true);
     }
 
     /**

@@ -40,6 +40,24 @@
             }
 
             /*
+            | The chrome of a node
+            | The chrome is always shown. A chrome that appears and
+            | disappears changes the layout under the pointer, and near an
+            | edge that changes which node is hovered, so hovering
+            | alternates between two nodes while the parts of the canvas
+            | push each other around. Always shown, the layout stays put,
+            | and the hover target stays with it. Where a node's own
+            | display would make the chrome a part of its row or grid — a
+            | flex, a grid, columns — the renderer anchors the chrome to
+            | the node's corner instead, so it never joins the flow it
+            | decorates.
+            */
+
+            .bw-chrome {
+                display: var(--bw-chrome-display, flex);
+            }
+
+            /*
             | Preview dialog
             | The page is styled by the browser build of Tailwind, which does
             | not know about the backdrop of a dialog.

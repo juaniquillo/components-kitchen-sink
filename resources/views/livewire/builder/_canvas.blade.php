@@ -1,6 +1,7 @@
 <section
     class="rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800"
     x-data="{ previewOpen: false }"
+    x-bind:inert="previewOpen"
     x-on:builder:morphed.window="if (previewOpen && ! $refs.preview.open) $refs.preview.showModal()"
 >
     @if ($tableNotice !== null)

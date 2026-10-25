@@ -53,7 +53,7 @@ it('gives a phrasing container a span for its chrome', function () {
 
 it('gives the elements that only accept one kind of child a matching tag', function () {
     expect(NodeChrome::tag('lists.ul'))->toBe('li')
-        ->and(NodeChrome::tag('table.tr'))->toBe('td')
+        ->and(NodeChrome::tag('table.tr'))->toBe('tr')
         ->and(NodeChrome::tag('table.tbody'))->toBe('tr')
         ->and(NodeChrome::tag('table.table'))->toBe('caption');
 });
@@ -112,11 +112,40 @@ it('builds a chrome with a handle, a configure button and an add menu', function
         }
     }
 
-    expect($buttons)->toHaveCount(5)
-        ->and($buttons[0])->toHaveKey('wire:sort:handle')
-        ->and($buttons[1]['wire:click.stop.prevent'] ?? null)->toContain('openConfig')
-        ->and($buttons[2]['x-on:click'] ?? null)->toBe('open = !open')
-        ->and($buttons[4]['x-on:click'] ?? null)->toContain('arm()');
+    expect($buttons)->toHaveCount(6)
+        ->and($buttons[0])->not->toHaveKey('wire:sort:handle')
+        ->and($buttons[1])->toHaveKey('wire:sort:handle')
+        ->and($buttons[2]['wire:click.stop.prevent'] ?? null)->toContain('openConfig')
+        ->and($buttons[3]['x-on:click'] ?? null)->toBe('open = !open')
+        ->and($buttons[5]['x-on:click'] ?? null)->toContain('arm()');
+});
+
+it('labels the chrome with the type of its node', function () {
+    // Every node gets a chrome of its own now that they are always shown,
+    // so stacked bars need a name to tell each other apart.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'inline.button'));
+
+    $label = $chrome->getContents()[0];
+
+    expect($label->getContents())->toBe(['Button'])
+        ->and($label->getAttributes()['class'] ?? '')->toContain('uppercase');
+});
+
+it('gives the label no pointer', function () {
+    // A click on the label belongs to the node under it, not to the chrome.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $label = $chrome->getContents()[0];
+
+    expect($label->getAttributes()['class'] ?? '')->toContain('pointer-events-none');
+});
+
+it('labels the toolbar of a section as well', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.thead'));
+
+    $cell = $chrome->getContents()[0];
+
+    expect($cell->getContents()[0]->getContents())->toBe(['Table Head']);
 });
 
 it('marks the chrome so a drag can leave it alone', function () {
@@ -125,6 +154,27 @@ it('marks the chrome so a drag can leave it alone', function () {
     $chrome = NodeChrome::build($node);
 
     expect($chrome->getAttributes()['class'] ?? '')->toContain('bw-chrome');
+});
+
+it('floats the chrome of a node that lays out across its row', function () {
+    // A flex row, a grid or a column layout would take the chrome as one
+    // of its own parts, so its chrome is anchored to the node's corner.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'), overlay: true);
+
+    $class = $chrome->getAttributes()['class'] ?? '';
+
+    expect($class)->toContain('absolute bottom-0 right-0')
+        ->and($class)->not->toContain('relative')
+        ->and($class)->not->toContain('mb-1');
+});
+
+it('keeps the chrome of a node that stacks in the flow', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $class = $chrome->getAttributes()['class'] ?? '';
+
+    expect($class)->toContain('relative')
+        ->not->toContain('absolute');
 });
 
 it('leaves a node that cannot be moved without a handle', function () {
@@ -153,7 +203,7 @@ it('swallows the default so a link is not activated by the chrome', function () 
     // The configure button stops the propagation, so the default has to be
     // swallowed there as well.
     $contents = $chrome->getContents();
-    $config = $contents[1];
+    $config = $contents[2];
 
     expect($config->getAttributes())->toHaveKey('wire:click.stop.prevent');
 });
@@ -163,7 +213,7 @@ it('offers a text entry in the menu', function () {
 
     $chrome = NodeChrome::build($node);
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
 
     $parts = method_exists($menu, 'getContents') ? $menu->getContents() : [];
 
@@ -178,7 +228,7 @@ it('offers a text entry in the menu', function () {
 it('offers a table in the menu of a node that takes one', function () {
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
 
     $parts = $menu ? $menu->getContents() : [];
     $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
@@ -199,7 +249,7 @@ it('offers no table in the menu of a node that does not take one', function () {
     // A paragraph is phrasing content, and a table is not in it.
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'paragraph'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
 
     $parts = $menu ? $menu->getContents() : [];
     $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
@@ -220,13 +270,43 @@ it('carries the toolbar of a table section in a cell', function () {
     expect(count($contents))->toBe(1)
         ->and(NodeChrome::tag('table.thead'))->toBe('tr')
         ->and($contents[0])->toBeInstanceOf(MainBackendComponent::class)
-        ->and(count($contents[0]->getContents()))->toBe(5);
+        ->and(count($contents[0]->getContents()))->toBe(6);
+});
+
+it('spans the table with the chrome of a section', function () {
+    // A section's chrome is a row of the table, so it takes part in the
+    // layout. The cell that carries its toolbar spans every column, so the
+    // toolbar sits at the table's right edge like the bars of the other
+    // nodes do.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.thead'));
+
+    $cell = $chrome->getContents()[0];
+
+    expect($cell->getAttributes())->toHaveKey('colspan', '999')
+        ->and($chrome->getAttributes()['style'] ?? '')->toContain('--bw-chrome-display: table-row;');
+});
+
+it('rows the toolbar of a row under the row', function () {
+    // A row only holds cells, and its chrome was first given a cell within
+    // the row, but a cell in the flow of a row would take a column of the
+    // table. So the chrome is a row of the table itself, after the row.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.tr'));
+
+    $cell = $chrome->getContents()[0];
+
+    expect(NodeChrome::tag('table.tr'))->toBe('tr')
+        ->and($chrome->getAttributes()['class'] ?? '')->toBe('bw-chrome')
+        ->and($chrome->getAttributes()['style'] ?? '')->toContain('--bw-chrome-display: table-row;')
+        ->and($cell->getAttributes())->toHaveKey('colspan', '999');
 });
 
 it('offers the row and column operations on a row', function () {
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.tr'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    // The toolbar travels in the cell the chrome row holds.
+    $cell = $chrome->getContents()[0];
+
+    $menu = $cell->getContents()[4] ?? null;
 
     $parts = $menu ? $menu->getContents() : [];
     $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
@@ -247,7 +327,7 @@ it('offers the row and column operations on a row', function () {
 it('offers deleting the column on a cell', function () {
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.td'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
 
     $parts = $menu ? $menu->getContents() : [];
     $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
@@ -271,7 +351,7 @@ it('offers the components a node may contain in its menu', function () {
 
     $contents = $chrome?->getContents() ?? [];
 
-    $menu = $contents[3] ?? null;
+    $menu = $contents[4] ?? null;
 
     $parts = method_exists($menu, 'getContents') ? $menu->getContents() : [];
 
@@ -353,7 +433,7 @@ it('does not offer text to a node that only takes children', function () {
     // A list has somewhere to put an item and nowhere to put a run of text.
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'lists.ul'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
 
     expect($menu->getContents())->toHaveCount(1);
 });
@@ -361,7 +441,7 @@ it('does not offer text to a node that only takes children', function () {
 it('offers text to a component that only takes text', function () {
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'form.textarea'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
     $parts = $menu->getContents();
 
     expect($parts)->toHaveCount(2)
@@ -371,7 +451,7 @@ it('offers text to a component that only takes text', function () {
 it('offers both text and components to a node that takes both', function () {
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
 
-    $menu = $chrome->getContents()[3] ?? null;
+    $menu = $chrome->getContents()[4] ?? null;
 
     expect($menu?->getContents())->toHaveCount(4);
 

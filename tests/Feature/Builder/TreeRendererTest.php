@@ -107,11 +107,12 @@ it('wraps a textarea, whose contents are text and not markup', function () {
     $html = (new TreeRenderer)->render(BuilderNode::tree('n1', 'form.textarea'));
 
     // A textarea is RCDATA: a chrome inside one would be read out as text, so
-    // the toolbar has to ride outside it, on the wrapper.
+    // the toolbar has to ride outside it, on the wrapper. The chrome is the
+    // first element of the wrapper, like the bar of any other node is.
     expect($html)->toContain('bw-wrap')
         ->toContain('bw-chrome')
         ->toContain('<textarea')
-        ->and(strpos($html, 'bw-chrome'))->toBeGreaterThan(strpos($html, '<textarea'));
+        ->and(strpos($html, 'bw-chrome'))->toBeLessThan(strpos($html, '<textarea'));
 });
 
 it('does not wrap a component where a span would be invalid', function () {
@@ -217,6 +218,53 @@ it('puts the classes of a theme on the clean preview as well', function () {
     expect($html)->toContain('bg-indigo-600 text-white');
 });
 
+it('scopes the id-like attributes of a clean render', function () {
+    // The canvas and its preview sit on the page at once, and a label
+    // points at the first element that carries its `for`, so the second
+    // copy holds ids of its own.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2', 'n3', 'n4', 'n5', 'n6'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'form.label');
+    $tree['nodes']['n2']['attrs'] = ['for' => 'name'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'form.text');
+    $tree['nodes']['n3']['attrs'] = ['id' => 'name', 'list' => 'options'];
+    $tree['nodes']['n4'] = BuilderNode::make('n4', 'form.datalist');
+    $tree['nodes']['n4']['attrs'] = ['id' => 'options'];
+    $tree['nodes']['n5'] = BuilderNode::make('n5', 'table.th');
+    $tree['nodes']['n5']['attrs'] = ['headers' => 'a b'];
+    $tree['nodes']['n6'] = BuilderNode::make('n6', 'inline.button');
+    $tree['nodes']['n6']['attrs'] = ['id' => ''];
+
+    $html = (new TreeRenderer([], 'bw-preview-'))->render($tree, null, clean: true);
+
+    expect($html)->toContain('for="bw-preview-name"')
+        ->toContain('id="bw-preview-name"')
+        ->toContain('list="bw-preview-options"')
+        ->toContain('id="bw-preview-options"')
+        ->toContain('headers="bw-preview-a bw-preview-b"')
+        ->toContain('id=""')
+        ->not->toContain('id="name"')
+        ->not->toContain('for="name"')
+        ->not->toContain('id="bw-preview-"');
+});
+
+it('leaves the ids of a canvas render alone', function () {
+    // The canvas is what the user has built, so it shows the ids the
+    // generated code will carry.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2', 'n3'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'form.label');
+    $tree['nodes']['n2']['attrs'] = ['for' => 'name'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'form.text');
+    $tree['nodes']['n3']['attrs'] = ['id' => 'name'];
+
+    $html = (new TreeRenderer)->render($tree, null);
+
+    expect($html)->toContain('for="name"')
+        ->toContain('id="name"')
+        ->not->toContain('bw-preview-');
+});
+
 it('leaves a node alone when the theme is not in the registry', function () {
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['children'] = ['n2'];
@@ -272,7 +320,10 @@ it('marks a wrapped node as selected', function () {
 
     $html = (new TreeRenderer)->render($tree, 'n2');
 
-    expect($html)->toContain('data-selected="true"');
+    // The inner element keeps its marker for the outline and the drawer,
+    // and the wrapper carries it too, because the chrome of the wrapped
+    // node hangs there and has to stay visible while it is selected.
+    expect(substr_count($html, 'data-selected="true"'))->toBe(2);
 });
 
 it('escapes the text it renders', function () {
@@ -295,15 +346,131 @@ it('renders the chrome with a drag handle, a configure button and an add menu', 
     expect($html)->toContain('wire:sort:handle')
         ->toContain('openConfig')
         ->toContain('add(')
-        ->toContain('paragraph');
+        ->toContain('paragraph')
+        // Every chrome is named after the type of its node, and the label
+        // is text case in the markup: the uppercase comes from CSS.
+        ->toContain('Paragraph');
 });
 
-it('gives a node the position the chrome is placed against', function () {
+it('keeps the chrome in the flow of its node', function () {
     $tree = BuilderNode::tree('n1', 'div');
 
     $html = (new TreeRenderer)->render($tree);
 
+    // The chrome is a bar in the flow of its node, so the node itself needs
+    // no positioning to keep it off the content. Only the chrome positions
+    // itself, so the menu has somewhere to hang from.
+    expect($html)->not->toContain('position: relative');
+
+    preg_match('/class="([^"]*\bbw-chrome\b[^"]*)"/', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('relative');
+});
+
+it('floats the chrome of a node that lays its children out across a row', function () {
+    // A flex row puts the first child of a node in the row itself, so a
+    // chrome in the flow would become part of the row. The node is
+    // positioned and its chrome anchors to its bottom right corner instead.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['attrs'] = ['class' => 'gap-2 items-center flex'];
+
+    $html = (new TreeRenderer)->render($tree);
+
     expect($html)->toContain('position: relative');
+
+    // The Alpine of the chrome holds a > character, so the class can only
+    // be found without excluding it.
+    preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+});
+
+it('keeps the chrome in the flow of a node that stacks its children', function () {
+    // A flex column stacks its children the way a block does, so its chrome
+    // lands above the content like the bar of any other node.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['attrs'] = ['class' => 'flex flex-col gap-2'];
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->not->toContain('position: relative');
+
+    preg_match('/class="([^"]*\bbw-chrome\b[^"]*)"/', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('relative')
+        ->not->toContain('absolute');
+});
+
+it('takes the theme classes into account when it places a chrome', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['theme'] = ['layout' => ['spread']];
+
+    $html = (new TreeRenderer(['layout' => ['spread' => 'grid gap-2']]))->render($tree);
+
+    expect($html)->toContain('position: relative');
+
+    preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+});
+
+it('floats the chrome of a node with a grid class of its own', function () {
+    // The class of a grid rides in a typed attribute, exactly like the
+    // classes of a theme do, so the same spread detection has to catch it.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['attrs'] = ['class' => 'grid grid-cols-3 gap-2'];
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->toContain('position: relative');
+
+    preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+});
+
+it('floats the chrome of a node with a column class of its own', function () {
+    // Columns flow across the node in their own way, so they get the same
+    // treatment as the flex rows and the grids.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['attrs'] = ['class' => 'columns-2 gap-4'];
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->toContain('position: relative');
+
+    preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+});
+
+it('follows a row with a chrome row of its own', function () {
+    // A row only holds cells, and a chrome in the flow of the row would
+    // take a column of the table, so the chrome is a table row of its own
+    // right after the row.
+    $tree = BuilderNode::tree('n1', 'table.table');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'table.tbody');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'table.tr');
+    $tree['nodes']['n3']['children'] = ['n4'];
+    $tree['nodes']['n4'] = BuilderNode::make('n4', 'table.td');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    // The row never needs positioning and holds no chrome, and the chrome
+    // row follows the row's last cell, so the row itself takes no column
+    // for it.
+    expect($html)->not->toContain('position: relative')
+        ->and($html)->toContain('wire:key="chrome-n3"');
+
+    $row = strpos($html, 'wire:key="n3"');
+    $rowEnd = strpos($html, '</tr>', $row);
+    $chrome = strpos($html, 'wire:key="chrome-n3"');
+
+    expect($row)->toBeGreaterThan(-1)
+        ->and($rowEnd)->toBeGreaterThan($row)
+        ->and($chrome)->toBeGreaterThan($rowEnd);
 });
 
 it('swallows the default on a node, so a link is not activated by a click', function () {

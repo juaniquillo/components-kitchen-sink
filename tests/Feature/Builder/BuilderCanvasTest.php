@@ -707,6 +707,37 @@ it('renders a clean preview without any of the builders additions', function () 
         ->not->toContain('position: relative');
 });
 
+it('renders the preview dialog with ids of its own', function () {
+    // The canvas and its preview are on the page at once, and a label
+    // points at the first element that carries its `for`. The canvas
+    // keeps the ids the composition carries and the dialog gets scoped
+    // ones.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2', 'n3'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'form.label');
+    $tree['nodes']['n2']['attrs'] = ['for' => 'name'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'form.text');
+    $tree['nodes']['n3']['attrs'] = ['id' => 'name'];
+
+    $component = Livewire::test(BuilderCanvas::class)
+        ->set('tree', $tree);
+
+    expect($component->instance()->cleanPreview())->toContain('for="bw-preview-name"')
+        ->toContain('id="bw-preview-name"');
+
+    $component->assertSee('for="name"', false)
+        ->assertSee('id="name"', false);
+});
+
+it('knocks the canvas out while the preview is open', function () {
+    // The preview dialog takes the label of the canvas and would take its
+    // way, so the canvas is made inert while the dialog is up. The binding
+    // lives with the state that owns the dialog, and the dialog itself is
+    // in the top layer, so ancestor inertness does not reach it.
+    Livewire::test(BuilderCanvas::class)
+        ->assertSee('x-bind:inert="previewOpen"', false);
+});
+
 it('renders the preview with the drag and drop attributes', function () {
     $component = Livewire::test(BuilderCanvas::class)
         ->call('add', 'headers.h1');

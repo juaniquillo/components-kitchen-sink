@@ -73,8 +73,9 @@ final class NodeChrome
         'lists.ul' => 'li',
         'lists.ol' => 'li',
 
-        // Rows only hold cells.
-        'table.tr' => 'td',
+        // Rows only hold cells, so a row's chrome is a row of its own: the
+        // renderer places it after the row it belongs to.
+        'table.tr' => 'tr',
 
         // Table sections only hold rows.
         'table.thead' => 'tr',
@@ -174,14 +175,19 @@ final class NodeChrome
      *
      * @param  Node  $node
      * @param  bool  $draggable  Whether the node can be moved, and so needs a handle.
+     * @param  bool  $overlay  Whether the chrome floats over the node instead of riding in its flow.
      */
-    public static function build(array $node, bool $draggable = true, array $childTypes = []): MainBackendComponent
+    public static function build(array $node, bool $draggable = true, array $childTypes = [], bool $overlay = false): MainBackendComponent
     {
         $id = $node['id'];
 
         $chrome = new MainBackendComponent(self::COMPONENTS[self::tag($node['type']) ?? 'span']);
 
-        $chrome->setAttributes([
+        // The chrome is a bar in the flow of its node: the layout engine of
+        // the browser keeps everything apart, where a floating toolbar landed
+        // on content and on other toolbars. The tag the parser needs decides
+        // how much of the styling rides on the chrome itself.
+        $attributes = [
             'wire:key' => 'chrome-'.$id,
             'x-data' => self::alpine($id),
             'x-on:click.outside' => 'open = false',
@@ -191,12 +197,39 @@ final class NodeChrome
             // A node may be a link, and a click on a button inside a link
             // still activates it, so the chrome swallows the default.
             'x-on:click.prevent' => 'true',
-            // The marker lets the sort configuration keep the chrome out of
-            // the way, so a drag takes the node and not its toolbar.
-            'class' => 'bw-chrome absolute -top-2.5 right-0 z-20 flex items-center gap-0.5 rounded-md border border-slate-300 bg-white/95 p-0.5 shadow-sm dark:border-slate-600 dark:bg-slate-800/95',
-        ]);
+        ];
 
-        $contents = [];
+        $tag = self::tag($node['type']);
+
+        if ($tag === 'tr') {
+            // A row's chrome is a table row as well, so a row cannot be a
+            // bar. Its display stays a table row and its styling moves to
+            // the cell that carries the toolbar; the display the chrome
+            // goes back to when it is shown travels in a variable the
+            // stylesheet of the canvas uses.
+            $attributes['class'] = 'bw-chrome';
+            $attributes['style'] = '--bw-chrome-display: table-row;';
+        } elseif ($overlay) {
+            // A node whose own display puts every first child in its row or
+            // grid — a flex, a grid, columns — would take the chrome as a
+            // part of that layout. So its chrome is anchored to the node's
+            // bottom right corner instead, and the node itself is positioned
+            // by the renderer, which the menu hangs from the chrome from.
+            // The corner is the bottom one because the bars of the node's own
+            // children ride along the top edge: a bar at the top right would
+            // hide under the bar of the first row's last cell, and a bar
+            // above the node would land on the node before it.
+            $attributes['class'] = 'bw-chrome absolute bottom-0 right-0 z-20 items-center justify-end gap-0.5 rounded-md border border-slate-300 bg-white/95 p-0.5 shadow-sm dark:border-slate-600 dark:bg-slate-800/95';
+        } else {
+            // The bar's flex display comes from the stylesheet of the canvas
+            // when it shows the chrome: a display utility class here would
+            // win the cascade over the rule that keeps it put away.
+            $attributes['class'] = 'bw-chrome relative z-20 mb-1 items-center justify-end gap-0.5 rounded-md border border-slate-300 bg-white/95 p-0.5 shadow-sm dark:border-slate-600 dark:bg-slate-800/95';
+        }
+
+        $chrome->setAttributes($attributes);
+
+        $contents = [self::label($node['type'])];
 
         if ($draggable) {
             $contents[] = self::handle();
@@ -216,10 +249,18 @@ final class NodeChrome
 
         // A row only holds cells, and the parser would hoist the toolbar out
         // of the chrome row and leave it without its Alpine scope, so on a
-        // table section the toolbar travels in a cell. The chrome row is out
-        // of flow, so the cell takes no space in the table.
+        // table section the toolbar travels in a cell. The cell spans the
+        // columns of the table, so the toolbar sits at its right edge like
+        // the bars of the other nodes do.
         if (self::tag($node['type']) === 'tr') {
             $cell = new MainBackendComponent(self::COMPONENTS['td']);
+
+            $cell->setAttributes([
+                // The browser clamps a colspan wider than the table.
+                'colspan' => '999',
+                'class' => 'relative space-x-0.5 bg-white/95 py-0.5 pr-1 pl-2 text-right dark:bg-slate-800/95',
+            ]);
+
             $cell->setContents($contents);
             $chrome->setContents([$cell]);
         } else {
@@ -267,6 +308,26 @@ final class NodeChrome
         return "{ open: false, textMode: false, draft: '', armed: false, arm() { "
             ."if (this.armed) { this.\$wire.remove('".$id."'); this.armed = false; return } "
             .'this.armed = true; setTimeout(() => this.armed = false, 4000) } }';
+    }
+
+    /**
+     * The label of the component the chrome belongs to.
+     *
+     * With every chrome shown at all times, a tree shows a bar per node,
+     * and stacked bars are indistinguishable without one. The label never
+     * takes the pointer, so a click on it keeps selecting the node.
+     */
+    private static function label(string $type): MainBackendComponent
+    {
+        $label = new MainBackendComponent(ComponentEnum::SPAN);
+
+        $label->setAttributes([
+            'class' => 'mr-auto pointer-events-none select-none pl-1 text-[10px] uppercase leading-4 tracking-wide text-slate-400 dark:text-slate-500',
+        ]);
+
+        $label->setContent(ComponentRegistry::get($type)?->label ?? '');
+
+        return $label;
     }
 
     /**
