@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\TreeMutator;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /*
@@ -19,8 +18,23 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
-    ->use(RefreshDatabase::class)
     ->in('Feature');
+
+/*
+|--------------------------------------------------------------------------
+| Composition Files
+|--------------------------------------------------------------------------
+|
+| The saved compositions are plain files under a configured directory of the
+| "local" disk. Every test process gets a directory of its own, so parallel
+| workers never see the files another one is juggling. Para-test hands every
+| worker a TEST_TOKEN; on its own the worker identifies itself by its id.
+*/
+
+function builderTestDirectory(): string
+{
+    return 'builder-tests-'.(getenv('TEST_TOKEN') ?: getmypid());
+}
 
 /*
 |--------------------------------------------------------------------------

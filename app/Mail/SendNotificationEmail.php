@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -18,7 +17,7 @@ class SendNotificationEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public User $user)
+    public function __construct()
     {
         //
     }
@@ -41,7 +40,7 @@ class SendNotificationEmail extends Mailable
         return new Content(
             view: 'mail.notification',
             with: [
-                'name' => $this->user->name,
+                'name' => 'John Doe',
             ],
         );
     }

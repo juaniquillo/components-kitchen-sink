@@ -29,7 +29,31 @@
 
             <button
                 type="button"
-                x-on:click="previewOpen = true; $refs.preview.showModal()"
+                wire:click="save"
+                class="rounded border border-indigo-600 px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:border-indigo-400 dark:text-indigo-300 dark:hover:bg-indigo-500/10"
+            >
+                Save
+            </button>
+
+            <button
+                type="button"
+                wire:click="openThemes"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                Themes
+            </button>
+
+            <button
+                type="button"
+                wire:click="openSaved"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                Saved
+            </button>
+
+            <button
+                type="button"
+                x-on:click="previewOpen = true; $refs.preview.showModal(); $wire.call('openPreview')"
                 class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
             >
                 Preview
@@ -56,26 +80,28 @@
     --}}
     <dialog
         x-ref="preview"
-        x-on:cancel="previewOpen = false"
-        x-on:click="if ($event.target === $el) { previewOpen = false; $refs.preview.close(); }"
+        x-on:cancel="previewOpen = false; $wire.call('closePreview')"
+        x-on:click="if ($event.target === $el) { previewOpen = false; $refs.preview.close(); $wire.call('closePreview'); }"
         class="m-auto w-[calc(100%_-_2rem)] max-w-2xl rounded-lg bg-white p-0 shadow-xl dark:bg-slate-800"
     >
-        <div class="flex max-h-[80vh] flex-col">
-            <div class="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
-                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Preview</h3>
+        @if ($this->previewRequested)
+            <div class="flex max-h-[80vh] flex-col">
+                <div class="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Preview</h3>
 
-                <button
-                    type="button"
-                    x-on:click="previewOpen = false; $refs.preview.close()"
-                    class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-                >
-                    Close
-                </button>
-            </div>
+                    <button
+                        type="button"
+                        x-on:click="previewOpen = false; $refs.preview.close(); $wire.call('closePreview')"
+                        class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+                    >
+                        Close
+                    </button>
+                </div>
 
-            <div class="overflow-auto p-6">
-                {!! $this->cleanPreview !!}
+                <div class="overflow-auto p-6">
+                    {!! $this->cleanPreview !!}
+                </div>
             </div>
-        </div>
+        @endif
     </dialog>
 </section>

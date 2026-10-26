@@ -7,8 +7,6 @@ use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
 use App\Cruds\CrudCollection;
 use App\Emails\EmailCollection;
-use App\Emails\Exceptions\MissingEmailUserException;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
@@ -73,13 +71,7 @@ Route::get('/emails/{name}', function (string $name) {
 
     $mailer = $email::mailer();
 
-    $user = User::first();
-
-    if (! $user) {
-        throw new MissingEmailUserException($name);
-    }
-
-    return new $mailer($user);
+    return new $mailer;
 
 })->name('email.preview');
 
@@ -119,9 +111,3 @@ Route::post('/cruds', function (Request $request) {
         ->back()
         ->with('success_'.$crudClass::IDENTIFIER, 'All good 👍');
 })->name('cruds.store');
-
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-require __DIR__.'/settings.php';

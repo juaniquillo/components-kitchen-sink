@@ -83,6 +83,16 @@ class BuilderCanvas extends Component
     public ?string $tableModeId = null;
 
     /**
+     * The tool the drawer is showing when no node is being configured.
+     *
+     * Saved compositions and themes live in the drawer too, so a value
+     * here opens the drawer on one of them instead of a node.
+     *
+     * @var 'themes'|'saved'|null
+     */
+    public ?string $drawerMode = null;
+
+    /**
      * The number of columns the table form is set to.
      */
     public int $newTableColumns = 3;
@@ -104,6 +114,16 @@ class BuilderCanvas extends Component
      * The name given to the composition when it is saved.
      */
     public string $compositionName = '';
+
+    /**
+     * Whether the preview dialog holds its copy of the composition.
+     *
+     * The clean preview is a second full render of the tree on every
+     * update of the canvas, so the dialog only carries it when the user
+     * is looking at it: opening the dialog asks for it, closing it takes
+     * it away again.
+     */
+    public bool $previewRequested = false;
 
     /**
      * The attribute name waiting to be added or updated.
@@ -336,9 +356,10 @@ class BuilderCanvas extends Component
             return;
         }
 
-        // The drawer shows one thing at a time, and the table form gives way
-        // to the node that was asked about.
+        // The drawer shows one thing at a time, and the table form and the
+        // tools give way to the node that was asked about.
         $this->tableModeId = null;
+        $this->drawerMode = null;
 
         // The draft belongs to the node it was typed for, so it is only kept
         // when the same node is opened again.
@@ -370,6 +391,20 @@ class BuilderCanvas extends Component
      */
     public function closeConfig(): void
     {
+        $this->clearConfiguring();
+
+        // The tools panel goes away with the drawer being closed.
+        $this->drawerMode = null;
+    }
+
+    /**
+     * Drop whatever node the drawer was showing.
+     *
+     * The drawer itself may stay open: the tools panels do not belong to
+     * one node, so they survive a change of the composition.
+     */
+    private function clearConfiguring(): void
+    {
         $this->configuringId = null;
         $this->tableModeId = null;
 
@@ -378,6 +413,41 @@ class BuilderCanvas extends Component
         $this->textDraft = '';
 
         $this->cancelAttribute();
+    }
+
+    /**
+     * Open the drawer on the themes panel.
+     */
+    public function openThemes(): void
+    {
+        $this->openTool('themes');
+    }
+
+    /**
+     * Open the drawer on the saved compositions panel.
+     */
+    public function openSaved(): void
+    {
+        $this->openTool('saved');
+
+        // The name input is the way in of the panel, and a request from
+        // the header deserves to land ready to type.
+        $this->dispatch('builder-focus-name');
+    }
+
+    /**
+     * Open the drawer on a tools panel.
+     *
+     * The drawer shows one thing at a time, and the node being configured
+     * gives way to the tool that was asked for.
+     *
+     * @param  'themes'|'saved'  $mode
+     */
+    private function openTool(string $mode): void
+    {
+        $this->clearConfiguring();
+
+        $this->drawerMode = $mode;
     }
 
     /**
@@ -744,7 +814,12 @@ class BuilderCanvas extends Component
         $name = trim($this->compositionName);
 
         if ($name === '') {
-            $name = 'composition';
+            // A save without a name has nothing to save under yet, so the
+            // saved compositions panel is opened with the input waiting
+            // for one.
+            $this->openSaved();
+
+            return;
         }
 
         $repository = new CompositionRepository;
@@ -777,8 +852,10 @@ class BuilderCanvas extends Component
         $this->nodeCounter = $this->highestNodeId();
 
         // The drawer was showing a node of the composition that was on the
-        // canvas, and that node is not necessarily in this one.
-        $this->closeConfig();
+        // canvas, and that node is not necessarily in this one. The drawer
+        // itself stays open, so the list the composition was picked from
+        // keeps showing.
+        $this->clearConfiguring();
 
         $this->fingerprint = $this->currentFingerprint();
     }
@@ -806,6 +883,22 @@ class BuilderCanvas extends Component
     public function delete(string $slug): void
     {
         (new CompositionRepository)->delete($slug);
+    }
+
+    /**
+     * The preview dialog asked for its copy of the composition.
+     */
+    public function openPreview(): void
+    {
+        $this->previewRequested = true;
+    }
+
+    /**
+     * The preview dialog let go of its copy of the composition.
+     */
+    public function closePreview(): void
+    {
+        $this->previewRequested = false;
     }
 
     /**

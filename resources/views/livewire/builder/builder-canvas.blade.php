@@ -6,11 +6,7 @@
             @include('livewire.builder._canvas')
         </div>
 
-        @include('livewire.builder._themes')
-
         @include('livewire.builder._code')
-
-        @include('livewire.builder._saved')
     </div>
 
     {{--

@@ -17,7 +17,6 @@
         "juaniquillo/laravel-backend-component": "@dev",
         "juaniquillo/mjml-backend-components": "@dev",
         "juaniquillo/slate-backend-components": "@dev",
-        "laravel/fortify": "^1.36.1",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "livewire/blaze": "^1.0.7",
@@ -77,6 +76,11 @@
             "@php artisan config:clear --ansi",
             "@test:lint",
             "@php artisan test"
+        ],
+        "test:parallel": [
+            "@php artisan config:clear --ansi",
+            "@test:lint",
+            "@php artisan test --parallel"
         ],
         "qa": [
             "@php artisan config:clear --ansi",

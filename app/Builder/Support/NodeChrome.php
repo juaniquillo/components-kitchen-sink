@@ -325,7 +325,7 @@ final class NodeChrome
             'class' => 'mr-auto pointer-events-none select-none pl-1 text-[10px] uppercase leading-4 tracking-wide text-slate-400 dark:text-slate-500',
         ]);
 
-        $label->setContent(ComponentRegistry::get($type)?->label ?? '');
+        $label->setContent(ComponentRegistry::get($type)->label);
 
         return $label;
     }

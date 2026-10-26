@@ -7,13 +7,11 @@ use App\Builder\Support\CompositionRepository;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    config()->set('builder.directory', 'builder-tests');
-
     $this->repository = new CompositionRepository;
 });
 
 afterEach(function () {
-    foreach (Storage::disk('local')->files('builder-tests') as $file) {
+    foreach (Storage::disk('local')->files(builderTestDirectory()) as $file) {
         Storage::disk('local')->delete($file);
     }
 });
@@ -21,10 +19,10 @@ afterEach(function () {
 it('saves a composition as a json file', function () {
     $this->repository->save('Hero section', BuilderNode::tree('n1', 'div'));
 
-    expect(Storage::disk('local')->exists('builder-tests/hero-section.json'))->toBeTrue();
+    expect(Storage::disk('local')->exists(builderTestDirectory().'/hero-section.json'))->toBeTrue();
 
     $contents = json_decode(
-        Storage::disk('local')->get('builder-tests/hero-section.json'),
+        Storage::disk('local')->get(builderTestDirectory().'/hero-section.json'),
         true,
     );
 
@@ -72,7 +70,7 @@ it('keeps several variants of one group', function () {
 it('reads a group that held a single variant back as a list', function () {
     // A group used to hold a single variant, so a file written before a
     // group could hold several still has to be read.
-    Storage::disk('local')->put('builder-tests/themed.json', json_encode([
+    Storage::disk('local')->put(builderTestDirectory().'/themed.json', json_encode([
         'version' => 1,
         'name' => 'Themed',
         'saved_at' => now()->toIso8601String(),
@@ -261,7 +259,7 @@ it('refuses a name that would escape the directory', function () {
 });
 
 it('discards a file that holds an unknown component', function () {
-    Storage::disk('local')->put('builder-tests/broken.json', json_encode([
+    Storage::disk('local')->put(builderTestDirectory().'/broken.json', json_encode([
         'version' => 1,
         'name' => 'Broken',
         'saved_at' => '2026-01-01T00:00:00+00:00',
@@ -284,7 +282,7 @@ it('discards a file that holds an unknown component', function () {
 });
 
 it('discards attributes the guard blocks', function () {
-    Storage::disk('local')->put('builder-tests/hostile.json', json_encode([
+    Storage::disk('local')->put(builderTestDirectory().'/hostile.json', json_encode([
         'version' => 1,
         'name' => 'Hostile',
         'saved_at' => '2026-01-01T00:00:00+00:00',
@@ -309,7 +307,7 @@ it('discards attributes the guard blocks', function () {
 });
 
 it('discards a theme variant that does not exist', function () {
-    Storage::disk('local')->put('builder-tests/themed.json', json_encode([
+    Storage::disk('local')->put(builderTestDirectory().'/themed.json', json_encode([
         'version' => 1,
         'name' => 'Themed',
         'saved_at' => '2026-01-01T00:00:00+00:00',

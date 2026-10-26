@@ -1,20 +1,21 @@
 @php
     $node = $this->configuring;
     $descriptor = $this->configuringDescriptor;
-    $open = $configuringId !== null || $tableModeId !== null;
+    $open = $configuringId !== null || $tableModeId !== null || $drawerMode !== null;
 @endphp
 
 <aside
     data-builder-drawer
     data-open="{{ $open ? 'true' : 'false' }}"
     class="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-xl transition-transform duration-200 dark:border-slate-700 dark:bg-slate-900 {{ $open ? 'translate-x-0' : 'translate-x-full' }}"
-    aria-label="Component configuration"
+    aria-label="Builder drawer"
     x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]')) this.$wire.closeConfig() } }"
     x-on:keydown.escape.window="close()"
+    x-on:builder-focus-name.window="$nextTick(() => $refs.nameInput && $refs.nameInput.focus())"
 >
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-            {{ $tableModeId !== null ? 'Add table' : 'Configure' }}
+            {{ $tableModeId !== null ? 'Add table' : ($drawerMode === 'themes' ? 'Themes' : ($drawerMode === 'saved' ? 'Saved compositions' : 'Configure')) }}
         </h2>
 
         <button
@@ -82,6 +83,10 @@
                 </button>
             </div>
         </div>
+    @elseif ($drawerMode === 'themes')
+        @include('livewire.builder._themes')
+    @elseif ($drawerMode === 'saved')
+        @include('livewire.builder._saved')
     @elseif ($node === null || $descriptor === null)
         <p class="text-xs text-slate-400">Select a node and press its configure button.</p>
     @else
