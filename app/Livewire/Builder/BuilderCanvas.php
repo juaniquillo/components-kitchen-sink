@@ -173,6 +173,32 @@ class BuilderCanvas extends Component
      */
     public string $fingerprint = '';
 
+    /**
+     * The states the undo can bring back, oldest first.
+     *
+     * A snapshot is the whole of what a composition is — its tree, its
+     * themes, the node being looked at and the name it is saved under —
+     * as json, so an undo puts back exactly what the change replaced.
+     *
+     * @var array<int, string>
+     */
+    public array $undoStack = [];
+
+    /**
+     * The states a redo can bring back, newest first.
+     *
+     * @var array<int, string>
+     */
+    public array $redoStack = [];
+
+    /**
+     * How many changes the undo remembers.
+     *
+     * A session is a long run of small changes, and a stack that grows
+     * without end would drag every request behind it.
+     */
+    private const HISTORY_LIMIT = 25;
+
     public function mount(): void
     {
         $this->tree = BuilderNode::tree($this->nextId(), 'div');
@@ -186,6 +212,8 @@ class BuilderCanvas extends Component
      */
     public function saveTheme(): void
     {
+        $before = $this->snapshot();
+
         $group = trim($this->themeGroup);
         $variant = trim($this->themeVariant);
 
@@ -207,6 +235,8 @@ class BuilderCanvas extends Component
         $this->themeNotice = null;
 
         $this->clearThemeInputs();
+
+        $this->record($before);
     }
 
     /**
@@ -214,6 +244,8 @@ class BuilderCanvas extends Component
      */
     public function updateThemeClasses(string $group, string $variant, string $classes): void
     {
+        $before = $this->snapshot();
+
         if (! $this->themeExists($group, $variant)) {
             return;
         }
@@ -234,6 +266,8 @@ class BuilderCanvas extends Component
         $this->themes = (new ThemeRegistry($this->themes))
             ->with($group, $variant, $sanitized)
             ->groups();
+
+        $this->record($before);
     }
 
     /**
@@ -244,6 +278,8 @@ class BuilderCanvas extends Component
      */
     public function deleteTheme(string $group, string $variant): void
     {
+        $before = $this->snapshot();
+
         if ($this->themeUsage($group, $variant) > 0) {
             $this->themeNotice = 'This theme is still used by a node, so it cannot be removed.';
 
@@ -253,6 +289,8 @@ class BuilderCanvas extends Component
         $this->themeNotice = null;
 
         $this->themes = (new ThemeRegistry($this->themes))->without($group, $variant)->groups();
+
+        $this->record($before);
     }
 
     /**
@@ -273,6 +311,8 @@ class BuilderCanvas extends Component
      */
     public function toggleTheme(string $nodeId, string $group, string $variant): void
     {
+        $before = $this->snapshot();
+
         if (! $this->themeExists($group, $variant)) {
             return;
         }
@@ -280,10 +320,14 @@ class BuilderCanvas extends Component
         if ($this->nodeUsesTheme($nodeId, $group, $variant)) {
             $this->tree = TreeMutator::removeTheme($this->tree, $nodeId, $group, $variant);
 
+            $this->record($before);
+
             return;
         }
 
         $this->tree = TreeMutator::addTheme($this->tree, $nodeId, $group, $variant);
+
+        $this->record($before);
     }
 
     /**
@@ -291,7 +335,11 @@ class BuilderCanvas extends Component
      */
     public function removeNodeTheme(string $nodeId, string $group, string $variant): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::removeTheme($this->tree, $nodeId, $group, $variant);
+
+        $this->record($before);
     }
 
     /**
@@ -333,8 +381,12 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::move($this->tree, $itemId, $parentId, $position);
         $this->selectedId = $itemId;
+
+        $this->record($before);
     }
 
     /**
@@ -455,9 +507,7 @@ class BuilderCanvas extends Component
      */
     public function addAttribute(): void
     {
-        $nodeId = $this->configuringId;
-
-        if ($nodeId === null) {
+        if ($this->configuringId === null) {
             return;
         }
 
@@ -473,9 +523,13 @@ class BuilderCanvas extends Component
             return;
         }
 
-        $this->tree = TreeMutator::setAttribute($this->tree, $nodeId, $name, $this->attributeValue);
+        $before = $this->snapshot();
+
+        $this->tree = TreeMutator::setAttribute($this->tree, $this->configuringId, $name, $this->attributeValue);
 
         $this->cancelAttribute();
+
+        $this->record($before);
     }
 
     /**
@@ -499,17 +553,19 @@ class BuilderCanvas extends Component
      */
     public function deleteAttribute(string $name): void
     {
-        $nodeId = $this->configuringId;
-
-        if ($nodeId === null) {
+        if ($this->configuringId === null) {
             return;
         }
 
-        $this->tree = TreeMutator::removeAttribute($this->tree, $nodeId, $name);
+        $before = $this->snapshot();
+
+        $this->tree = TreeMutator::removeAttribute($this->tree, $this->configuringId, $name);
 
         if ($this->editingAttribute === $name) {
             $this->cancelAttribute();
         }
+
+        $this->record($before);
     }
 
     /**
@@ -528,6 +584,8 @@ class BuilderCanvas extends Component
      */
     public function add(string $type, ?string $parentId = null): void
     {
+        $before = $this->snapshot();
+
         $descriptor = ComponentRegistry::get($type);
 
         if ($descriptor === null) {
@@ -569,6 +627,8 @@ class BuilderCanvas extends Component
         if (ComponentRegistry::isTextual($type)) {
             $this->openConfig($node['id']);
         }
+
+        $this->record($before);
     }
 
     /**
@@ -595,6 +655,8 @@ class BuilderCanvas extends Component
      */
     public function remove(string $nodeId): void
     {
+        $before = $this->snapshot();
+
         // Everything below the node goes with it, so the drawer and the
         // selection have to be cleared for those too.
         $descendants = TreeMutator::descendantsOf($this->tree, $nodeId);
@@ -608,6 +670,8 @@ class BuilderCanvas extends Component
         if ($this->configuringId === $nodeId || in_array($this->configuringId, $descendants, true)) {
             $this->closeConfig();
         }
+
+        $this->record($before);
     }
 
     /**
@@ -619,7 +683,11 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::addText($this->tree, $parentId, $text, $this->nextId());
+
+        $this->record($before);
     }
 
     /**
@@ -627,7 +695,11 @@ class BuilderCanvas extends Component
      */
     public function removeText(string $segmentId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::remove($this->tree, $segmentId);
+
+        $this->record($before);
     }
 
     /**
@@ -650,6 +722,8 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $before = $this->snapshot();
+
         $id = $this->nextId();
 
         $this->tree = TreeMutator::addText($this->tree, $this->configuringId, $text, $id);
@@ -658,6 +732,8 @@ class BuilderCanvas extends Component
         // only cleared when it did.
         if (isset($this->tree['nodes'][$id])) {
             $this->textDraft = '';
+
+            $this->record($before);
         }
     }
 
@@ -666,11 +742,15 @@ class BuilderCanvas extends Component
      */
     public function duplicate(string $nodeId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::duplicate(
             $this->tree,
             $nodeId,
             fn (string $id): string => $this->nextId(),
         );
+
+        $this->record($before);
     }
 
     /**
@@ -714,6 +794,8 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $before = $this->snapshot();
+
         $columns = max(1, min(99, $this->newTableColumns));
         $rows = max(1, min(99, $this->newTableRows));
 
@@ -738,6 +820,8 @@ class BuilderCanvas extends Component
         $this->tableNotice = null;
 
         $this->closeConfig();
+
+        $this->record($before);
     }
 
     /**
@@ -745,6 +829,8 @@ class BuilderCanvas extends Component
      */
     public function addRowBelow(string $rowId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::addRowBelow(
             $this->tree,
             $rowId,
@@ -752,6 +838,8 @@ class BuilderCanvas extends Component
         );
 
         $this->tableNotice = null;
+
+        $this->record($before);
     }
 
     /**
@@ -759,6 +847,8 @@ class BuilderCanvas extends Component
      */
     public function addColumn(string $rowId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::addColumn(
             $this->tree,
             $rowId,
@@ -766,6 +856,8 @@ class BuilderCanvas extends Component
         );
 
         $this->tableNotice = null;
+
+        $this->record($before);
     }
 
     /**
@@ -773,6 +865,8 @@ class BuilderCanvas extends Component
      */
     public function deleteColumn(string $cellId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::deleteColumn($this->tree, $cellId);
 
         // The operation leaves the tree alone when the column is not well
@@ -780,6 +874,8 @@ class BuilderCanvas extends Component
         $this->tableNotice = isset($this->tree['nodes'][$cellId])
             ? 'This table cannot lose a column while one of its cells spans rows or columns.'
             : null;
+
+        $this->record($before);
     }
 
     /**
@@ -787,7 +883,11 @@ class BuilderCanvas extends Component
      */
     public function moveUp(string $nodeId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::shift($this->tree, $nodeId, -1);
+
+        $this->record($before);
     }
 
     /**
@@ -795,7 +895,11 @@ class BuilderCanvas extends Component
      */
     public function moveDown(string $nodeId): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::shift($this->tree, $nodeId, 1);
+
+        $this->record($before);
     }
 
     /**
@@ -803,7 +907,11 @@ class BuilderCanvas extends Component
      */
     public function updateText(string $nodeId, string $text): void
     {
+        $before = $this->snapshot();
+
         $this->tree = TreeMutator::setText($this->tree, $nodeId, $text);
+
+        $this->record($before);
     }
 
     /**
@@ -840,6 +948,8 @@ class BuilderCanvas extends Component
      */
     public function load(string $slug): void
     {
+        $before = $this->snapshot();
+
         $found = (new CompositionRepository)->findWithThemes($slug);
 
         if ($found === null) {
@@ -851,6 +961,11 @@ class BuilderCanvas extends Component
         $this->selectedId = $this->tree['root'];
         $this->nodeCounter = $this->highestNodeId();
 
+        // The composition that was loaded now owns the canvas: its name is
+        // what saving updates, so a save right after a load does not fall
+        // back on the name the input was still carrying.
+        $this->compositionName = $found['name'];
+
         // The drawer was showing a node of the composition that was on the
         // canvas, and that node is not necessarily in this one. The drawer
         // itself stays open, so the list the composition was picked from
@@ -858,6 +973,8 @@ class BuilderCanvas extends Component
         $this->clearConfiguring();
 
         $this->fingerprint = $this->currentFingerprint();
+
+        $this->record($before);
     }
 
     /**
@@ -868,6 +985,8 @@ class BuilderCanvas extends Component
      */
     public function resetCanvas(): void
     {
+        $before = $this->snapshot();
+
         $this->tree = BuilderNode::tree($this->nextId(), 'div');
         $this->selectedId = $this->tree['root'];
         $this->compositionName = '';
@@ -875,6 +994,91 @@ class BuilderCanvas extends Component
         $this->closeConfig();
 
         $this->fingerprint = $this->currentFingerprint();
+
+        $this->record($before);
+    }
+
+    /**
+     * Take the composition back to the state before the last change.
+     */
+    public function undo(): void
+    {
+        if ($this->undoStack === []) {
+            return;
+        }
+
+        $this->redoStack[] = $this->snapshot();
+
+        $this->restore((string) array_pop($this->undoStack));
+    }
+
+    /**
+     * Bring back the change the last undo took away.
+     */
+    public function redo(): void
+    {
+        if ($this->redoStack === []) {
+            return;
+        }
+
+        $this->undoStack[] = $this->snapshot();
+
+        $this->restore((string) array_pop($this->redoStack));
+    }
+
+    /**
+     * The composition as it is right now, for the undo to bring back.
+     */
+    private function snapshot(): string
+    {
+        $snapshot = json_encode([
+            $this->tree,
+            $this->themes,
+            $this->selectedId,
+            $this->compositionName,
+        ]);
+
+        return $snapshot === false ? '' : $snapshot;
+    }
+
+    /**
+     * Remember the state a change has replaced, once its work is done.
+     *
+     * Every changing action hands the state it started from here at its
+     * end. A change that turned out to change nothing — a refusal, a move
+     * that landed where it came from — is not remembered, because an undo
+     * that does nothing reads like the undo is broken. A new change also
+     * takes the redo with it: there is nothing to bring back over it.
+     */
+    private function record(string $before): void
+    {
+        if ($this->snapshot() === $before) {
+            return;
+        }
+
+        $this->undoStack[] = $before;
+        $this->redoStack = [];
+
+        if (count($this->undoStack) > self::HISTORY_LIMIT) {
+            array_shift($this->undoStack);
+        }
+    }
+
+    /**
+     * Put a snapshot back on the canvas.
+     */
+    private function restore(string $snapshot): void
+    {
+        /** @var array{0: Tree, 1: array<string, array<string, string>>, 2: string|null, 3: string} $state */
+        $state = json_decode($snapshot, true);
+
+        [$this->tree, $this->themes, $this->selectedId, $this->compositionName] = $state;
+
+        // The drawer was showing a node that may not be in the composition
+        // the undo brought back, so it is only kept when the node survived.
+        if ($this->configuringId !== null && TreeMutator::find($this->tree, $this->configuringId) === null) {
+            $this->clearConfiguring();
+        }
     }
 
     /**
@@ -920,6 +1124,20 @@ class BuilderCanvas extends Component
     public function dirty(): bool
     {
         return $this->fingerprint !== $this->currentFingerprint();
+    }
+
+    /**
+     * Whether saving now would replace an existing composition.
+     *
+     * A save is found by its name, so a name the directory already holds
+     * makes the save an overwrite. The saved panel asks this, so the
+     * overwrite is announced before it happens instead of a save quietly
+     * taking the place of a composition the user may have wanted kept.
+     */
+    #[Computed]
+    public function saveOverwrites(): bool
+    {
+        return (new CompositionRepository)->has($this->compositionName);
     }
 
     /**

@@ -20,19 +20,33 @@
 
             <button
                 type="button"
+                wire:click="undo"
+                @disabled($this->undoStack === [])
+                title="Undo (Ctrl+Z)"
+                aria-label="Undo"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                ↺
+            </button>
+
+            <button
+                type="button"
+                wire:click="redo"
+                @disabled($this->redoStack === [])
+                title="Redo (Ctrl+Shift+Z)"
+                aria-label="Redo"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                ↻
+            </button>
+
+            <button
+                type="button"
                 wire:click="configureSelected"
                 @disabled($selectedId === null)
                 class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
             >
                 Configure selected
-            </button>
-
-            <button
-                type="button"
-                wire:click="save"
-                class="rounded border border-indigo-600 px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:border-indigo-400 dark:text-indigo-300 dark:hover:bg-indigo-500/10"
-            >
-                Save
             </button>
 
             <button

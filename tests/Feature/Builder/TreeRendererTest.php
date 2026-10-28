@@ -358,8 +358,8 @@ it('keeps the chrome in the flow of its node', function () {
     $html = (new TreeRenderer)->render($tree);
 
     // The chrome is a bar in the flow of its node, so the node itself needs
-    // no positioning to keep it off the content. Only the chrome positions
-    // itself, so the menu has somewhere to hang from.
+    // no positioning to keep it off the content. The chrome takes a
+    // positioning of its own to stack its bar over what its node holds.
     expect($html)->not->toContain('position: relative');
 
     preg_match('/class="([^"]*\bbw-chrome\b[^"]*)"/', $html, $matches);
@@ -367,20 +367,49 @@ it('keeps the chrome in the flow of its node', function () {
     expect($matches[1] ?? '')->toContain('relative');
 });
 
-it('floats the chrome of a node that lays its children out across a row', function () {
+it('wraps the chrome of a node that lays its children out across a row', function () {
     // A flex row puts the first child of a node in the row itself, so a
     // chrome in the flow would become part of the row. The node is
-    // positioned and its chrome anchors to its bottom right corner instead.
+    // wrapped, and its chrome rides in the wrapper above it, in the flow.
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['attrs'] = ['class' => 'gap-2 items-center flex'];
 
     $html = (new TreeRenderer)->render($tree);
 
-    expect($html)->toContain('position: relative');
+    // The chrome is a bar in the flow of the wrapper, so the node itself
+    // needs no positioning to keep it off the content.
+    expect($html)->not->toContain('position: relative');
 
     // The Alpine of the chrome holds a > character, so the class can only
     // be found without excluding it.
     preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
+
+    expect($matches[1] ?? '')->toContain('relative z-20 mb-1')
+        ->not->toContain('absolute');
+
+    // The wrapper is a block of its own and the sortable item, and the
+    // node sits inside it.
+    expect($html)->toContain('bw-wrap')
+        ->toContain('display: block;')
+        ->toContain('wire:sort:item="n1"');
+});
+
+it('floats the chrome of a node inside a row of the parent', function () {
+    // A node inside the row of a flex row cannot be wrapped: a wrapper
+    // would take the place of the node in the row, and its grow and
+    // alignment would be lost. So its chrome anchors to its bottom right
+    // corner, and the node is positioned for the chrome to anchor to.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['attrs'] = ['class' => 'items-center flex'];
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'div');
+    $tree['nodes']['n2']['attrs'] = ['class' => 'gap-2 flex'];
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->toContain('position: relative');
+
+    preg_match('/wire:key="chrome-n2".*?class="([^"]*)"/s', $html, $matches);
 
     expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
 });
@@ -407,14 +436,18 @@ it('takes the theme classes into account when it places a chrome', function () {
 
     $html = (new TreeRenderer(['layout' => ['spread' => 'grid gap-2']]))->render($tree);
 
-    expect($html)->toContain('position: relative');
+    // The theme classes decide where the first child lands like the typed
+    // ones do, so a node with a spread theme is wrapped as well.
+    expect($html)->not->toContain('position: relative')
+        ->toContain('display: block;');
 
     preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
 
-    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+    expect($matches[1] ?? '')->toContain('relative z-20 mb-1')
+        ->not->toContain('absolute');
 });
 
-it('floats the chrome of a node with a grid class of its own', function () {
+it('wraps the chrome of a node with a grid class of its own', function () {
     // The class of a grid rides in a typed attribute, exactly like the
     // classes of a theme do, so the same spread detection has to catch it.
     $tree = BuilderNode::tree('n1', 'div');
@@ -422,14 +455,16 @@ it('floats the chrome of a node with a grid class of its own', function () {
 
     $html = (new TreeRenderer)->render($tree);
 
-    expect($html)->toContain('position: relative');
+    expect($html)->not->toContain('position: relative')
+        ->toContain('display: block;');
 
     preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
 
-    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+    expect($matches[1] ?? '')->toContain('relative z-20 mb-1')
+        ->not->toContain('absolute');
 });
 
-it('floats the chrome of a node with a column class of its own', function () {
+it('wraps the chrome of a node with a column class of its own', function () {
     // Columns flow across the node in their own way, so they get the same
     // treatment as the flex rows and the grids.
     $tree = BuilderNode::tree('n1', 'div');
@@ -437,11 +472,13 @@ it('floats the chrome of a node with a column class of its own', function () {
 
     $html = (new TreeRenderer)->render($tree);
 
-    expect($html)->toContain('position: relative');
+    expect($html)->not->toContain('position: relative')
+        ->toContain('display: block;');
 
     preg_match('/wire:key="chrome-n1".*?class="([^"]*)"/s', $html, $matches);
 
-    expect($matches[1] ?? '')->toContain('absolute bottom-0 right-0');
+    expect($matches[1] ?? '')->toContain('relative z-20 mb-1')
+        ->not->toContain('absolute');
 });
 
 it('follows a row with a chrome row of its own', function () {

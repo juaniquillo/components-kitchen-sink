@@ -190,10 +190,10 @@ final class NodeChrome
         $attributes = [
             'wire:key' => 'chrome-'.$id,
             'x-data' => self::alpine($id),
-            'x-on:click.outside' => 'open = false',
-            // The menu takes the escape key and keeps it from the drawer, so
-            // the drawer is only closed when there is no menu to dismiss.
-            'x-on:keydown.escape.window' => 'if (open) { open = false; $event.stopImmediatePropagation() }',
+            // A menu opens and closes itself with the popover api, and a
+            // click outside one is a light dismiss of its own. The drawer
+            // holds the escape key back while a menu or a dialog is open,
+            // so nothing closes the drawer behind a menu.
             // A node may be a link, and a click on a button inside a link
             // still activates it, so the chrome swallows the default.
             'x-on:click.prevent' => 'true',
@@ -209,6 +209,16 @@ final class NodeChrome
             // stylesheet of the canvas uses.
             $attributes['class'] = 'bw-chrome';
             $attributes['style'] = '--bw-chrome-display: table-row;';
+        } elseif ($tag === 'caption') {
+            // A table hosts its chrome in a caption, the one element a table
+            // may carry besides its parts, and the one that renders above
+            // them. The display of a caption has to stay a caption: any
+            // other display takes the caption-ness away from the element,
+            // and the table puts the toolbar back under the head it was
+            // always meant to ride above. So the caption is bare and the
+            // bar of the toolbar travels in an element of its own.
+            $attributes['class'] = 'bw-chrome';
+            $attributes['style'] = '--bw-chrome-display: table-caption;';
         } elseif ($overlay) {
             // A node whose own display puts every first child in its row or
             // grid — a flex, a grid, columns — would take the chrome as a
@@ -241,7 +251,7 @@ final class NodeChrome
         $acceptsText = self::acceptsText($node);
 
         if ($allowed !== [] || $acceptsText) {
-            $contents[] = self::add();
+            $contents[] = self::add($id);
             $contents[] = self::menu($node, $allowed, $acceptsText, $childTypes);
         }
 
@@ -263,6 +273,18 @@ final class NodeChrome
 
             $cell->setContents($contents);
             $chrome->setContents([$cell]);
+        } elseif ($tag === 'caption') {
+            // The caption carries the bar of the toolbar in one element of
+            // its own: the bar keeps the styling the other bars have, and
+            // the caption keeps the display a caption has to have.
+            $bar = new MainBackendComponent(ComponentEnum::SPAN);
+
+            $bar->setAttributes([
+                'class' => 'relative z-20 mb-1 flex items-center justify-end gap-0.5 rounded-md border border-slate-300 bg-white/95 p-0.5 shadow-sm dark:border-slate-600 dark:bg-slate-800/95',
+            ]);
+
+            $bar->setContents($contents);
+            $chrome->setContents([$bar]);
         } else {
             $chrome->setContents($contents);
         }
@@ -301,11 +323,12 @@ final class NodeChrome
      * The Alpine state of a chrome.
      *
      * The delete button arms itself and deletes on a second click, so a
-     * misclick on a small target cannot destroy anything.
+     * misclick on a small target cannot destroy anything. The menu of the
+     * chrome is a popover, and the browser owns its open state.
      */
     private static function alpine(string $id): string
     {
-        return "{ open: false, textMode: false, draft: '', armed: false, arm() { "
+        return "{ textMode: false, draft: '', armed: false, arm() { "
             ."if (this.armed) { this.\$wire.remove('".$id."'); this.armed = false; return } "
             .'this.armed = true; setTimeout(() => this.armed = false, 4000) } }';
     }
@@ -359,13 +382,24 @@ final class NodeChrome
 
     /**
      * The button that opens the menu of things to add.
+     *
+     * The menu is a popover in the top layer, so no toolbar of another node
+     * can paint over it. Out of the flow a popover has no containing block
+     * to hang from, and anchor positioning ties it back to this button.
+     *
+     * The chrome keeps the default of every click under it, and the popover
+     * target works as default action of the click itself, so the button
+     * stops the chrome from seeing its click at all.
      */
-    private static function add(): MainBackendComponent
+    private static function add(string $id): MainBackendComponent
     {
         return self::button('+', [
             'wire:sort:ignore' => '',
-            'x-on:click' => 'open = !open',
+            // The stop is only there to keep the click from the chrome.
+            'x-on:click.stop' => 'true',
+            'popovertarget' => 'bw-menu-'.$id,
             'title' => 'Add content',
+            'style' => 'anchor-name: --bw-add-'.$id,
             'class' => 'rounded px-1 text-xs leading-4 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700',
         ]);
     }
@@ -380,7 +414,7 @@ final class NodeChrome
         $button->setAttributes([
             'type' => 'button',
             'wire:sort:ignore' => '',
-            'x-on:click' => 'open = false; arm()',
+            'x-on:click' => 'arm()',
             'x-on:mouseleave' => 'armed = false',
             'x-bind:title' => "armed ? 'Click again to delete' : 'Delete'",
             'class' => 'rounded px-1 text-xs leading-4 text-red-500 hover:bg-red-50 dark:text-red-400',
@@ -412,9 +446,12 @@ final class NodeChrome
      * The menu of things that can be added to a node.
      *
      * Every part of it is phrasing content, so the menu can live inside a
-     * paragraph without the parser pulling it out. The table operations come
-     * first, the text entry is only offered where the node takes text, and
-     * the component list only where it takes children: a list or a table row
+     * paragraph without the parser pulling it out. The menu is a popover:
+     * the browser takes it to the top layer, whence nothing on the canvas
+     * can paint over it, and gives it the light dismisses, the escape key
+     * and one open menu at a time. The table operations come first, the
+     * text entry is only offered where the node takes text, and the
+     * component list only where it takes children: a list or a table row
      * has somewhere to put an item, but nowhere to put a run of text.
      *
      * @param  array<int, string>  $allowed
@@ -425,9 +462,10 @@ final class NodeChrome
         $menu = new MainBackendComponent(ComponentEnum::SPAN);
 
         $menu->setAttributes([
-            'x-show' => 'open',
-            'x-cloak' => '',
-            'class' => 'absolute top-full right-0 z-30 mt-1 w-56 max-h-64 overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg dark:border-slate-600 dark:bg-slate-800',
+            'id' => 'bw-menu-'.$node['id'],
+            'popover' => 'auto',
+            'style' => 'position-anchor: --bw-add-'.$node['id'],
+            'class' => 'bw-menu w-56 max-h-64 overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg dark:border-slate-600 dark:bg-slate-800',
         ]);
 
         $contents = [];
@@ -541,7 +579,7 @@ final class NodeChrome
 
             $item->setAttributes([
                 'wire:sort:ignore' => '',
-                'x-on:click' => 'open = false; '.$action['wire'],
+                'x-on:click' => "\$el.closest('[popover]')?.hidePopover(); ".$action['wire'],
                 'class' => 'block cursor-pointer rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-500/20',
             ]);
 
@@ -604,7 +642,7 @@ final class NodeChrome
             $item = new MainBackendComponent(ComponentEnum::SPAN);
             $item->setAttributes([
                 'wire:sort:ignore' => '',
-                'x-on:click' => "open = false; \$wire.add('".$type."', '".$id."')",
+                'x-on:click' => "\$el.closest('[popover]')?.hidePopover(); \$wire.add('".$type."', '".$id."')",
                 'class' => 'block cursor-pointer rounded px-2 py-1 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
             ]);
             $item->setContent($descriptor->label);

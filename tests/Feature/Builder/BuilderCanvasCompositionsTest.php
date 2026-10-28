@@ -95,6 +95,62 @@ it('keeps the saved compositions drawer open while one is loaded', function () {
         ->assertSet('configuringId', null);
 });
 
+it('asks before a load replaces work that is not saved', function () {
+    // A load swaps the whole tree in, so a canvas that holds work which
+    // is not saved has to be asked, the way the reset and the delete of
+    // a composition are. A clean canvas has nothing to lose, and the
+    // load goes ahead without a word.
+    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('openSaved')
+        ->assertSee("wire:click=\"load('simple')\"", false)
+        ->assertDontSee('wire:confirm="Loading a composition will replace the one on the canvas', false);
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->call('openSaved')
+        ->assertSee('wire:confirm="Loading a composition will replace the one on the canvas. Are you sure?"', false);
+});
+
+it('announces that a save will overwrite an existing composition', function () {
+    // A save is found by its name, so a name the directory already holds
+    // makes the save an overwrite, and the file it replaces is work the
+    // user may have wanted kept. The button asks, and the panel says so
+    // while the name is still being typed.
+    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('openSaved')
+        ->assertDontSee('wire:confirm="A composition with this name already exists', false)
+        ->assertDontSee('An existing composition with this name will be overwritten.', false)
+        ->set('compositionName', 'Simple')
+        ->assertSee('wire:confirm="A composition with this name already exists and will be overwritten. Are you sure?"', false)
+        ->assertSee('An existing composition with this name will be overwritten.', false);
+
+    // The name is what decides it, not how it is written, so any spelling
+    // that turns into the same slug announces the overwrite as well.
+    Livewire::test(BuilderCanvas::class)
+        ->call('openSaved')
+        ->set('compositionName', 'SIMPLE')
+        ->assertSee('An existing composition with this name will be overwritten.', false);
+});
+
+it('names the canvas after the composition that was loaded', function () {
+    // The name the input was still carrying belongs to the composition that
+    // was on the canvas before: loading another one makes it wrong, and a
+    // save made with it would end up somewhere unexpected.
+    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
+
+    (new CompositionRepository)->save('Other', BuilderNode::tree('n1', 'div'));
+
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->set('compositionName', 'Simple')
+        ->call('load', 'other')
+        ->assertSet('compositionName', 'Other');
+});
+
 it('is clean when the page opens', function () {
     Livewire::test(BuilderCanvas::class)
         ->assertSee('data-dirty="false"', false);

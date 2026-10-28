@@ -9,7 +9,7 @@
     data-open="{{ $open ? 'true' : 'false' }}"
     class="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-xl transition-transform duration-200 dark:border-slate-700 dark:bg-slate-900 {{ $open ? 'translate-x-0' : 'translate-x-full' }}"
     aria-label="Builder drawer"
-    x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]')) this.$wire.closeConfig() } }"
+    x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]') && ! document.querySelector(':popover-open')) this.$wire.closeConfig() } }"
     x-on:keydown.escape.window="close()"
     x-on:builder-focus-name.window="$nextTick(() => $refs.nameInput && $refs.nameInput.focus())"
 >

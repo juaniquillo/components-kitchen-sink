@@ -13,6 +13,9 @@
     <button
         type="button"
         wire:click="save"
+        @if ($this->saveOverwrites())
+            wire:confirm="A composition with this name already exists and will be overwritten. Are you sure?"
+        @endif
         class="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white transition hover:bg-indigo-500"
     >
         Save
@@ -27,6 +30,12 @@
         Reset
     </button>
 </div>
+
+@if ($this->saveOverwrites())
+    <p class="mt-1 text-[11px] text-amber-600 dark:text-amber-400">
+        An existing composition with this name will be overwritten.
+    </p>
+@endif
 
 @if ($this->saved !== [])
     <ul class="mt-3 divide-y divide-slate-100 dark:divide-slate-700">
@@ -43,6 +52,9 @@
 
                 <div class="flex shrink-0 gap-1">
                     <button type="button" wire:click="load('{{ $composition->slug }}')"
+                        @if ($this->dirty())
+                            wire:confirm="Loading a composition will replace the one on the canvas. Are you sure?"
+                        @endif
                         class="rounded border border-slate-200 px-2 py-1 text-xs hover:bg-slate-50 dark:border-slate-600">
                         Load
                     </button>

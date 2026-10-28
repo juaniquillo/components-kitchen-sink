@@ -58,6 +58,25 @@
             }
 
             /*
+            | The menu of things to add
+            | The menu is a native popover: the browser takes it to the top
+            | layer, so no toolbar of another node can paint over it, and
+            | gives it the light dismisses, the escape key and one open menu
+            | at a time. Out of the flow a popover has no containing block
+            | to hang from, so anchor positioning ties it back to the
+            | button that opened it.
+            */
+
+            [popover].bw-menu {
+                position: fixed;
+                inset: auto;
+                margin: 0;
+                top: calc(anchor(bottom) + 4px);
+                right: anchor(right);
+                position-try-fallbacks: flip-block, flip-inline;
+            }
+
+            /*
             | Preview dialog
             | The page is styled by the browser build of Tailwind, which does
             | not know about the backdrop of a dialog.

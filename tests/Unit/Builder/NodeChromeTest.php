@@ -101,7 +101,6 @@ it('builds a chrome with a handle, a configure button and an add menu', function
     $contents = $chrome?->getContents() ?? [];
 
     expect($attributes)->toHaveKey('x-data')
-        ->toHaveKey('x-on:click.outside')
         ->and($attributes['wire:key'])->toBe('chrome-n1');
 
     $buttons = [];
@@ -116,8 +115,27 @@ it('builds a chrome with a handle, a configure button and an add menu', function
         ->and($buttons[0])->not->toHaveKey('wire:sort:handle')
         ->and($buttons[1])->toHaveKey('wire:sort:handle')
         ->and($buttons[2]['wire:click.stop.prevent'] ?? null)->toContain('openConfig')
-        ->and($buttons[3]['x-on:click'] ?? null)->toBe('open = !open')
-        ->and($buttons[5]['x-on:click'] ?? null)->toContain('arm()');
+        ->and($buttons[3]['popovertarget'] ?? null)->toBe('bw-menu-n1')
+        ->and($buttons[3]['style'] ?? null)->toBe('anchor-name: --bw-add-n1')
+        ->and($buttons[5]['x-on:click'] ?? null)->toBe('arm()');
+});
+
+it('hangs its add menu from the button that opens it', function () {
+    // The menu is a popover: the browser takes it to the top layer of the
+    // page, whence no toolbar of another node can paint over it, and out
+    // of the flow it has nowhere to hang from but the anchor the button
+    // carries.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $menu = $chrome->getContents()[4] ?? null;
+
+    $attributes = $menu?->getAttributes() ?? [];
+
+    expect($attributes)->toHaveKey('popover', 'auto')
+        ->toHaveKey('id', 'bw-menu-n1')
+        ->and($attributes['style'] ?? '')->toBe('position-anchor: --bw-add-n1')
+        ->and($attributes['class'] ?? '')->toContain('bw-menu')
+        ->not->toHaveKey('x-show');
 });
 
 it('labels the chrome with the type of its node', function () {
@@ -298,6 +316,25 @@ it('rows the toolbar of a row under the row', function () {
         ->and($chrome->getAttributes()['class'] ?? '')->toBe('bw-chrome')
         ->and($chrome->getAttributes()['style'] ?? '')->toContain('--bw-chrome-display: table-row;')
         ->and($cell->getAttributes())->toHaveKey('colspan', '999');
+});
+
+it('keeps the caption of a table a caption', function () {
+    // The display of a caption has to stay a caption: any other display
+    // takes the caption-ness away from the element, and the table puts the
+    // toolbar back under the head it was always meant to ride above. So
+    // the caption itself is bare, and the bar of the toolbar travels in
+    // one element of its own, the way a row's does in its cell.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.table'));
+
+    expect(NodeChrome::tag('table.table'))->toBe('caption')
+        ->and($chrome->getAttributes()['class'] ?? '')->toBe('bw-chrome')
+        ->and($chrome->getAttributes()['style'] ?? '')->toContain('--bw-chrome-display: table-caption;')
+        ->and(count($chrome->getContents()))->toBe(1);
+
+    $bar = $chrome->getContents()[0];
+
+    expect($bar->getAttributes()['class'] ?? '')->toContain('flex')
+        ->and(count($bar->getContents()))->toBe(6);
 });
 
 it('offers the row and column operations on a row', function () {

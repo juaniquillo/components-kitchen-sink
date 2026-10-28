@@ -86,9 +86,9 @@ final class CompositionRepository
     }
 
     /**
-     * The tree and the themes of a saved composition.
+     * The name, the tree and the themes of a saved composition.
      *
-     * @return array{tree: Tree, themes: array<string, array<string, string>>}|null
+     * @return array{name: string, tree: Tree, themes: array<string, array<string, string>>}|null
      */
     public function findWithThemes(string $slug): ?array
     {
@@ -117,6 +117,7 @@ final class CompositionRepository
         }
 
         return [
+            'name' => is_string($envelope['name'] ?? null) ? $envelope['name'] : $this->slugOf($path),
             'tree' => $tree,
             'themes' => $this->serializer->themes($envelope),
         ];
@@ -185,6 +186,19 @@ final class CompositionRepository
         }
 
         return $this->disk()->delete($path);
+    }
+
+    /**
+     * Whether a composition is already saved under the given name.
+     *
+     * The name is what a save is found by, so a name that turns into a
+     * slug the directory already holds makes the next save an overwrite.
+     */
+    public function has(string $name): bool
+    {
+        $slug = $this->normalise($name);
+
+        return $slug !== null && $this->disk()->exists($this->path($slug));
     }
 
     /**

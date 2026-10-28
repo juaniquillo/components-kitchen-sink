@@ -35,6 +35,18 @@ it('saves a composition as a json file', function () {
         ->and($contents['tree']['root'])->toBe('n1');
 });
 
+it('says whether a name is already saved', function () {
+    $this->repository->save('Simple', BuilderNode::tree('n1', 'div'));
+
+    // The name is what a save is found by, so any name that turns into
+    // the slug of a saved composition counts, however it is written.
+    expect($this->repository->has('Simple'))->toBeTrue()
+        ->and($this->repository->has('SIMPLE'))->toBeTrue()
+        ->and($this->repository->has('Other'))->toBeFalse()
+        ->and($this->repository->has('!!!'))->toBeFalse()
+        ->and($this->repository->has(''))->toBeFalse();
+});
+
 it('keeps the themes with the composition', function () {
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['children'] = ['n2'];
@@ -48,6 +60,7 @@ it('keeps the themes with the composition', function () {
     $found = $this->repository->findWithThemes('themed');
 
     expect($found)->not->toBeNull()
+        ->and($found['name'])->toBe('Themed')
         ->and($found['themes'])->toBe($themes)
         ->and($found['tree']['nodes']['n2']['theme'])->toBe(['action' => ['primary']]);
 });

@@ -94,8 +94,11 @@ final class TreeRenderer
      * Build the component for a node and everything below it.
      *
      * @param  Tree  $tree
+     * @param  bool  $parentFlowsAcross  Whether the parent lays its children
+     *                                   out across its own row, so a wrapper around the node would take the
+     *                                   place of the node in that row.
      */
-    private function build(array $tree, string $nodeId, ?string $selectedId, bool $clean, ?string $parentType = null): MainBackendComponent
+    private function build(array $tree, string $nodeId, ?string $selectedId, bool $clean, ?string $parentType = null, bool $parentFlowsAcross = false): MainBackendComponent
     {
         $node = $tree['nodes'][$nodeId];
 
@@ -105,6 +108,18 @@ final class TreeRenderer
         // The root of the tree has nowhere to be moved to, so it is left
         // without a handle.
         $draggable = $node['id'] !== $tree['root'];
+
+        // A node whose own display lays its children out across its row —
+        // a flex, a grid, columns — cannot hold a bar in its flow: the bar
+        // would become a part of that row. When its own parent does not
+        // flow across as well, the node is wrapped, and its chrome rides
+        // in the wrapper above it, the way the chrome of any other node
+        // does. Only a node inside another flowing row keeps a floating
+        // chrome anchored to its bottom right corner, because a wrapper
+        // there would take the place of the node in the row of the parent,
+        // and its grow and alignment would be lost with it.
+        $flowsAcross = $hostsOwnChrome && $this->flowsAcross($node);
+        $overlay = $flowsAcross && ($parentFlowsAcross || ! $canBeWrapped);
 
         // A component that cannot hold a chrome of its own is given one, so
         // that it can be wrapped in something that can. A row is the other
@@ -118,16 +133,20 @@ final class TreeRenderer
                 $node,
                 $draggable,
                 $this->childTypes($tree, $node),
-                $hostsOwnChrome && $this->flowsAcross($node),
+                $overlay,
             );
 
         if ($chrome !== null && ! $hostsOwnChrome) {
             return $this->buildWrapped($tree, $node, $chrome, $selectedId, $clean);
         }
 
+        if ($chrome !== null && $flowsAcross && ! $overlay) {
+            return $this->buildWrapped($tree, $node, $chrome, $selectedId, $clean, block: true);
+        }
+
         $component = new MainBackendComponent($node['type']);
 
-        $component->setAttributes($this->attributes($tree, $node, $selectedId, $clean));
+        $component->setAttributes($this->attributes($tree, $node, $selectedId, $clean, $overlay));
         $component->setContents($this->contents($tree, $node, $selectedId, $clean, $chrome));
 
         return $component;
@@ -159,19 +178,25 @@ final class TreeRenderer
      * The wrapper is the sortable item, and the component sits inside it.
      *
      * @param  Tree  $tree
-     * @param  Node  $node
+     * @param  array<string, mixed>  $node
+     * @param  bool  $block  Whether the wrapper is a block of its own, so a
+     *                       node that lays its children out across a row gets its chrome in a row
+     *                       above it instead of a floating toolbar anchored to its corner.
      */
-    private function buildWrapped(array $tree, array $node, MainBackendComponent $chrome, ?string $selectedId, bool $clean): MainBackendComponent
+    private function buildWrapped(array $tree, array $node, MainBackendComponent $chrome, ?string $selectedId, bool $clean, bool $block = false): MainBackendComponent
     {
-        $wrapper = new MainBackendComponent(ComponentEnum::SPAN);
+        // The wrapper of a node that cannot hold the chrome is a span, so
+        // it can sit in the middle of a line of text like the component it
+        // wraps does. The wrapper of a node that flows across its own row
+        // is a block, so the chrome of the node is a row of its own above
+        // the row of the node.
+        $wrapper = new MainBackendComponent($block ? ComponentEnum::DIV : ComponentEnum::SPAN);
 
         $wrapperAttributes = [
             'wire:sort:item' => $node['id'],
             'wire:key' => $node['id'],
             'class' => 'bw-wrap',
-            // The wrapper is inline, so it can sit in the middle of a line of
-            // text like the component it wraps does.
-            'style' => 'display: inline-block;',
+            'style' => $block ? 'display: block;' : 'display: inline-block;',
         ];
 
         // The chrome of the wrapped node hangs on the wrapper, so the
@@ -243,7 +268,7 @@ final class TreeRenderer
                 continue;
             }
 
-            $contents[] = $this->build($tree, $childId, $selectedId, $clean, $node['type']);
+            $contents[] = $this->build($tree, $childId, $selectedId, $clean, $node['type'], $this->flowsAcross($node));
 
             // A row's chrome cannot live in the row: a row holds nothing
             // but cells, and a chrome cell in the flow of a row would take
@@ -269,9 +294,12 @@ final class TreeRenderer
      *
      * @param  Tree  $tree
      * @param  Node  $node
+     * @param  bool  $positioned  Whether the node carries a floating chrome
+     *                            that anchors to its bottom right corner, and so needs a positioning
+     *                            of its own to anchor to.
      * @return array<string, string>
      */
-    private function attributes(array $tree, array $node, ?string $selectedId, bool $clean): array
+    private function attributes(array $tree, array $node, ?string $selectedId, bool $clean, bool $positioned = false): array
     {
         if ($clean) {
             return $this->themedAttributes($node);
@@ -309,7 +337,7 @@ final class TreeRenderer
 
         $attributes = array_merge($attributes, $this->themedAttributes($node));
 
-        $style = $this->style($node);
+        $style = $this->style($node, $positioned);
 
         if ($style !== null) {
             // A style on the node's own attributes stays first, and the
@@ -422,18 +450,19 @@ final class TreeRenderer
     /**
      * The style the builder adds to a node in the canvas.
      *
-     * A node whose own display would make its chrome part of a row or a
-     * grid — a flex, a grid, columns — is positioned, so its floating
-     * chrome has something to anchor to. An empty inline element still
-     * needs a box to be seen in.
+     * A node with a floating chrome anchored to its bottom right corner is
+     * positioned, so the chrome has something to anchor to. A node whose
+     * chrome rides in a wrapper above it stays the element it is. An empty
+     * inline element still needs a box to be seen in.
      *
      * @param  Node  $node
+     * @param  bool  $positioned  Whether the node carries a floating chrome.
      */
-    private function style(array $node): ?string
+    private function style(array $node, bool $positioned = false): ?string
     {
         $style = $this->boxStyle($node);
 
-        if ($this->flowsAcross($node) && $this->canHoldChrome($node)) {
+        if ($positioned) {
             $style = 'position: relative; '.trim($style);
         }
 
