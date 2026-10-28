@@ -66,17 +66,6 @@ final class TreeRenderer
     ];
 
     /**
-     * The attributes that name an element by id.
-     *
-     * Most of them name one element, and `headers` names the cells a table
-     * cell points at, so its value is a list that is scoped one id at a
-     * time.
-     *
-     * @var array<int, string>
-     */
-    private const ID_ATTRIBUTES = ['id', 'for', 'list', 'headers'];
-
-    /**
      * Render a whole tree to HTML.
      *
      * A clean render leaves out everything the builder adds — the chrome, the
@@ -211,9 +200,20 @@ final class TreeRenderer
         $inner = new MainBackendComponent($node['type']);
 
         $innerAttributes = [
+            // A wrapped node that takes children stays a container the
+            // canvas can drop into and whose children can be sorted: the
+            // wrapper is the sortable item of the parent, and the node
+            // inside it holds the group its own children sort in. Without
+            // these, a drag inside the node would be caught by the nearest
+            // container above it, and the whole node would be dragged.
+            ...$this->sortAttributes($node),
             ...$this->themedAttributes($node),
             'data-node-id' => $node['id'],
-            'wire:click.stop' => "select('".$node['id']."')",
+            // The same prevention the nodes that hold a chrome of their
+            // own carry: a click in the canvas selects, and does not
+            // toggle the checkbox the click landed on or submit the form
+            // the button it landed on belongs to.
+            'wire:click.stop.prevent' => "select('".$node['id']."')",
         ];
 
         if ($selectedId === $node['id']) {
@@ -311,19 +311,13 @@ final class TreeRenderer
             $attributes['wire:sort:item'] = $node['id'];
         }
 
-        $attributes['wire:key'] = $node['id'];
-
-        if ($this->isContainer($node)) {
-            $attributes['wire:sort'] = 'handleSort';
-            $attributes['wire:sort:group'] = self::GROUP;
-            $attributes['wire:sort:group-id'] = $node['id'];
-            // It has to come after wire:sort:group, because Livewire's sort
-            // binding walks the attributes in DOM order and stops there.
-            $attributes['wire:sort:config'] = self::SORT_CONFIG;
-        }
-
-        $attributes['wire:click.stop.prevent'] = "select('".$node['id']."')";
-        $attributes['data-node-id'] = $node['id'];
+        $attributes = [
+            ...$attributes,
+            'wire:key' => $node['id'],
+            ...$this->sortAttributes($node),
+            'wire:click.stop.prevent' => "select('".$node['id']."')",
+            'data-node-id' => $node['id'],
+        ];
 
         if ($selectedId === $node['id']) {
             $attributes['data-selected'] = 'true';
@@ -351,6 +345,30 @@ final class TreeRenderer
         }
 
         return $attributes;
+    }
+
+    /**
+     * The attributes that make a node a live container in the canvas.
+     *
+     * They are kept in one place because the order matters: Livewire's
+     * sort binding walks the attributes in DOM order and stops at
+     * wire:sort:group, so wire:sort has to come first.
+     *
+     * @param  Node  $node
+     * @return array<string, string>
+     */
+    private function sortAttributes(array $node): array
+    {
+        if (! $this->isContainer($node)) {
+            return [];
+        }
+
+        return [
+            'wire:sort' => 'handleSort',
+            'wire:sort:group' => self::GROUP,
+            'wire:sort:group-id' => $node['id'],
+            'wire:sort:config' => self::SORT_CONFIG,
+        ];
     }
 
     /**
@@ -400,7 +418,7 @@ final class TreeRenderer
         $scoped = [];
 
         foreach ($attributes as $name => $value) {
-            if (in_array($name, self::ID_ATTRIBUTES, true) && trim($value) !== '') {
+            if (in_array($name, BuilderNode::ID_ATTRIBUTES, true) && trim($value) !== '') {
                 $ids = $name === 'headers'
                     ? array_map($this->scopedId(...), preg_split('/\s+/', trim($value), -1, PREG_SPLIT_NO_EMPTY) ?: [])
                     : [$this->scopedId(trim($value))];

@@ -41,6 +41,19 @@ final class BuilderNode
     public const TYPE_TEXT = 'text';
 
     /**
+     * The attributes that name an element by id.
+     *
+     * The renderer scopes them so two renders of one tree keep their own
+     * elements, and the mutator renames them when a node is copied, so a
+     * duplicate does not put two elements with the same id on the page.
+     * Most of them name one element, and `headers` names the cells a
+     * table cell points at, as a list of ids separated by spaces.
+     *
+     * @var array<int, string>
+     */
+    public const ID_ATTRIBUTES = ['id', 'for', 'list', 'headers'];
+
+    /**
      * Create a node with sensible defaults.
      *
      * @return Node

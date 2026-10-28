@@ -284,6 +284,60 @@ it('duplicates a node with fresh ids', function () {
         ->and($tree['nodes'])->toHaveKey('n4-copy2');
 });
 
+it('gives the ids of a duplicate values of their own, with their references following', function () {
+    // A label points at its input by id, and the copy of the pair has to
+    // keep pointing at the copy of the input, not at the original. The
+    // suffix of a renamed id is the new id of the node that carries it.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'div');
+    $tree['nodes']['n2']['children'] = ['n3', 'n4'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'form.label');
+    $tree['nodes']['n3']['attrs'] = ['for' => 'name'];
+    $tree['nodes']['n4'] = BuilderNode::make('n4', 'form.text');
+    $tree['nodes']['n4']['attrs'] = ['id' => 'name'];
+
+    $counter = 0;
+
+    $tree = TreeMutator::duplicate($tree, 'n2', function (string $id) use (&$counter): string {
+        $counter++;
+
+        return $id.'-copy'.$counter;
+    });
+
+    expect($tree['nodes']['n2-copy1']['children'])->toBe(['n3-copy2', 'n4-copy3'])
+        ->and($tree['nodes']['n4-copy3']['attrs']['id'])->toBe('name-n4-copy3')
+        ->and($tree['nodes']['n3-copy2']['attrs']['for'])->toBe('name-n4-copy3');
+});
+
+it('follows the ids a copy references and leaves the ones outside it alone', function () {
+    // A cell names the cells it covers through the headers attribute, as
+    // ids separated by spaces. The ones of the branch follow the copy,
+    // and the ones that name a cell the copy does not hold stay: the
+    // copy still covers the same outside cells the original does.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'table.table');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'table.tr');
+    $tree['nodes']['n3']['children'] = ['n4', 'n5'];
+    $tree['nodes']['n4'] = BuilderNode::make('n4', 'table.th');
+    $tree['nodes']['n4']['attrs'] = ['id' => 'a'];
+    $tree['nodes']['n5'] = BuilderNode::make('n5', 'table.td');
+    $tree['nodes']['n5']['attrs'] = ['headers' => 'a elsewhere'];
+
+    $counter = 0;
+
+    $tree = TreeMutator::duplicate($tree, 'n2', function (string $id) use (&$counter): string {
+        $counter++;
+
+        return $id.'-copy'.$counter;
+    });
+
+    expect($tree['nodes']['n4-copy3']['attrs']['id'])->toBe('a-n4-copy3')
+        ->and($tree['nodes']['n5-copy4']['attrs']['headers'])->toBe('a-n4-copy3 elsewhere');
+});
+
 it('scaffolds a whole table under a node', function () {
     $tree = tableTree();
 

@@ -657,19 +657,12 @@ class BuilderCanvas extends Component
     {
         $before = $this->snapshot();
 
-        // Everything below the node goes with it, so the drawer and the
-        // selection have to be cleared for those too.
-        $descendants = TreeMutator::descendantsOf($this->tree, $nodeId);
+        // Everything below the node goes with it.
+        $removed = [$nodeId, ...TreeMutator::descendantsOf($this->tree, $nodeId)];
 
         $this->tree = TreeMutator::remove($this->tree, $nodeId);
 
-        if ($this->selectedId === $nodeId || in_array($this->selectedId, $descendants, true)) {
-            $this->selectedId = $this->tree['root'];
-        }
-
-        if ($this->configuringId === $nodeId || in_array($this->configuringId, $descendants, true)) {
-            $this->closeConfig();
-        }
+        $this->forgetNodePointers($removed);
 
         $this->record($before);
     }
@@ -744,11 +737,32 @@ class BuilderCanvas extends Component
     {
         $before = $this->snapshot();
 
+        $parentId = TreeMutator::parentOf($this->tree, $nodeId);
+        $siblings = $parentId !== null ? $this->tree['nodes'][$parentId]['children'] : [];
+
         $this->tree = TreeMutator::duplicate(
             $this->tree,
             $nodeId,
             fn (string $id): string => $this->nextId(),
         );
+
+        // The copy's id is the one its parent did not hold before, and when
+        // the duplication refused there is no such id.
+        $copyId = $parentId !== null
+            ? (array_values(array_diff($this->tree['nodes'][$parentId]['children'] ?? [], $siblings))[0] ?? null)
+            : null;
+
+        if ($copyId === null) {
+            return;
+        }
+
+        $this->selectedId = $copyId;
+
+        // The drawer was showing the original: the copy is what the user is
+        // about to work on next.
+        if ($this->configuringId === $nodeId) {
+            $this->openConfig($copyId);
+        }
 
         $this->record($before);
     }
@@ -867,6 +881,8 @@ class BuilderCanvas extends Component
     {
         $before = $this->snapshot();
 
+        $nodeIds = array_keys($this->tree['nodes']);
+
         $this->tree = TreeMutator::deleteColumn($this->tree, $cellId);
 
         // The operation leaves the tree alone when the column is not well
@@ -875,7 +891,34 @@ class BuilderCanvas extends Component
             ? 'This table cannot lose a column while one of its cells spans rows or columns.'
             : null;
 
+        // The cells of the column go out in one operation, so the pointers
+        // that pointed at any of them go out with it.
+        $this->forgetNodePointers(array_values(array_diff(
+            $nodeIds,
+            array_keys($this->tree['nodes']),
+        )));
+
         $this->record($before);
+    }
+
+    /**
+     * Drop the pointers that pointed at nodes that are gone.
+     *
+     * The selection and the drawer cannot stay on a node that is not in
+     * the tree any more: the drawer would show nothing, and the button
+     * that configures the selection would do the same.
+     *
+     * @param  array<int, string>  $removedIds
+     */
+    private function forgetNodePointers(array $removedIds): void
+    {
+        if ($this->selectedId !== null && in_array($this->selectedId, $removedIds, true)) {
+            $this->selectedId = $this->tree['root'];
+        }
+
+        if ($this->configuringId !== null && in_array($this->configuringId, $removedIds, true)) {
+            $this->closeConfig();
+        }
     }
 
     /**
@@ -1124,6 +1167,18 @@ class BuilderCanvas extends Component
     public function dirty(): bool
     {
         return $this->fingerprint !== $this->currentFingerprint();
+    }
+
+    /**
+     * Whether the canvas holds nothing but its root.
+     *
+     * The empty canvas shows a hint, so a fresh page says what to do
+     * instead of leaving a blank frame.
+     */
+    #[Computed]
+    public function canvasEmpty(): bool
+    {
+        return ($this->tree['nodes'][$this->tree['root']]['children'] ?? []) === [];
     }
 
     /**

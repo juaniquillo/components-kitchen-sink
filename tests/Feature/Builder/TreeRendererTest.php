@@ -394,6 +394,58 @@ it('wraps the chrome of a node that lays its children out across a row', functio
         ->toContain('wire:sort:item="n1"');
 });
 
+it('keeps a wrapped spread container a drop target and its children sortable', function () {
+    // A node that lays its children out across a row is wrapped so its
+    // chrome can ride above the row. The wrapper is the sortable item of
+    // the parent, and the node inside it has to hold the group its own
+    // children sort in. Without those attributes on the node, a drag
+    // inside it would be caught by the nearest container above it, and
+    // the whole node would be dragged in the place of the child.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'div');
+    $tree['nodes']['n2']['attrs'] = ['class' => 'flex'];
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'inline.button');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    // The root, the wrapped spread container and the wrapped button all
+    // take children, so each one holds a group of its own.
+    expect(substr_count($html, 'wire:sort="handleSort"'))->toBe(3)
+        ->and($html)->toContain('wire:sort:group-id="n2"')
+        // The wrapper is the item the parent sorts, and the node itself is
+        // not an item of anything.
+        ->and(substr_count($html, 'wire:sort:item="n2"'))->toBe(1);
+});
+
+it('keeps a wrapped select a live container as well', function () {
+    // A select cannot hold the chrome, so it is wrapped, and it takes
+    // children all the same: its options have to stay sortable within it
+    // instead of a drag on one of them taking the whole select.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'form.select');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'form.option');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->toContain('wire:sort:item="n2"')
+        ->toContain('wire:sort:group-id="n2"')
+        ->toContain('wire:sort:item="n3"');
+});
+
+it('leaves the sort family out of a clean render of a spread node', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['attrs'] = ['class' => 'flex'];
+
+    $html = (new TreeRenderer)->render($tree, null, clean: true);
+
+    expect($html)->not->toContain('wire:sort')
+        ->not->toContain('bw-wrap');
+});
+
 it('floats the chrome of a node inside a row of the parent', function () {
     // A node inside the row of a flex row cannot be wrapped: a wrapper
     // would take the place of the node in the row, and its grow and

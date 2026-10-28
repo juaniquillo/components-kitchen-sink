@@ -83,6 +83,21 @@ it('duplicates a node with fresh ids', function () {
         ->assertSet('tree.nodes.n3.type', 'headers.h1');
 });
 
+it('puts the drawer on the copy of the node it duplicated', function () {
+    // The copy is what the user is about to work on: duplicating a node
+    // and then typing into the drawer would quietly change the original
+    // instead, so the drawer follows the copy and the draft of the
+    // original does not.
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->set('textDraft', 'still typing')
+        ->call('duplicate', 'n2')
+        ->assertSet('selectedId', 'n3')
+        ->assertSet('configuringId', 'n3')
+        ->assertSet('textDraft', '')
+        ->assertSet('tree.nodes.n1.children', ['n2', 'n3']);
+});
+
 it('moves a node up and down among its siblings', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'headers.h1')
@@ -131,6 +146,35 @@ it('opens the drawer for a node', function () {
         ->call('openConfig', 'n2')
         ->assertSet('configuringId', 'n2')
         ->assertSet('selectedId', 'n2');
+});
+
+it('says when the canvas is empty', function () {
+    // A fresh page holds nothing but its root, so it says what to do
+    // instead of leaving a blank frame. The hint is a sibling of the
+    // preview and never a part of the tree.
+    Livewire::test(BuilderCanvas::class)
+        ->assertSee('The canvas is empty.', false)
+        ->call('add', 'paragraph')
+        ->assertDontSee('The canvas is empty.', false);
+});
+
+it('takes the empty hint away with the reset as well', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->assertDontSee('The canvas is empty.', false)
+        ->call('resetCanvas')
+        ->assertSee('The canvas is empty.', false);
+});
+
+it('holds a native save confirmation on the canvas', function () {
+    // The save tells the page it happened, and the confirmation is a
+    // native popover waiting for it: the browser owns the top layer and
+    // the close button, and only the timer that dismisses it is script.
+    Livewire::test(BuilderCanvas::class)
+        ->assertSee('popover="manual"', false)
+        ->assertSee('popovertarget="builder-saved-toast"', false)
+        ->assertSee('popovertargetaction="hide"', false)
+        ->assertSee('x-on:builder-saved.window', false);
 });
 
 it('says on the drawer whether it is open', function () {

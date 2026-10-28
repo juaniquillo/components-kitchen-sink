@@ -3,13 +3,24 @@
     data-dirty="{{ $this->dirty() ? 'true' : 'false' }}"
     x-data="{
         shortcut(event) {
+            if (! (event.ctrlKey || event.metaKey)) return;
+
+            const key = event.key.toLowerCase();
+
+            // A save from the keyboard has to work while the name of the
+            // composition is being typed too: naming the composition and
+            // pressing Ctrl+S is the natural flow, and the browser would
+            // open its own save-page dialog otherwise.
+            if (key === 's' && ! event.shiftKey) {
+                event.preventDefault();
+                this.$wire.save();
+                return;
+            }
+
             // The keys the composition is undone and redone with belong to
             // the field the user is typing into otherwise, so the browser
             // keeps its own undo there.
-            if (! (event.ctrlKey || event.metaKey)) return;
             if (event.target.closest('input, textarea, select, [contenteditable]')) return;
-
-            const key = event.key.toLowerCase();
 
             if (key === 'z' && ! event.shiftKey) {
                 event.preventDefault();

@@ -403,6 +403,8 @@ final class TreeMutator
         $copy = self::copyWithNewIds($tree, $nodeId, $idFactory, $copied);
         $copied[$copy['id']] = $copy;
 
+        $copied = self::renameIdentities($copied);
+
         // Everything below the copy goes into the tree first, so the copy
         // itself can be added as a child of its parent.
         foreach ($copied as $id => $copiedNode) {
@@ -414,6 +416,55 @@ final class TreeMutator
         $position = self::positionOf($tree, $nodeId);
 
         return self::addChild($tree, $parentId, $copy, ($position ?? 0) + 1);
+    }
+
+    /**
+     * Give the identity attributes of a copied branch values of their own.
+     *
+     * A copy that kept the id of its original would put two elements with
+     * the same id on the canvas and in the generated code, and a label
+     * would point at the first of them. An id is given the id of the node
+     * it landed on as a suffix, and the references that point at ids of
+     * the branch — a label at its input, a cell at its headers — follow
+     * along. References that point outside the branch stay as they are:
+     * a copy of a label is still a label for the same input.
+     *
+     * @param  array<string, Node>  $copied
+     * @return array<string, Node>
+     */
+    private static function renameIdentities(array $copied): array
+    {
+        $map = [];
+
+        foreach ($copied as $newId => $copiedNode) {
+            if (isset($copiedNode['attrs']['id'])) {
+                $map[$copiedNode['attrs']['id']] = $copiedNode['attrs']['id'].'-'.$newId;
+            }
+        }
+
+        foreach ($copied as $newId => $copiedNode) {
+            foreach (BuilderNode::ID_ATTRIBUTES as $attribute) {
+                if (! isset($copiedNode['attrs'][$attribute])) {
+                    continue;
+                }
+
+                if ($attribute === 'headers') {
+                    $copiedNode['attrs'][$attribute] = implode(' ', array_map(
+                        fn (string $token): string => $map[$token] ?? $token,
+                        explode(' ', $copiedNode['attrs'][$attribute]),
+                    ));
+
+                    continue;
+                }
+
+                $value = $copiedNode['attrs'][$attribute];
+                $copiedNode['attrs'][$attribute] = $map[$value] ?? $value;
+            }
+
+            $copied[$newId] = $copiedNode;
+        }
+
+        return $copied;
     }
 
     /**

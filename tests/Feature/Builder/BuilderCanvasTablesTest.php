@@ -78,6 +78,41 @@ it('removes a column from the canvas when a cell asks', function () {
         ->assertSet('tableNotice', null);
 });
 
+it('clears the selection of a cell the column operation took out', function () {
+    // The operation reaches across the rows of the table, so the cell
+    // the selection is on can go even though another cell asked for the
+    // deletion. A selection left on a node that is not there makes the
+    // button that configures it do nothing at all.
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('select', 'n22')
+        ->call('deleteColumn', 'n15')
+        ->assertSet('selectedId', 'n1');
+});
+
+it('closes the drawer of a cell the column operation took out', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('openConfig', 'n22')
+        ->call('deleteColumn', 'n15')
+        ->assertSet('configuringId', null);
+});
+
+it('leaves the selection alone when the column is refused', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('tableMode', 'n1')
+        ->call('scaffoldTable')
+        ->call('openConfig', 'n13')
+        ->set('attributeName', 'colspan')
+        ->set('attributeValue', '2')
+        ->call('addAttribute')
+        ->call('select', 'n22')
+        ->call('deleteColumn', 'n15')
+        ->assertSet('selectedId', 'n22');
+});
+
 it('refuses a column while a cell of the table spans rows or columns', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
