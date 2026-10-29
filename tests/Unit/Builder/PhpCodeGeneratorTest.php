@@ -45,7 +45,7 @@ it('writes several variants of one group as a list', function () {
         ->toContain("'bottom-sm',");
 });
 
-it('shows the theme file the code needs', function () {
+it('keeps the theme files out of the snippet', function () {
     $tree = BuilderNode::tree('n1', 'div');
     $tree['nodes']['n1']['children'] = ['n2'];
     $tree['nodes']['n2'] = BuilderNode::make('n2', 'inline.button');
@@ -53,11 +53,22 @@ it('shows the theme file the code needs', function () {
 
     $generator = new PhpCodeGenerator(['action' => ['primary' => 'bg-indigo-600 text-white']]);
 
-    $snippet = $generator->snippet($tree);
+    // The files travel in the export, so the component is all a snippet is.
+    expect($generator->snippet($tree))
+        ->toContain("'action' => 'primary',")
+        ->toContain('LocalThemeComponentBuilder as ComponentBuilder')
+        ->not->toContain('resources/views/_themes')
+        ->not->toContain("'primary' => 'bg-indigo-600 text-white',");
+});
 
-    expect($snippet)->toContain('resources/views/_themes/tailwind/action.blade.php')
-        ->toContain("'primary' => 'bg-indigo-600 text-white',")
-        ->toContain('LocalThemeComponentBuilder as ComponentBuilder');
+it('writes a theme as a file the local manager reads', function () {
+    $generator = new PhpCodeGenerator(['action' => ['primary' => 'bg-indigo-600 text-white']]);
+
+    $file = $generator->themeFile('action');
+
+    expect($file)->toStartWith("<?php\n\nreturn [")
+        ->toContain("    'primary' => 'bg-indigo-600 text-white',")
+        ->toEndWith("];\n");
 });
 
 it('uses the local builder even when there is no theme', function () {
@@ -75,7 +86,10 @@ it('leaves a theme that no node uses out of the snippet', function () {
 
     $generator = new PhpCodeGenerator(['action' => ['primary' => 'bg-indigo-600']]);
 
-    expect($generator->snippet($tree))->not->toContain('action.blade.php');
+    // The snippet never carries themes any more; the archive is where they
+    // are written, so an unused group is no different from a used one.
+    expect($generator->snippet($tree))->not->toContain('action.blade.php')
+        ->not->toContain('bg-indigo-600');
 });
 
 it('generates attributes, text and children', function () {

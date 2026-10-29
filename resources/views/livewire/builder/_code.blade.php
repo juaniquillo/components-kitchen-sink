@@ -52,4 +52,10 @@
     </div>
 
     <pre x-ref="code" class="max-h-80 overflow-auto text-xs leading-relaxed text-slate-100"><code>{{ $this->code }}</code></pre>
+
+    @if ($this->themes !== [])
+        <p class="mt-2 text-[11px] text-slate-400">
+            The theme files this code names are exported from the Themes panel, as a .zip.
+        </p>
+    @endif
 </section>

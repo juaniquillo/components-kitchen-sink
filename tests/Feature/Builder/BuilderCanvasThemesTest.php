@@ -197,7 +197,7 @@ it('writes the themes into the generated code', function () {
     expect($component->instance()->code())
         ->toContain('->setThemes([')
         ->toContain("'action' => 'primary',")
-        ->toContain('resources/views/_themes/tailwind/action.blade.php');
+        ->not->toContain('resources/views/_themes');
 });
 
 it('keeps the themes when it is reset', function () {

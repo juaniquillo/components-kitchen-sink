@@ -345,6 +345,10 @@ class BuilderCanvas extends Component
         $this->clearNotice(NoticeSurface::THEME);
 
         $this->clearThemeInputs();
+
+        // The groups are collapsed by default, and a variant that lands in a
+        // group nobody can see looks like a save that did nothing.
+        $this->dispatch('builder-theme-saved', group: $group);
     }
 
     /**

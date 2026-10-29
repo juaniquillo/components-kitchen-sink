@@ -97,3 +97,34 @@ it('says which theme chips are on a node', function () {
 
     expect($component->html())->toContain('aria-pressed="true"');
 });
+
+it('makes each theme group a disclosure', function () {
+    // Every group starts collapsed: the file path in the header is the
+    // button that opens it, and the bulk buttons move all of them at once.
+    $html = Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('openThemes')
+        ->html();
+
+    expect($html)->toContain('aria-controls="theme-group-action"')
+        ->toContain('id="theme-group-action"')
+        ->toContain('x-bind:aria-expanded')
+        ->toContain('aria-label="Classes of action / primary"')
+        ->toContain('Collapse all')
+        ->toContain('Expand all');
+});
+
+it('offers the themes as a download', function () {
+    $component = Livewire::test(BuilderCanvas::class)
+        ->set('themeGroup', 'action')
+        ->set('themeVariant', 'primary')
+        ->set('themeClasses', 'bg-indigo-600')
+        ->call('saveTheme')
+        ->call('openThemes');
+
+    expect($component->html())->toContain('Download all themes (.zip)')
+        ->toContain(route('builder.export', ['workspace' => $component->instance()->workspace]));
+});

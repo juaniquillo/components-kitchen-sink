@@ -129,7 +129,7 @@ app/Builder/
 ├── Registries/ComponentRegistry.php + ThemeRegistry.php
 └── Support/AttributeGuard.php, ClassList.php, CompositionHistory.php,
              NodeChrome.php, TreeRenderer.php, TreeMutator.php,
-             PhpCodeGenerator.php, CompositionSerializer.php,
+             PhpCodeGenerator.php, ThemeArchive.php, CompositionSerializer.php,
              WorkspaceRepository.php, RuntimeTailwind.php
 
 app/Livewire/Builder/BuilderCanvas.php + DrawerMode.php + NoticeSurface.php
@@ -252,7 +252,11 @@ The components that hold text and the components that hold children are describe
 
 #### Themes
 
-A theme is a named set of Tailwind classes, by group and variant (`action / primary`), defined in the drawer's **Themes** panel. A node holds a reference to the theme rather than a copy of its classes, so changing a theme restyles every component that uses it. The chips in the node panel toggle variants on and off, and a theme that is still used by a node cannot be deleted. The generated PHP emits the classes themselves, so the copied code does not depend on the builder.
+A theme is a named set of Tailwind classes, by group and variant (`action / primary`), defined in the drawer's **Themes** panel. A node holds a reference to the theme rather than a copy of its classes, so changing a theme restyles every component that uses it. The chips in the node panel toggle variants on and off, and a theme that is still used by a node cannot be deleted. The generated PHP names the group and the variant; the classes themselves live in the theme file.
+
+The groups are listed collapsed to begin with: the file path in a group's header is the button that opens it, and **Collapse all** / **Expand all** move them all at once. Saving a variant opens its group, so a theme that was just added never lands out of sight.
+
+**Download all themes (.zip)** exports every group as the file the local theme manager reads, under `resources/views/_themes/tailwind/<group>.blade.php`. Unzipping the archive at the root of a project puts the files in place, or its `resources` folder can be dragged into the project; a file with the same group name replaces the one that is already there. The archive carries a README that says so. The component is not part of the archive: it is copied from the Generated code panel, because only the user knows where it is going.
 
 The canvas is styled by the browser build of Tailwind, not by the compiled stylesheet: the builder page turns the local assets off and is handed the application's `@theme` and `@custom-variant dark` declarations by `RuntimeTailwind`, so the two stay in step.
 
@@ -281,7 +285,7 @@ A class typed into the themes panel appears on the canvas at once — the browse
 
 The undo keys belong to the field while the focus is in an input, so typing keeps the browser's own undo. Dragging needs a pointer: the keyboard way to move a node is **Up** / **Down** in the drawer.
 
-The drawer is `inert` while it is closed, moves focus to its **Close** button when it opens, and gives the focus back to the canvas when it closes. Every icon of the node chrome has an accessible name, and the entries of the add menu are real buttons, so Tab reaches them and Enter and Space fire them. The builder was checked with axe-core in a real browser; the one violation left on the page is the shared navigation's link colour, which is an application-wide decision and not the builder's.
+The drawer is `inert` while it is closed, moves focus to its **Close** button when it opens, and gives the focus back to the canvas when it closes. Every icon of the node chrome has an accessible name, and the entries of the add menu are real buttons, so Tab reaches them and Enter and Space fire them. The header of a theme group is a button as well, so a keyboard opens and closes a group with Enter, and the class field inside it is named after its group and variant. The builder was checked with axe-core in a real browser; the one violation left on the page is the shared navigation's link colour, which is an application-wide decision and not the builder's.
 
 ### Form Patterns
 

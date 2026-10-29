@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
+use App\Builder\Support\ThemeArchive;
 use App\Builder\Support\WorkspaceRepository;
 use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
@@ -12,6 +13,7 @@ use App\Emails\EmailCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 Route::get('/', function () {
 
@@ -129,6 +131,28 @@ Route::get('/builder/{workspace}', function (string $workspace) {
     return view('builder', ['workspace' => $workspace]);
 
 })->name('builder.workspace');
+
+Route::get('/builder/{workspace}/export', function (string $workspace) {
+
+    $found = (new WorkspaceRepository)->find($workspace);
+
+    if ($found === null) {
+        abort(404);
+    }
+
+    // The archive is written to a temporary file and handed to the browser;
+    // nothing of the export stays on the server once it has been sent.
+    $path = (new ThemeArchive)->write($found['themes']);
+
+    return response()
+        ->download(
+            $path,
+            (Str::slug($found['name']) ?: 'themes').'.zip',
+            ['Content-Type' => 'application/zip'],
+        )
+        ->deleteFileAfterSend(true);
+
+})->name('builder.export');
 
 Route::post('/cruds', function (Request $request) {
     $identifier = $request->input('identifier');

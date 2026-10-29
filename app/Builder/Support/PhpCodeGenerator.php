@@ -43,17 +43,9 @@ final class PhpCodeGenerator
         $lines = [
             $this->componentImport(),
             'use Juaniquillo\BackendComponents\Enums\ComponentEnum;',
+            '',
+            '$component = '.$this->expression($tree, $tree['root']).';',
         ];
-
-        $files = $this->themeFiles($tree);
-
-        if ($files !== '') {
-            $lines[] = '';
-            $lines[] = $files;
-        }
-
-        $lines[] = '';
-        $lines[] = '$component = '.$this->expression($tree, $tree['root']).';';
 
         return implode("\n", $lines);
     }
@@ -72,62 +64,24 @@ final class PhpCodeGenerator
     }
 
     /**
-     * The theme files the code needs.
+     * The complete contents of the file a theme group lives in.
      *
-     * A theme is a group of variants and a group is a file, so the file
-     * holds the variants of the group. Only the groups the tree uses are
-     * shown, so the snippet holds what the code actually needs.
-     *
-     * @param  Tree  $tree
+     * A theme is a group of variants and a group is a file, so one call
+     * writes one file. The themes are not carried in the snippet: the
+     * files are exported together, and the component is copied from the
+     * panel, which leaves the two usable in whatever project they land.
      */
-    private function themeFiles(array $tree): string
+    public function themeFile(string $group): string
     {
-        $groups = $this->usedGroups($tree);
+        $lines = ['<?php', '', 'return ['];
 
-        if ($groups === []) {
-            return '';
+        foreach ($this->themes[$group] ?? [] as $variant => $classes) {
+            $lines[] = self::INDENT.$this->literal($variant).' => '.$this->literal($classes).',';
         }
 
-        $lines = ['/*', '| Theme files', '|'];
+        $lines[] = '];';
 
-        foreach ($groups as $group) {
-            $lines[] = '| resources/views/_themes/tailwind/'.$group.'.blade.php';
-            $lines[] = '|';
-            $lines[] = '| return [';
-
-            foreach ($this->themes[$group] ?? [] as $variant => $classes) {
-                $lines[] = '|     '.$this->literal($variant).' => '.$this->literal($classes).',';
-            }
-
-            $lines[] = '| ];';
-            $lines[] = '|';
-        }
-
-        $lines[] = '*/';
-
-        return implode("\n", $lines);
-    }
-
-    /**
-     * The groups the tree uses, in the order the registry holds them.
-     *
-     * @param  Tree  $tree
-     * @return array<int, string>
-     */
-    private function usedGroups(array $tree): array
-    {
-        $used = [];
-
-        foreach ($tree['nodes'] as $node) {
-            foreach (array_keys($node['theme']) as $group) {
-                $used[$group] = true;
-            }
-        }
-
-        return array_values(array_filter(
-            array_keys($this->themes),
-            static fn (string $group): bool => isset($used[$group]),
-        ));
+        return implode("\n", $lines)."\n";
     }
 
     /**
