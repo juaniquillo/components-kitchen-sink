@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "ext-zip": "*",
         "electrik/slate": "^3.0",
         "juaniquillo/crud-assistant": "@dev",
         "juaniquillo/flux-backend-components": "@dev",
