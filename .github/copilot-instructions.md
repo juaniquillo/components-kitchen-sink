@@ -123,7 +123,7 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Enums
 
-- Typically, keys in an Enum should be TitleCase. For example: `FavoritePerson`, `BestLake`, `Monthly`.
+- Typically, keys in an Enum should be ALL CAPS. For example: `case CANVAS = 'canvas';`, `case BEST_LAKE = 'best_lake';`. The value keeps its lowercase form, and vendor enums keep the convention they ship with.
 
 ## Comments
 

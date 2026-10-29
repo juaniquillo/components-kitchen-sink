@@ -87,7 +87,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Always use curly braces for control structures, even for single-line bodies.
 - Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
 - Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
-- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
+- Use ALL CAPS for Enum keys: `case CANVAS = 'canvas';`, `case BEST_LAKE = 'best_lake';`. The value keeps its lowercase form, the case name is shouty. This applies to enums this application writes; vendor enums keep the convention they ship with.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
 

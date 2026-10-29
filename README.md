@@ -85,27 +85,54 @@ The pipeline: `Messages::*::build()` composes an MJML tree → `php artisan emai
 
 ### Component Builder
 
-A drag-and-drop builder for `backend-component` trees, at `/builder`. Compose a component from the base `ComponentEnum` vocabulary, then copy the PHP that reproduces it.
+A drag-and-drop builder for `backend-component` trees, at `/builder`. Compose a component from the base `ComponentEnum` vocabulary, then copy the PHP that reproduces it. Every workspace has its own address, so handing one over is a matter of sending a link.
 
 | Panel | What it does |
 |---|---|
+| **Workspace header** | The workspace name, saved as it is typed, with **Copy link**, **New**, **Reset** and **Delete**. |
 | **Palette** | Every base component, grouped (Layout, Typography, Text, Media & Links, Lists, Table, Form). Click to add. |
 | **Canvas** | The real rendered output. Drag the handle to reorder a node or move it into another parent; click to select. |
-| **Drawer** | Slides in from the right with the text and attributes of the node being configured. || **Generated code** | The PHP for the current tree, with a copy button. |
-| **Saved compositions** | Save, load and delete compositions stored as flat JSON files. |
+| **Drawer** | Slides in from the right: the node being configured, the table form, or the themes panel. |
+| **Generated code** | The PHP for the current tree, with a copy button. |
+
+#### Workspaces
+
+`/builder` is onboarding: **New workspace** makes one, and a second field opens an existing one from a pasted link — the whole address or just the id at the end. A workspace lives at `/builder/{workspace}`, where the id is a ULID.
+
+The address is the whole of the capability: anyone holding the link can open and edit the workspace. There are no accounts, no sharing settings and no lock — one writer at a time is assumed, and two tabs on the same link are last-write-wins.
+
+The name in the header belongs to the workspace and not to the composition: **Reset** clears the canvas but keeps the workspace and its name, and the undo brings the canvas back. **New** starts a second workspace and leaves the first where it is. **Delete** removes the file for everyone holding the link and returns to onboarding.
+
+A workspace is one flat JSON file under `storage/app/private/builder/`, named by its id:
+
+```json
+{
+    "id": "01J...",
+    "version": 1,
+    "name": "Hero section",
+    "saved_at": "2026-10-29T21:06:09.077783+00:00",
+    "tree": { "root": "n1", "nodes": {} },
+    "themes": { "action": { "primary": "bg-indigo-600 text-white" } }
+}
+```
+
+Nothing is saved by hand. Every request that changes the tree, the themes or the name writes the file once, on its way out, and only when a fingerprint says something moved — opening the drawer or the preview leaves it alone. **Ctrl+S** writes it again and shows the toast as an acknowledgement.
+
+**Undo and redo** live in the browser session, keyed by the workspace id, with 25 steps. They are not part of the file: a shared link opens on the work without someone else's undo stack, and requests do not carry the history.
 
 #### Architecture
 
 ```
 app/Builder/
 ├── Components/ComponentDescriptor.php + ContentMode.php
-├── Contracts/BuilderNode.php + SavedComposition.php
-├── Registries/ComponentRegistry.php
-└── Support/AttributeGuard.php, NodeChrome.php, TreeRenderer.php,
-             TreeMutator.php, PhpCodeGenerator.php,
-             CompositionSerializer.php, CompositionRepository.php
+├── Contracts/BuilderNode.php
+├── Registries/ComponentRegistry.php + ThemeRegistry.php
+└── Support/AttributeGuard.php, ClassList.php, CompositionHistory.php,
+             NodeChrome.php, TreeRenderer.php, TreeMutator.php,
+             PhpCodeGenerator.php, CompositionSerializer.php,
+             WorkspaceRepository.php, RuntimeTailwind.php
 
-app/Livewire/Builder/BuilderCanvas.php
+app/Livewire/Builder/BuilderCanvas.php + DrawerMode.php + NoticeSurface.php
 ```
 
 The tree is a flat map of nodes keyed by id, each holding the ids of its children (`App\Builder\Contracts\BuilderNode`). A flat map keeps the type free of recursion, makes moving a node a matter of editing two lists, and stays small on disk.
@@ -120,10 +147,10 @@ The chrome has to live *inside* the node it belongs to — the handle must be a 
 
 | Node | Chrome tag | Nodes with no chrome |
 |---|---|---|
-| `div`, `form`, `fieldset`, `li`, `details`, `dialog` | `<div>` | `img`, `col`, all nine form inputs |
-| `p`, `h1`–`h6`, `span`, `a`, `button`, `label`, `summary`, `td`, `th` | `<span>` | `select`, `optgroup`, `datalist`, `option` |
+| `div`, `form`, `fieldset`, `li`, `details`, `dialog` | `<div>` | `img`, `col`, `colgroup`, and every form control (`input`s, `textarea`, `select`, `optgroup`, `option`, `datalist`) |
+| `p`, `h1`–`h6`, `span`, `a`, `button`, `label`, `summary`, `td`, `th` | `<span>` | |
 | `ul`, `ol` | `<li>` | |
-| `tr` | `<td>` | |
+| `tr` | `<tr>` | |
 | `thead`, `tbody`, `tfoot` | `<tr>` | |
 | `table` | `<caption>` | |
 
@@ -178,12 +205,21 @@ Drag starts from the handle (`wire:sort:handle`), which keeps the rest of the no
 
 A node may be a link, and a click on a button inside a link still activates it, so the chrome swallows the default — and so does the node itself, which means clicking a link in the canvas selects it instead of navigating away. The **Preview** modal is where the real thing is seen.
 
-The handler receives the dropped item, its new position and the container it landed in, which is exactly the primitive a tree needs:
+The handler receives the dropped item, its new position and the container it landed in, which is exactly the primitive a tree needs. A drop the parent cannot hold, or one into the node itself, is refused before the tree is touched, and the canvas says why:
 
 ```php
 public function handleSort(string $itemId, int $position, ?string $parentId): void
 {
-    $this->tree = TreeMutator::move($this->tree, $itemId, $parentId, $position);
+    if (($refusal = $this->sortRefusal($itemId, $parentId)) !== null) {
+        $this->notify(NoticeSurface::CANVAS, $refusal);
+
+        return;
+    }
+
+    $this->transact(function () use ($itemId, $parentId, $position): void {
+        $this->tree = TreeMutator::move($this->tree, $itemId, $parentId, $position);
+        $this->selectedId = $itemId;
+    });
 }
 ```
 
@@ -197,12 +233,12 @@ The name is not taken on trust. It ends up inside a Livewire expression and insi
 |---|---|
 | `on*` | Event handlers — `onclick="…"` would be a live cross site scripting hole |
 | `style` | CSS injection |
-| `wire:*` | **Privilege escalation** — a saved component could invoke any public method on the builder |
+| `wire:*` | **Privilege escalation** — a workspace file could invoke any public method on the builder |
 | `x-*` | Alpine's directive syntax |
 | `data-node-id`, `data-selected` | The builder's own, and they would collide with the injected ones |
 | anything that is not a valid attribute name | A quote or a bracket in the name would let it break out of the expression it sits in |
 
-Everything else is allowed — `aria-label`, `data-*`, `itemprop`, `contenteditable`, `part`, `translate`. The guard is the single source of truth: the mutator applies it when an attribute is set, and the serializer applies it again when a saved file is read back, so a hand written file cannot smuggle one in either.
+Everything else is allowed — `aria-label`, `data-*`, `itemprop`, `contenteditable`, `part`, `translate`. The guard is the single source of truth: the mutator applies it when an attribute is set, and the serializer applies it again when a workspace file is read back, so a hand written file cannot smuggle one in either.
 
 The per component attribute lists are still there, but they are no longer a rule — they are the suggestions the name field offers.
 
@@ -214,17 +250,38 @@ A paragraph holds a link, a span or a `strong`; a `div` holds a paragraph; there
 
 The components that hold text and the components that hold children are described separately, so a paragraph gets both a text field and an add button, while a `div` gets an add button but no reason to be typed into. Adding a text element opens the drawer on it, with the text field ready.
 
-#### Styles
+#### Themes
 
-There are none yet. The theme system is deliberately left out of this first cut — the inspector deals with text and attributes only, and the canvas is unstyled. The plumbing to bring the package's theme vocabulary back is a separate piece of work.
+A theme is a named set of Tailwind classes, by group and variant (`action / primary`), defined in the drawer's **Themes** panel. A node holds a reference to the theme rather than a copy of its classes, so changing a theme restyles every component that uses it. The chips in the node panel toggle variants on and off, and a theme that is still used by a node cannot be deleted. The generated PHP emits the classes themselves, so the copied code does not depend on the builder.
 
-#### Saved compositions
+The canvas is styled by the browser build of Tailwind, not by the compiled stylesheet: the builder page turns the local assets off and is handed the application's `@theme` and `@custom-variant dark` declarations by `RuntimeTailwind`, so the two stay in step.
 
-Compositions are stored as flat JSON files in `storage/app/private/builder/`, which is already excluded from version control by `storage/app/private/.gitignore` — no database, and no `.gitignore` change. A saved file is data, never code, and everything read back is validated against the registry before it reaches the builder, so a hand-edited file cannot smuggle in an unknown component or a disallowed attribute.
+#### Reading a file back
+
+A file is data, never code. `CompositionSerializer` validates everything it reads against the registry: an unknown component, an attribute the guard blocks, a theme reference that points at nothing, a child its parent cannot hold, a node with two parents and a cycle are all dropped before the tree reaches the canvas. The same pass runs on a file that was edited by hand, which is why the store can stay a plain directory.
+
+#### Refusals
+
+An action that cannot be done says why, in the place that asked for it: a drop the parent cannot hold, a node dropped into itself, a duplicated root, a table that would gain a second head, a theme that would lose its last class, an attribute the guard blocks. There is one notice at a time, tagged with the panel it belongs to, and the next successful action of that panel takes it away.
 
 #### Known limitation
 
-Tailwind scans *source files*. The chrome's classes live in `app/Builder/Support/NodeChrome.php`, so `resources/css/app.css` carries an `@source '../../app/Builder/**/*.php'` entry to pick them up. A `class` value typed into the drawer and saved as JSON will not be in the compiled CSS for the same reason — raw `class` needs a safelist or an `@source` entry.
+Tailwind scans *source files*. The chrome's classes live in `app/Builder/Support/NodeChrome.php`, so `resources/css/app.css` carries an `@source '../../app/Builder/**/*.php'` entry to pick them up.
+
+A class typed into the themes panel appears on the canvas at once — the browser build generates it as it shows up — but it only reaches the rest of the application once it is in a source file the compiled build scans, or in a safelist. Pasting the generated PHP into a Blade view is the usual way: the classes it names are then in a file Tailwind reads.
+
+#### Keyboard and accessibility
+
+| Key | Does |
+|---|---|
+| `Ctrl`/`⌘` + `S` | Writes the workspace now and shows the toast |
+| `Ctrl`/`⌘` + `Z` | Undo |
+| `Ctrl`/`⌘` + `Shift` + `Z`, or `Ctrl`/`⌘` + `Y` | Redo |
+| `Escape` | Closes the drawer, a menu, or the preview dialog |
+
+The undo keys belong to the field while the focus is in an input, so typing keeps the browser's own undo. Dragging needs a pointer: the keyboard way to move a node is **Up** / **Down** in the drawer.
+
+The drawer is `inert` while it is closed, moves focus to its **Close** button when it opens, and gives the focus back to the canvas when it closes. Every icon of the node chrome has an accessible name, and the entries of the add menu are real buttons, so Tab reaches them and Enter and Space fire them. The builder was checked with axe-core in a real browser; the one violation left on the page is the shared navigation's link colour, which is an application-wide decision and not the builder's.
 
 ### Form Patterns
 
@@ -285,10 +342,17 @@ Run the test suite:
 php artisan test --compact
 ```
 
-Or with Pest:
+Or run it in parallel, the way the full suite is checked before a change is finished:
 
 ```bash
-php artisan pest --compact
+php artisan test --parallel --compact
+```
+
+Pest itself accepts a path and a filter:
+
+```bash
+vendor/bin/pest tests/Feature/Builder --compact
+vendor/bin/pest --filter="undoes a change"
 ```
 
 ## Package Integration
