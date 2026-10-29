@@ -17,6 +17,7 @@
         "juaniquillo/laravel-backend-component": "@dev",
         "juaniquillo/mjml-backend-components": "@dev",
         "juaniquillo/slate-backend-components": "@dev",
+        "juaniquillo/svg-backend-components": "@dev",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "livewire/blaze": "^1.0.7",
