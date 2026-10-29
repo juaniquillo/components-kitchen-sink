@@ -938,9 +938,15 @@ class BuilderCanvas extends Component
 
     /**
      * Open the drawer with the table form, for the node a table goes under.
+     *
+     * The palette offers the same form without a node of its own, so the
+     * table goes where any other palette entry goes: into the container the
+     * selection is in.
      */
-    public function tableMode(string $nodeId): void
+    public function tableMode(?string $nodeId = null): void
     {
+        $nodeId ??= $this->targetParent('table.table');
+
         $node = TreeMutator::find($this->tree, $nodeId);
 
         if ($node === null) {

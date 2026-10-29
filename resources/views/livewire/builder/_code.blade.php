@@ -51,7 +51,12 @@
         </button>
     </div>
 
-    <pre x-ref="code" class="max-h-80 overflow-auto text-xs leading-relaxed text-slate-100"><code>{{ $this->code }}</code></pre>
+    <pre
+        x-ref="code"
+        tabindex="0"
+        aria-label="Generated code"
+        class="max-h-80 overflow-auto rounded text-xs leading-relaxed text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+    ><code>{{ $this->code }}</code></pre>
 
     @if ($this->themes !== [])
         <p class="mt-2 text-[11px] text-slate-400">

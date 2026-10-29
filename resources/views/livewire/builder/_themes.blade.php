@@ -84,6 +84,10 @@
             Download all themes (.zip)
         </a>
 
+        <p class="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+            Unzip at the project root; an existing file with the same group name is replaced.
+        </p>
+
         <div class="mt-3">
             @foreach ($themes as $group => $variants)
                 <div

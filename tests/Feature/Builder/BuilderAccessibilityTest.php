@@ -117,6 +117,14 @@ it('makes each theme group a disclosure', function () {
         ->toContain('Expand all');
 });
 
+it('makes the generated code reachable with the keyboard', function () {
+    // The code panel scrolls, and a scrollable region with nothing
+    // focusable inside it cannot be scrolled from the keyboard.
+    expect(Livewire::test(BuilderCanvas::class)->html())
+        ->toContain('tabindex="0"')
+        ->toContain('aria-label="Generated code"');
+});
+
 it('offers the themes as a download', function () {
     $component = Livewire::test(BuilderCanvas::class)
         ->set('themeGroup', 'action')
