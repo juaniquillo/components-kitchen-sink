@@ -385,9 +385,15 @@ final class TreeMutator
     /**
      * Copy a node, and everything below it, next to the original.
      *
+     * The id of the copy comes back with the tree: the copy is the one node
+     * the caller could not know, and comparing the children of the parent
+     * before and after would be a second way of saying the same thing. A
+     * refusal — the root has nowhere to go — hands back a null id and the
+     * tree untouched.
+     *
      * @param  Tree  $tree
      * @param  callable(string): string  $idFactory
-     * @return Tree
+     * @return array{tree: Tree, id: string|null}
      */
     public static function duplicate(array $tree, string $nodeId, callable $idFactory): array
     {
@@ -395,7 +401,7 @@ final class TreeMutator
         $parentId = self::parentOf($tree, $nodeId);
 
         if ($node === null || $parentId === null) {
-            return $tree;
+            return ['tree' => $tree, 'id' => null];
         }
 
         $copied = [];
@@ -415,7 +421,13 @@ final class TreeMutator
 
         $position = self::positionOf($tree, $nodeId);
 
-        return self::addChild($tree, $parentId, $copy, ($position ?? 0) + 1);
+        $tree = self::addChild($tree, $parentId, $copy, ($position ?? 0) + 1);
+
+        // The parent is the one that decides whether the copy landed, so the
+        // id is only reported when it did.
+        $attached = in_array($copy['id'], $tree['nodes'][$parentId]['children'] ?? [], true);
+
+        return ['tree' => $tree, 'id' => $attached ? $copy['id'] : null];
     }
 
     /**
@@ -493,16 +505,7 @@ final class TreeMutator
             return $tree;
         }
 
-        $siblings = $tree['nodes'][$parentId]['children'];
-
-        $tree = self::duplicate($tree, $rowId, $idFactory);
-
-        // The copy's id is the one its parent did not hold before, and when
-        // the duplication refused there is no such id.
-        $copyId = array_values(array_diff(
-            $tree['nodes'][$parentId]['children'] ?? [],
-            $siblings,
-        ))[0] ?? null;
+        ['tree' => $tree, 'id' => $copyId] = self::duplicate($tree, $rowId, $idFactory);
 
         if ($copyId === null) {
             return $tree;

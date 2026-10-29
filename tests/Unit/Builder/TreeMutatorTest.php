@@ -273,15 +273,30 @@ it('does not shift a node past the ends of its list', function () {
 it('duplicates a node with fresh ids', function () {
     $counter = 0;
 
-    $tree = TreeMutator::duplicate($this->tree, 'n2', function (string $id) use (&$counter): string {
+    ['tree' => $tree, 'id' => $copyId] = TreeMutator::duplicate($this->tree, 'n2', function (string $id) use (&$counter): string {
         $counter++;
 
         return $id.'-copy'.$counter;
     });
 
-    expect($tree['nodes']['n1']['children'])->toBe(['n2', 'n2-copy1', 'n3'])
+    expect($copyId)->toBe('n2-copy1')
+        ->and($tree['nodes']['n1']['children'])->toBe(['n2', 'n2-copy1', 'n3'])
         ->and($tree['nodes']['n2-copy1']['children'])->toBe(['n4-copy2'])
         ->and($tree['nodes'])->toHaveKey('n4-copy2');
+});
+
+it('refuses to copy the root, which has nowhere to go', function () {
+    $counter = 0;
+
+    ['tree' => $tree, 'id' => $copyId] = TreeMutator::duplicate($this->tree, 'n1', function (string $id) use (&$counter): string {
+        $counter++;
+
+        return $id.'-copy'.$counter;
+    });
+
+    expect($copyId)->toBeNull()
+        ->and($tree)->toBe($this->tree)
+        ->and($counter)->toBe(0);
 });
 
 it('gives the ids of a duplicate values of their own, with their references following', function () {
@@ -299,13 +314,14 @@ it('gives the ids of a duplicate values of their own, with their references foll
 
     $counter = 0;
 
-    $tree = TreeMutator::duplicate($tree, 'n2', function (string $id) use (&$counter): string {
+    ['tree' => $tree, 'id' => $copyId] = TreeMutator::duplicate($tree, 'n2', function (string $id) use (&$counter): string {
         $counter++;
 
         return $id.'-copy'.$counter;
     });
 
-    expect($tree['nodes']['n2-copy1']['children'])->toBe(['n3-copy2', 'n4-copy3'])
+    expect($copyId)->toBe('n2-copy1')
+        ->and($tree['nodes']['n2-copy1']['children'])->toBe(['n3-copy2', 'n4-copy3'])
         ->and($tree['nodes']['n4-copy3']['attrs']['id'])->toBe('name-n4-copy3')
         ->and($tree['nodes']['n3-copy2']['attrs']['for'])->toBe('name-n4-copy3');
 });
@@ -328,7 +344,7 @@ it('follows the ids a copy references and leaves the ones outside it alone', fun
 
     $counter = 0;
 
-    $tree = TreeMutator::duplicate($tree, 'n2', function (string $id) use (&$counter): string {
+    ['tree' => $tree] = TreeMutator::duplicate($tree, 'n2', function (string $id) use (&$counter): string {
         $counter++;
 
         return $id.'-copy'.$counter;

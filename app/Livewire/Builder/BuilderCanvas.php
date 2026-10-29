@@ -724,22 +724,17 @@ class BuilderCanvas extends Component
      */
     public function duplicate(string $nodeId): void
     {
-        $parentId = TreeMutator::parentOf($this->tree, $nodeId);
-        $siblings = $parentId !== null ? $this->tree['nodes'][$parentId]['children'] : [];
-
-        $this->transact(function () use ($nodeId, $parentId, $siblings): void {
-            $this->tree = TreeMutator::duplicate(
+        $this->transact(function () use ($nodeId): void {
+            ['tree' => $tree, 'id' => $copyId] = TreeMutator::duplicate(
                 $this->tree,
                 $nodeId,
                 fn (string $id): string => $this->nextId(),
             );
 
-            // The copy's id is the one its parent did not hold before, and when
-            // the duplication refused there is no such id.
-            $copyId = $parentId !== null
-                ? (array_values(array_diff($this->tree['nodes'][$parentId]['children'] ?? [], $siblings))[0] ?? null)
-                : null;
+            $this->tree = $tree;
 
+            // The root has nowhere to go, so it has no copy to select or
+            // configure either.
             if ($copyId === null) {
                 return;
             }

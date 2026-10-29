@@ -100,6 +100,20 @@ it('puts the drawer on the copy of the node it duplicated', function () {
         ->assertSet('tree.nodes.n1.children', ['n2', 'n3']);
 });
 
+it('refuses to copy the root, and remembers nothing to undo', function () {
+    // The root has nowhere to go, so the copy is refused before any id is
+    // handed out: nothing to select, nothing to configure, and nothing for
+    // the undo to bring back.
+    $component = Livewire::test(BuilderCanvas::class)
+        ->call('duplicate', 'n1');
+
+    $instance = $component->instance();
+
+    expect(array_keys($instance->tree['nodes']))->toBe(['n1'])
+        ->and($instance->selectedId)->toBe('n1')
+        ->and($instance->undoStack)->toBe([]);
+});
+
 it('moves a node up and down among its siblings', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'headers.h1')
