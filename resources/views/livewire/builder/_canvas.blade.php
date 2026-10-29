@@ -6,7 +6,9 @@
 
 <section
     id="builder-canvas-panel"
-    class="rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800"
+    tabindex="-1"
+    aria-labelledby="builder-canvas-heading"
+    class="rounded-lg bg-white p-3 shadow-sm focus:outline-none dark:bg-slate-800"
     x-data="{ previewOpen: false }"
     x-bind:inert="previewOpen"
     x-on:builder:morphed.window="if (previewOpen && ! $refs.preview.open) $refs.preview.showModal()"
@@ -18,59 +20,26 @@
     @endif
 
     <div class="mb-2 flex items-center justify-between gap-2">
-        <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Canvas</h2>
+        <h2 id="builder-canvas-heading" class="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">Canvas</h2>
 
         <div class="flex items-center gap-2">
-            <p class="hidden text-[11px] text-slate-400 sm:block">
+            <p class="hidden text-[11px] text-slate-500 sm:block dark:text-slate-400">
                 Drag the handle to move a node. Click to select.
             </p>
 
-            <button
-                type="button"
-                wire:click="undo"
-                @disabled(! $this->canUndo)
-                title="Undo (Ctrl+Z)"
-                aria-label="Undo"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-                ↺
-            </button>
+            <x-bw-button wire:click="undo" :disabled="! $this->canUndo" title="Undo (Ctrl+Z)" aria-label="Undo">↺</x-bw-button>
 
-            <button
-                type="button"
-                wire:click="redo"
-                @disabled(! $this->canRedo)
-                title="Redo (Ctrl+Shift+Z)"
-                aria-label="Redo"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-                ↻
-            </button>
+            <x-bw-button wire:click="redo" :disabled="! $this->canRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↻</x-bw-button>
 
-            <button
-                type="button"
-                wire:click="configureSelected"
-                @disabled($selectedId === null)
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
+            <x-bw-button wire:click="configureSelected" :disabled="$selectedId === null">
                 Configure selected
-            </button>
+            </x-bw-button>
 
-            <button
-                type="button"
-                wire:click="openThemes"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-                Themes
-            </button>
+            <x-bw-button wire:click="openThemes">Themes</x-bw-button>
 
-            <button
-                type="button"
-                x-on:click="previewOpen = true; $refs.preview.showModal(); $wire.call('openPreview')"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
+            <x-bw-button x-on:click="previewOpen = true; $refs.preview.showModal(); $wire.call('openPreview')">
                 Preview
-            </button>
+            </x-bw-button>
         </div>
     </div>
 
@@ -78,7 +47,7 @@
         class="relative min-h-[420px] rounded border border-dashed border-slate-300 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-900/40"
     >
         @if ($this->canvasEmpty())
-            <p class="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-slate-400">
+            <p class="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 The canvas is empty. Add a component from the palette on the left.
             </p>
         @endif
@@ -92,6 +61,10 @@
         only script is the timer that dismisses it again. The workspace is
         written on its own after every change, so the toast is the answer to
         a save from the keyboard rather than the only time anything is saved.
+
+        The colours and the spacing are classes on the element; what stays
+        here is what a class cannot say: the popover's own hide-and-show
+        states, the discrete transition between them, and the anchor.
     --}}
     <style>
         #builder-canvas-panel {
@@ -102,15 +75,6 @@
             position: fixed;
             inset: auto 1rem 1rem auto;
             margin: 0;
-            align-items: center;
-            gap: 0.5rem;
-            border-radius: 0.5rem;
-            border: 1px solid #c7d2fe;
-            background: #eef2ff;
-            color: #4338ca;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.75rem;
-            box-shadow: 0 4px 12px rgb(15 23 42 / 0.15);
             opacity: 0;
             transform: translateY(0.5rem);
             transition:
@@ -140,24 +104,27 @@
             }
         }
 
-        #builder-saved-toast button {
-            border-radius: 0.25rem;
-            padding: 0 0.25rem;
-            line-height: 1;
-            color: inherit;
-        }
-
-        #builder-saved-toast button:hover {
-            background: #c7d2fe;
+        @media (prefers-reduced-motion: reduce) {
+            #builder-saved-toast {
+                transition: none;
+                transform: none;
+            }
         }
     </style>
 
     <output
         id="builder-saved-toast"
         popover="manual"
+        class="items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs text-indigo-700 shadow-lg dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-200"
         x-data="{ timer: null }"
         x-on:builder-saved.window="clearTimeout(timer); if (! $el.matches(':popover-open')) $el.showPopover(); timer = setTimeout(() => { if ($el.matches(':popover-open')) $el.hidePopover(); }, 2000)"
-    >Saved ✓<button type="button" popovertarget="builder-saved-toast" popovertargetaction="hide" aria-label="Dismiss">×</button></output>
+    >Saved ✓<button
+            type="button"
+            popovertarget="builder-saved-toast"
+            popovertargetaction="hide"
+            aria-label="Dismiss"
+            class="rounded px-1 leading-none hover:bg-indigo-200 dark:hover:bg-indigo-500/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+        >×</button></output>
 
     {{--
         The dialog is a plain one: the page does not load the stylesheet of
@@ -172,6 +139,7 @@
     --}}
     <dialog
         x-ref="preview"
+        aria-labelledby="builder-preview-title"
         x-on:cancel="previewOpen = false; $wire.call('closePreview')"
         x-on:click="if ($event.target === $el) { previewOpen = false; $refs.preview.close(); $wire.call('closePreview'); }"
         class="m-auto w-[calc(100%_-_2rem)] max-w-2xl rounded-lg bg-white p-0 shadow-xl dark:bg-slate-800"
@@ -179,15 +147,11 @@
         @if ($this->previewRequested)
             <div class="flex max-h-[80vh] flex-col">
                 <div class="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
-                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Preview</h3>
+                    <h3 id="builder-preview-title" class="text-sm font-semibold text-slate-700 dark:text-slate-200">Preview</h3>
 
-                    <button
-                        type="button"
-                        x-on:click="previewOpen = false; $refs.preview.close(); $wire.call('closePreview')"
-                        class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-                    >
+                    <x-bw-button x-on:click="previewOpen = false; $refs.preview.close(); $wire.call('closePreview')">
                         Close
-                    </button>
+                    </x-bw-button>
                 </div>
 
                 <div class="overflow-auto p-6">

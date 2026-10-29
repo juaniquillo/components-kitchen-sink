@@ -5,7 +5,7 @@
         <div class="mb-6 text-center">
             <h1 class="text-3xl font-bold">Component Builder</h1>
 
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
                 Compose a component by dragging it together, then copy the generated PHP.
             </p>
         </div>
@@ -55,7 +55,7 @@
                     @csrf
 
                     <label class="min-w-0 flex-1">
-                        <span class="mb-1 block text-[11px] font-medium text-slate-500">Link or id</span>
+                        <span class="mb-1 block text-[11px] font-medium text-slate-500 dark:text-slate-400">Link or id</span>
 
                         <input
                             type="text"

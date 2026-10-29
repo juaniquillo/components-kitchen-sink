@@ -36,8 +36,12 @@ class BuilderCanvas extends Component
     /**
      * The composed tree.
      *
+     * Only the component writes it: every change goes through an action, and
+     * a request from the browser can only name the action it wants.
+     *
      * @var Tree
      */
+    #[Locked]
     public array $tree;
 
     /**
@@ -48,6 +52,7 @@ class BuilderCanvas extends Component
      *
      * @var array<string, array<string, string>>
      */
+    #[Locked]
     public array $themes = [];
 
     /**
@@ -67,7 +72,11 @@ class BuilderCanvas extends Component
 
     /**
      * The id of the node the inspector is showing.
+     *
+     * The selection is the component's own: the canvas action that selects a
+     * node is what a request can ask for.
      */
+    #[Locked]
     public ?string $selectedId = null;
 
     /**
@@ -159,6 +168,7 @@ class BuilderCanvas extends Component
     /**
      * How many nodes have been created, used to hand out unique ids.
      */
+    #[Locked]
     public int $nodeCounter = 0;
 
     /**
@@ -168,6 +178,7 @@ class BuilderCanvas extends Component
      * once, on the way out, and only when this says there is something new.
      * A request that only opened a panel leaves the file alone.
      */
+    #[Locked]
     public string $fingerprint = '';
 
     public function mount(?string $workspace = null): void
@@ -255,10 +266,19 @@ class BuilderCanvas extends Component
 
     /**
      * Put the stacks back in the session.
+     *
+     * A change that changed nothing leaves the stacks as they were, and the
+     * session is only written when the stacks really moved.
      */
     private function rememberHistory(CompositionHistory $history): void
     {
         [$undo, $redo] = $history->stacks();
+
+        $current = session()->get($this->historyKey(), []);
+
+        if (($current['undo'] ?? null) === $undo && ($current['redo'] ?? null) === $redo) {
+            return;
+        }
 
         session()->put($this->historyKey(), ['undo' => $undo, 'redo' => $redo]);
     }
@@ -558,11 +578,20 @@ class BuilderCanvas extends Component
      */
     public function closeConfig(): void
     {
+        $wasOpen = $this->drawer !== null;
+
         $this->clearConfiguring();
 
         // The tools panel goes away with the drawer being closed.
         $this->drawer = null;
         $this->drawerTarget = null;
+
+        if ($wasOpen) {
+            // The keyboard focus went into the drawer, and the thing that
+            // opened it is not necessarily where the user is any more, so
+            // the canvas takes it back.
+            $this->dispatch('builder-drawer-closed');
+        }
     }
 
     /**
@@ -597,6 +626,10 @@ class BuilderCanvas extends Component
     {
         $this->drawer = $mode;
         $this->drawerTarget = $mode === DrawerMode::NODE || $mode === DrawerMode::TABLE ? $target : null;
+
+        // The panel is a place of its own, so the keyboard focus goes with
+        // the panel instead of staying behind on the canvas.
+        $this->dispatch('builder-drawer-opened');
     }
 
     /**

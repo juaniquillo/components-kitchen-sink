@@ -33,56 +33,39 @@
     x-on:keydown.window="shortcut($event)"
 >
     <header class="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800">
-        <label class="min-w-0 flex-1">
-            <span class="mb-1 block text-[11px] font-medium text-slate-500">Workspace</span>
+        <label class="min-w-0 flex-1" for="builder-workspace-name">
+            <span class="mb-1 block text-[11px] font-medium text-slate-500 dark:text-slate-400">Workspace</span>
 
             <input
+                id="builder-workspace-name"
                 type="text"
                 wire:model.live.debounce.500ms="name"
-                aria-label="Workspace name"
+                maxlength="120"
                 class="w-full max-w-md rounded border border-slate-200 px-2 py-1 text-sm font-semibold dark:border-slate-600 dark:bg-slate-900"
             />
         </label>
 
         <div class="flex flex-wrap items-center gap-2">
-            <p class="hidden text-[11px] text-slate-400 sm:block">Changes save as you go.</p>
+            <p class="hidden text-[11px] text-slate-500 sm:block dark:text-slate-400">Changes save as you go.</p>
 
             <span class="contents" x-data="{ copied: false }">
-                <button
-                    type="button"
+                <x-bw-button
                     x-on:click="if (navigator.clipboard) navigator.clipboard.writeText(window.location.href).then(() => { copied = true; setTimeout(() => copied = false, 1500) })"
                     x-text="copied ? 'Copied ✓' : 'Copy link'"
-                    class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-                ></button>
+                ></x-bw-button>
 
                 <span class="sr-only" aria-live="polite" x-text="copied ? 'Link copied' : ''"></span>
             </span>
 
-            <button
-                type="button"
-                wire:click="newWorkspace"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-                New
-            </button>
+            <x-bw-button wire:click="newWorkspace">New</x-bw-button>
 
-            <button
-                type="button"
-                wire:click="resetCanvas"
-                wire:confirm="The canvas will be cleared. The undo can bring it back. Are you sure?"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
+            <x-bw-button wire:click="resetCanvas" wire:confirm="The canvas will be cleared. The undo can bring it back. Are you sure?">
                 Reset
-            </button>
+            </x-bw-button>
 
-            <button
-                type="button"
-                wire:click="deleteWorkspace"
-                wire:confirm="This workspace will be deleted for everyone holding the link. Are you sure?"
-                class="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-500/10"
-            >
+            <x-bw-button variant="danger" wire:click="deleteWorkspace" wire:confirm="This workspace will be deleted for everyone holding the link. Are you sure?">
                 Delete
-            </button>
+            </x-bw-button>
         </div>
     </header>
 

@@ -75,8 +75,9 @@ it('renders the preview dialog with ids of its own', function () {
     $tree['nodes']['n3'] = BuilderNode::make('n3', 'form.text');
     $tree['nodes']['n3']['attrs'] = ['id' => 'name'];
 
-    $component = Livewire::test(BuilderCanvas::class)
-        ->set('tree', $tree);
+    $component = Livewire::test(BuilderCanvas::class, [
+        'workspace' => (new WorkspaceRepository)->create('Preview', $tree),
+    ]);
 
     expect($component->instance()->cleanPreview())->toContain('for="bw-preview-name"')
         ->toContain('id="bw-preview-name"');

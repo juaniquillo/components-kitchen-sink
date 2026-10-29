@@ -4,7 +4,7 @@
     $themeMessage = $this->noticeOn(NoticeSurface::THEME);
 @endphp
 
-<p class="hidden text-[11px] text-slate-400 sm:block">
+<p class="hidden text-[11px] text-slate-500 sm:block dark:text-slate-400">
     A theme is a set of Tailwind classes you can use on any component.
 </p>
 
@@ -39,33 +39,27 @@
         />
     </label>
 
-    <button
-        type="button"
-        wire:click="saveTheme"
-        class="shrink-0 rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
-    >
-        Save
-    </button>
+    <x-bw-button wire:click="saveTheme">Save</x-bw-button>
 </div>
 
 @if ($themeMessage !== null)
-    <p class="mt-2 text-[11px] text-red-500" role="alert">{{ $themeMessage }}</p>
+    <p class="mt-2 text-[11px] text-red-600 dark:text-red-400" role="alert">{{ $themeMessage }}</p>
 @endif
 
 @if ($themes !== [])
     <div class="mt-3 space-y-3">
         @foreach ($themes as $group => $variants)
-            <div>
-                <h3 class="mb-1 text-[11px] font-medium text-slate-500">
+            <div wire:key="theme-panel-group-{{ $group }}">
+                <h3 class="mb-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
                     {{ $group }}
-                    <span class="font-normal text-slate-400">
+                    <span class="font-normal text-slate-500 dark:text-slate-400">
                         → resources/views/_themes/tailwind/{{ $group }}.blade.php
                     </span>
                 </h3>
 
                 <ul class="divide-y divide-slate-100 dark:divide-slate-700">
                     @foreach ($variants as $variant => $classes)
-                        <li class="flex items-center gap-2 py-1">
+                        <li wire:key="theme-panel-{{ $group }}-{{ $variant }}" class="flex items-center gap-2 py-1">
                             <span class="w-24 shrink-0 truncate text-[11px] font-medium text-slate-700 dark:text-slate-200">
                                 {{ $variant }}
                             </span>
@@ -77,18 +71,15 @@
                                 class="min-w-0 flex-1 rounded border border-slate-200 px-2 py-1 text-[11px] dark:border-slate-600 dark:bg-slate-900"
                             />
 
-                            <span class="shrink-0 text-[10px] text-slate-400">
+                            <span class="shrink-0 text-[10px] text-slate-500 dark:text-slate-400">
                                 used by {{ $this->themeUsage($group, $variant) }}
                             </span>
 
-                            <button
-                                type="button"
+                            <x-bw-button variant="danger" size="xs"
                                 wire:click="deleteTheme('{{ $group }}', '{{ $variant }}')"
-                                @disabled($this->themeUsage($group, $variant) > 0)
-                                class="shrink-0 rounded border border-red-200 px-1.5 py-0.5 text-[10px] text-red-600 hover:bg-red-50 disabled:opacity-40 dark:border-red-900"
-                            >
+                                :disabled="$this->themeUsage($group, $variant) > 0">
                                 Delete
-                            </button>
+                            </x-bw-button>
                         </li>
                     @endforeach
                 </ul>
@@ -96,7 +87,7 @@
         @endforeach
     </div>
 @else
-    <p class="mt-2 text-[11px] text-slate-400">
+    <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
         No themes yet. Add one above and it can be used on any component.
     </p>
 @endif

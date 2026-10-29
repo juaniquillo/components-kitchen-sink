@@ -241,21 +241,24 @@ final class NodeChrome
 
         $contents = [self::label($node['type'])];
 
+        $descriptor = ComponentRegistry::get($node['type']);
+        $name = $descriptor !== null ? $descriptor->label : $node['type'];
+
         if ($draggable) {
             $contents[] = self::handle();
         }
 
-        $contents[] = self::config($id);
+        $contents[] = self::config($id, $name);
 
         $allowed = self::allowedChildren($node);
         $acceptsText = self::acceptsText($node);
 
         if ($allowed !== [] || $acceptsText) {
-            $contents[] = self::add($id);
+            $contents[] = self::add($id, $name);
             $contents[] = self::menu($node, $allowed, $acceptsText, $childTypes);
         }
 
-        $contents[] = self::delete($id);
+        $contents[] = self::delete($id, $name);
 
         // A row only holds cells, and the parser would hoist the toolbar out
         // of the chrome row and leave it without its Alpine scope, so on a
@@ -345,7 +348,7 @@ final class NodeChrome
         $label = new MainBackendComponent(ComponentEnum::SPAN);
 
         $label->setAttributes([
-            'class' => 'mr-auto pointer-events-none select-none pl-1 text-[10px] uppercase leading-4 tracking-wide text-slate-400 dark:text-slate-500',
+            'class' => 'mr-auto pointer-events-none select-none pl-1 text-[10px] uppercase leading-4 tracking-wide text-slate-500 dark:text-slate-400',
         ]);
 
         $label->setContent(ComponentRegistry::get($type)->label);
@@ -361,6 +364,7 @@ final class NodeChrome
         return self::button('⋮⋮', [
             'wire:sort:handle' => '',
             'title' => 'Drag to move',
+            'aria-label' => 'Drag to move',
             'class' => 'cursor-grab rounded px-1 text-xs leading-4 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700',
         ]);
     }
@@ -368,7 +372,7 @@ final class NodeChrome
     /**
      * The button that opens the drawer for a node.
      */
-    private static function config(string $id): MainBackendComponent
+    private static function config(string $id, string $name): MainBackendComponent
     {
         return self::button('⚙', [
             'wire:sort:ignore' => '',
@@ -376,6 +380,7 @@ final class NodeChrome
             // still activates it, so the default is swallowed here too.
             'wire:click.stop.prevent' => "openConfig('".$id."')",
             'title' => 'Configure',
+            'aria-label' => 'Configure the '.$name,
             'class' => 'rounded px-1 text-xs leading-4 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700',
         ]);
     }
@@ -391,7 +396,7 @@ final class NodeChrome
      * target works as default action of the click itself, so the button
      * stops the chrome from seeing its click at all.
      */
-    private static function add(string $id): MainBackendComponent
+    private static function add(string $id, string $name): MainBackendComponent
     {
         return self::button('+', [
             'wire:sort:ignore' => '',
@@ -399,6 +404,7 @@ final class NodeChrome
             'x-on:click.stop' => 'true',
             'popovertarget' => 'bw-menu-'.$id,
             'title' => 'Add content',
+            'aria-label' => 'Add content to the '.$name,
             'style' => 'anchor-name: --bw-add-'.$id,
             'class' => 'rounded px-1 text-xs leading-4 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700',
         ]);
@@ -407,7 +413,7 @@ final class NodeChrome
     /**
      * The button that deletes a node, once it has been armed.
      */
-    private static function delete(string $id): MainBackendComponent
+    private static function delete(string $id, string $name): MainBackendComponent
     {
         $button = new MainBackendComponent(ComponentEnum::BUTTON);
 
@@ -417,7 +423,8 @@ final class NodeChrome
             'x-on:click' => 'arm()',
             'x-on:mouseleave' => 'armed = false',
             'x-bind:title' => "armed ? 'Click again to delete' : 'Delete'",
-            'class' => 'rounded px-1 text-xs leading-4 text-red-500 hover:bg-red-50 dark:text-red-400',
+            'aria-label' => 'Delete the '.$name,
+            'class' => 'rounded px-1 text-xs leading-4 text-red-600 hover:bg-red-50 dark:text-red-400',
         ]);
 
         $icon = new MainBackendComponent(ComponentEnum::SPAN);
@@ -464,6 +471,8 @@ final class NodeChrome
         $menu->setAttributes([
             'id' => 'bw-menu-'.$node['id'],
             'popover' => 'auto',
+            'role' => 'group',
+            'aria-label' => 'Add content',
             'style' => 'position-anchor: --bw-add-'.$node['id'],
             'class' => 'bw-menu w-56 max-h-64 overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg dark:border-slate-600 dark:bg-slate-800',
         ]);
@@ -575,12 +584,13 @@ final class NodeChrome
         $items = [];
 
         foreach ($actions as $action) {
-            $item = new MainBackendComponent(ComponentEnum::SPAN);
+            $item = new MainBackendComponent(ComponentEnum::BUTTON);
 
             $item->setAttributes([
+                'type' => 'button',
                 'wire:sort:ignore' => '',
                 'x-on:click' => "\$el.closest('[popover]')?.hidePopover(); ".$action['wire'],
-                'class' => 'block cursor-pointer rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-500/20',
+                'class' => 'block w-full cursor-pointer rounded px-2 py-1 text-left text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-500/20',
             ]);
 
             $item->setContent($action['label']);
@@ -598,12 +608,14 @@ final class NodeChrome
      */
     private static function textOption(): MainBackendComponent
     {
-        $option = new MainBackendComponent(ComponentEnum::SPAN);
+        $option = new MainBackendComponent(ComponentEnum::BUTTON);
 
         $option->setAttributes([
+            'type' => 'button',
+            'wire:sort:ignore' => '',
             'x-show' => '!textMode',
             'x-on:click' => 'textMode = true; $nextTick(() => $refs.textInput.focus())',
-            'class' => 'block cursor-pointer rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
+            'class' => 'block w-full cursor-pointer rounded px-2 py-1 text-left text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
         ]);
 
         $option->setContent('Text');
@@ -639,11 +651,12 @@ final class NodeChrome
                 continue;
             }
 
-            $item = new MainBackendComponent(ComponentEnum::SPAN);
+            $item = new MainBackendComponent(ComponentEnum::BUTTON);
             $item->setAttributes([
+                'type' => 'button',
                 'wire:sort:ignore' => '',
                 'x-on:click' => "\$el.closest('[popover]')?.hidePopover(); \$wire.add('".$type."', '".$id."')",
-                'class' => 'block cursor-pointer rounded px-2 py-1 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
+                'class' => 'block w-full cursor-pointer rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
             ]);
             $item->setContent($descriptor->label);
 

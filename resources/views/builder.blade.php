@@ -19,6 +19,16 @@
         @endif
         <style>
             /*
+            | Alpine hides an element carrying x-cloak until it has initialised
+            | it. The stylesheet of the application says so, but this page
+            | replaces the local assets with the runtime build, which does not
+            | read it.
+            */
+            [x-cloak] {
+                display: none !important;
+            }
+
+            /*
             | Builder canvas
             | Every node the builder renders carries a data-node-id, which lets the
             | nodes be outlined on hover and highlighted while selected.
@@ -105,7 +115,7 @@
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-bold">Component Builder</h1>
 
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
             Compose a component by dragging it together, then copy the generated PHP.
         </p>
     </div>
