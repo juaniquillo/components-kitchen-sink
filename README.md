@@ -90,7 +90,7 @@ A drag-and-drop builder for `backend-component` trees, at `/builder`. Compose a 
 | Panel | What it does |
 |---|---|
 | **Workspace header** | The workspace name, saved as it is typed, with **Copy link**, **New**, **Reset** and **Delete**. |
-| **Palette** | Every base component, grouped (Layout, Typography, Text, Media & Links, Lists, Table, Form). Click to add. |
+| **Palette** | Every base component, grouped (Layout, Typography, Text, Media & Links, Lists, Table, Form). Click to add. The Table group also offers **Add table…**, which asks for rows and columns and scaffolds the head and body. |
 | **Canvas** | The real rendered output. Drag the handle to reorder a node or move it into another parent; click to select. |
 | **Drawer** | Slides in from the right: the node being configured, the table form, or the themes panel. |
 | **Generated code** | The PHP for the current tree, with a copy button. |

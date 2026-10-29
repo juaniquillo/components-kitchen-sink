@@ -12,6 +12,31 @@ it('offers a table in the menu of the root', function () {
         ->assertSee('tableMode(', false);
 });
 
+it('offers the table form from the palette', function () {
+    // The palette has no node of its own, so the form goes where every
+    // other palette entry goes: the root, when nothing is selected.
+    Livewire::test(BuilderCanvas::class)
+        ->assertSee('wire:click="tableMode"', false)
+        ->call('tableMode')
+        ->assertSet('drawer', DrawerMode::TABLE)
+        ->assertSet('drawerTarget', 'n1');
+});
+
+it('puts a palette table in the selected container', function () {
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'div')
+        ->call('tableMode')
+        ->assertSet('drawerTarget', 'n2');
+});
+
+it('puts a palette table in the nearest container of a selection', function () {
+    // A paragraph cannot hold a table, so the root takes it instead.
+    Livewire::test(BuilderCanvas::class)
+        ->call('add', 'paragraph')
+        ->call('tableMode')
+        ->assertSet('drawerTarget', 'n1');
+});
+
 it('opens the table form for a node that takes a table', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
