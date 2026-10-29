@@ -1,3 +1,9 @@
+@use('App\Livewire\Builder\NoticeSurface')
+
+@php
+    $themeMessage = $this->noticeOn(NoticeSurface::THEME);
+@endphp
+
 <p class="hidden text-[11px] text-slate-400 sm:block">
     A theme is a set of Tailwind classes you can use on any component.
 </p>
@@ -42,8 +48,8 @@
     </button>
 </div>
 
-@if ($themeNotice !== null)
-    <p class="mt-2 text-[11px] text-red-500" role="alert">{{ $themeNotice }}</p>
+@if ($themeMessage !== null)
+    <p class="mt-2 text-[11px] text-red-500" role="alert">{{ $themeMessage }}</p>
 @endif
 
 @if ($themes !== [])

@@ -317,64 +317,64 @@ final class ComponentRegistry
         };
 
         // --- Layout -------------------------------------------------------
-        $add('div', 'Div', self::GROUP_LAYOUT, ContentMode::TextAndChildren, self::FLOW, self::SUGGESTED_ATTRIBUTES);
-        $add('collection', 'Collection', self::GROUP_LAYOUT, ContentMode::Children, self::FLOW, self::SUGGESTED_ATTRIBUTES);
-        $add('template', 'Template', self::GROUP_LAYOUT, ContentMode::Children, self::FLOW, self::SUGGESTED_ATTRIBUTES);
-        $add('details.details', 'Details', self::GROUP_LAYOUT, ContentMode::TextAndChildren, ['details.summary', ...self::FLOW], [...self::SUGGESTED_ATTRIBUTES, 'open']);
-        $add('details.summary', 'Summary', self::GROUP_LAYOUT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('layers.dialog', 'Dialog', self::GROUP_LAYOUT, ContentMode::TextAndChildren, self::FLOW, [...self::SUGGESTED_ATTRIBUTES, 'open']);
+        $add('div', 'Div', self::GROUP_LAYOUT, ContentMode::TEXT_AND_CHILDREN, self::FLOW, self::SUGGESTED_ATTRIBUTES);
+        $add('collection', 'Collection', self::GROUP_LAYOUT, ContentMode::CHILDREN, self::FLOW, self::SUGGESTED_ATTRIBUTES);
+        $add('template', 'Template', self::GROUP_LAYOUT, ContentMode::CHILDREN, self::FLOW, self::SUGGESTED_ATTRIBUTES);
+        $add('details.details', 'Details', self::GROUP_LAYOUT, ContentMode::TEXT_AND_CHILDREN, ['details.summary', ...self::FLOW], [...self::SUGGESTED_ATTRIBUTES, 'open']);
+        $add('details.summary', 'Summary', self::GROUP_LAYOUT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('layers.dialog', 'Dialog', self::GROUP_LAYOUT, ContentMode::TEXT_AND_CHILDREN, self::FLOW, [...self::SUGGESTED_ATTRIBUTES, 'open']);
         // --- Typography ---------------------------------------------------
-        $add('paragraph', 'Paragraph', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('headers.h1', 'Heading 1', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('headers.h2', 'Heading 2', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('headers.h3', 'Heading 3', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('headers.h4', 'Heading 4', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('headers.h5', 'Heading 5', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('headers.h6', 'Heading 6', self::GROUP_TYPOGRAPHY, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('paragraph', 'Paragraph', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('headers.h1', 'Heading 1', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('headers.h2', 'Heading 2', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('headers.h3', 'Heading 3', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('headers.h4', 'Heading 4', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('headers.h5', 'Heading 5', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('headers.h6', 'Heading 6', self::GROUP_TYPOGRAPHY, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
         // --- Text ----------------------------------------------------------
-        $add('inline.span', 'Span', self::GROUP_TEXT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('inline.bold', 'Bold', self::GROUP_TEXT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('inline.strong', 'Strong', self::GROUP_TEXT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('inline.em', 'Emphasis', self::GROUP_TEXT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('inline.italic', 'Italic', self::GROUP_TEXT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('inline.small', 'Small', self::GROUP_TEXT, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('inline.span', 'Span', self::GROUP_TEXT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('inline.bold', 'Bold', self::GROUP_TEXT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('inline.strong', 'Strong', self::GROUP_TEXT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('inline.em', 'Emphasis', self::GROUP_TEXT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('inline.italic', 'Italic', self::GROUP_TEXT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('inline.small', 'Small', self::GROUP_TEXT, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
         // --- Media & links ------------------------------------------------
-        $add('inline.link', 'Link', self::GROUP_MEDIA, ContentMode::TextAndChildren, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'href', 'target', 'rel', 'download']);
-        $add('inline.img', 'Image', self::GROUP_MEDIA, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, 'src', 'alt', 'width', 'height', 'loading', 'decoding']);
-        $add('inline.button', 'Button', self::GROUP_MEDIA, ContentMode::TextAndChildren, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'type', 'name', 'value', 'disabled']);
+        $add('inline.link', 'Link', self::GROUP_MEDIA, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'href', 'target', 'rel', 'download']);
+        $add('inline.img', 'Image', self::GROUP_MEDIA, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, 'src', 'alt', 'width', 'height', 'loading', 'decoding']);
+        $add('inline.button', 'Button', self::GROUP_MEDIA, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'type', 'name', 'value', 'disabled']);
         // --- Lists ---------------------------------------------------------
-        $add('lists.ul', 'Unordered List', self::GROUP_LISTS, ContentMode::Children, ['lists.li'], self::SUGGESTED_ATTRIBUTES);
-        $add('lists.ol', 'Ordered List', self::GROUP_LISTS, ContentMode::Children, ['lists.li'], self::SUGGESTED_ATTRIBUTES);
-        $add('lists.li', 'List Item', self::GROUP_LISTS, ContentMode::TextAndChildren, self::FLOW, self::SUGGESTED_ATTRIBUTES);
+        $add('lists.ul', 'Unordered List', self::GROUP_LISTS, ContentMode::CHILDREN, ['lists.li'], self::SUGGESTED_ATTRIBUTES);
+        $add('lists.ol', 'Ordered List', self::GROUP_LISTS, ContentMode::CHILDREN, ['lists.li'], self::SUGGESTED_ATTRIBUTES);
+        $add('lists.li', 'List Item', self::GROUP_LISTS, ContentMode::TEXT_AND_CHILDREN, self::FLOW, self::SUGGESTED_ATTRIBUTES);
         // --- Table ---------------------------------------------------------
-        $add('table.table', 'Table', self::GROUP_TABLE, ContentMode::Children, ['table.caption', 'table.colgroup', 'table.thead', 'table.tbody', 'table.tfoot', 'table.tr'], self::SUGGESTED_ATTRIBUTES);
-        $add('table.thead', 'Table Head', self::GROUP_TABLE, ContentMode::Children, ['table.tr'], self::SUGGESTED_ATTRIBUTES);
-        $add('table.tbody', 'Table Body', self::GROUP_TABLE, ContentMode::Children, ['table.tr'], self::SUGGESTED_ATTRIBUTES);
-        $add('table.tfoot', 'Table Foot', self::GROUP_TABLE, ContentMode::Children, ['table.tr'], self::SUGGESTED_ATTRIBUTES);
-        $add('table.tr', 'Table Row', self::GROUP_TABLE, ContentMode::Children, ['table.th', 'table.td'], self::SUGGESTED_ATTRIBUTES);
-        $add('table.th', 'Header Cell', self::GROUP_TABLE, ContentMode::TextAndChildren, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'colspan', 'rowspan', 'scope', 'headers']);
-        $add('table.td', 'Data Cell', self::GROUP_TABLE, ContentMode::TextAndChildren, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'colspan', 'rowspan']);
-        $add('table.caption', 'Caption', self::GROUP_TABLE, ContentMode::TextAndChildren, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'colspan']);
-        $add('table.colgroup', 'Column Group', self::GROUP_TABLE, ContentMode::Children, ['table.col'], self::SUGGESTED_ATTRIBUTES);
-        $add('table.col', 'Column', self::GROUP_TABLE, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, 'span']);
+        $add('table.table', 'Table', self::GROUP_TABLE, ContentMode::CHILDREN, ['table.caption', 'table.colgroup', 'table.thead', 'table.tbody', 'table.tfoot', 'table.tr'], self::SUGGESTED_ATTRIBUTES);
+        $add('table.thead', 'Table Head', self::GROUP_TABLE, ContentMode::CHILDREN, ['table.tr'], self::SUGGESTED_ATTRIBUTES);
+        $add('table.tbody', 'Table Body', self::GROUP_TABLE, ContentMode::CHILDREN, ['table.tr'], self::SUGGESTED_ATTRIBUTES);
+        $add('table.tfoot', 'Table Foot', self::GROUP_TABLE, ContentMode::CHILDREN, ['table.tr'], self::SUGGESTED_ATTRIBUTES);
+        $add('table.tr', 'Table Row', self::GROUP_TABLE, ContentMode::CHILDREN, ['table.th', 'table.td'], self::SUGGESTED_ATTRIBUTES);
+        $add('table.th', 'Header Cell', self::GROUP_TABLE, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'colspan', 'rowspan', 'scope', 'headers']);
+        $add('table.td', 'Data Cell', self::GROUP_TABLE, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'colspan', 'rowspan']);
+        $add('table.caption', 'Caption', self::GROUP_TABLE, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'colspan']);
+        $add('table.colgroup', 'Column Group', self::GROUP_TABLE, ContentMode::CHILDREN, ['table.col'], self::SUGGESTED_ATTRIBUTES);
+        $add('table.col', 'Column', self::GROUP_TABLE, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, 'span']);
         // --- Form ----------------------------------------------------------
-        $add('form.form', 'Form', self::GROUP_FORM, ContentMode::TextAndChildren, self::FLOW, [...self::SUGGESTED_ATTRIBUTES, 'action', 'method', 'enctype', 'novalidate']);
-        $add('form.fieldset', 'Fieldset', self::GROUP_FORM, ContentMode::TextAndChildren, self::FLOW, [...self::SUGGESTED_ATTRIBUTES, 'name', 'disabled']);
-        $add('form.legend', 'Legend', self::GROUP_FORM, ContentMode::TextAndChildren, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
-        $add('form.label', 'Label', self::GROUP_FORM, ContentMode::TextAndChildren, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'for']);
-        $add('form.text', 'Text Input', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
-        $add('form.email', 'Email Input', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
-        $add('form.password', 'Password Input', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
-        $add('form.search', 'Search Input', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
-        $add('form.file', 'File Input', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
-        $add('form.checkbox', 'Checkbox', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, 'name', 'value', 'checked', 'disabled', 'required']);
-        $add('form.radio', 'Radio', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, 'name', 'value', 'checked', 'disabled', 'required']);
-        $add('form.hidden', 'Hidden Input', self::GROUP_FORM, ContentMode::None, [], [...self::SUGGESTED_ATTRIBUTES, 'name', 'value']);
-        $add('form.textarea', 'Textarea', self::GROUP_FORM, ContentMode::Text, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES, 'rows', 'cols']);
-        $add('form.select', 'Select', self::GROUP_FORM, ContentMode::Children, ['form.optgroup', 'form.option'], [...self::SUGGESTED_ATTRIBUTES, 'name', 'disabled', 'required', 'multiple', 'size']);
-        $add('form.optgroup', 'Option Group', self::GROUP_FORM, ContentMode::Children, ['form.option'], [...self::SUGGESTED_ATTRIBUTES, 'label', 'disabled']);
-        $add('form.option', 'Option', self::GROUP_FORM, ContentMode::Text, [], [...self::SUGGESTED_ATTRIBUTES, 'value', 'selected', 'disabled', 'label']);
-        $add('form.datalist', 'Datalist', self::GROUP_FORM, ContentMode::Children, ['form.option'], self::SUGGESTED_ATTRIBUTES);
+        $add('form.form', 'Form', self::GROUP_FORM, ContentMode::TEXT_AND_CHILDREN, self::FLOW, [...self::SUGGESTED_ATTRIBUTES, 'action', 'method', 'enctype', 'novalidate']);
+        $add('form.fieldset', 'Fieldset', self::GROUP_FORM, ContentMode::TEXT_AND_CHILDREN, self::FLOW, [...self::SUGGESTED_ATTRIBUTES, 'name', 'disabled']);
+        $add('form.legend', 'Legend', self::GROUP_FORM, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, self::SUGGESTED_ATTRIBUTES);
+        $add('form.label', 'Label', self::GROUP_FORM, ContentMode::TEXT_AND_CHILDREN, self::PHRASING, [...self::SUGGESTED_ATTRIBUTES, 'for']);
+        $add('form.text', 'Text Input', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
+        $add('form.email', 'Email Input', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
+        $add('form.password', 'Password Input', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
+        $add('form.search', 'Search Input', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
+        $add('form.file', 'File Input', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES]);
+        $add('form.checkbox', 'Checkbox', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, 'name', 'value', 'checked', 'disabled', 'required']);
+        $add('form.radio', 'Radio', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, 'name', 'value', 'checked', 'disabled', 'required']);
+        $add('form.hidden', 'Hidden Input', self::GROUP_FORM, ContentMode::NONE, [], [...self::SUGGESTED_ATTRIBUTES, 'name', 'value']);
+        $add('form.textarea', 'Textarea', self::GROUP_FORM, ContentMode::TEXT, [], [...self::SUGGESTED_ATTRIBUTES, ...self::SUGGESTED_INPUT_ATTRIBUTES, 'rows', 'cols']);
+        $add('form.select', 'Select', self::GROUP_FORM, ContentMode::CHILDREN, ['form.optgroup', 'form.option'], [...self::SUGGESTED_ATTRIBUTES, 'name', 'disabled', 'required', 'multiple', 'size']);
+        $add('form.optgroup', 'Option Group', self::GROUP_FORM, ContentMode::CHILDREN, ['form.option'], [...self::SUGGESTED_ATTRIBUTES, 'label', 'disabled']);
+        $add('form.option', 'Option', self::GROUP_FORM, ContentMode::TEXT, [], [...self::SUGGESTED_ATTRIBUTES, 'value', 'selected', 'disabled', 'label']);
+        $add('form.datalist', 'Datalist', self::GROUP_FORM, ContentMode::CHILDREN, ['form.option'], self::SUGGESTED_ATTRIBUTES);
 
         return $definitions;
     }

@@ -12,20 +12,20 @@ enum ContentMode: string
     /**
      * The component holds no content at all (void elements).
      */
-    case None = 'none';
+    case NONE = 'none';
 
     /**
      * The component holds a single block of text.
      */
-    case Text = 'text';
+    case TEXT = 'text';
 
     /**
      * The component holds child components.
      */
-    case Children = 'children';
+    case CHILDREN = 'children';
 
     /**
      * The component holds text and child components.
      */
-    case TextAndChildren = 'text_and_children';
+    case TEXT_AND_CHILDREN = 'text_and_children';
 }

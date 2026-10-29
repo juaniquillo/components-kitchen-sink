@@ -94,7 +94,7 @@ it('puts the drawer on the copy of the node it duplicated', function () {
         ->set('textDraft', 'still typing')
         ->call('duplicate', 'n2')
         ->assertSet('selectedId', 'n3')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n3')
         ->assertSet('textDraft', '')
         ->assertSet('tree.nodes.n1.children', ['n2', 'n3']);
@@ -160,7 +160,7 @@ it('opens the drawer for a node', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'headers.h1')
         ->call('openConfig', 'n2')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n2')
         ->assertSet('selectedId', 'n2');
 });
@@ -221,11 +221,11 @@ it('says on the drawer whether a tool panel is open', function () {
 it('opens the drawer on the tool that was asked for', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openThemes')
-        ->assertSet('drawer', DrawerMode::Themes)
+        ->assertSet('drawer', DrawerMode::THEMES)
         ->call('closeConfig')
         ->assertSet('drawer', null)
         ->call('openSaved')
-        ->assertSet('drawer', DrawerMode::Saved);
+        ->assertSet('drawer', DrawerMode::SAVED);
 });
 
 it('gives the tools the whole drawer when a node is asked about', function () {
@@ -234,7 +234,7 @@ it('gives the tools the whole drawer when a node is asked about', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openThemes')
         ->call('openConfig', 'n1')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n1');
 });
 
@@ -242,7 +242,7 @@ it('clears the node of the drawer when a tool is asked for', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openConfig', 'n1')
         ->call('openSaved')
-        ->assertSet('drawer', DrawerMode::Saved)
+        ->assertSet('drawer', DrawerMode::SAVED)
         ->assertSet('drawerTarget', null);
 });
 
@@ -264,7 +264,7 @@ it('configures the selected node when there is no button to press', function () 
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'form.text')
         ->call('configureSelected')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n2');
 });
 
@@ -304,7 +304,7 @@ it('gives the configuration back when a node is asked about', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
         ->call('openConfig', 'n1')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n1')
         ->assertSee('data-open="true"', false);
 });

@@ -1,4 +1,5 @@
 @use('App\Livewire\Builder\DrawerMode')
+@use('App\Livewire\Builder\NoticeSurface')
 
 @php
     $node = $this->configuring;
@@ -18,9 +19,9 @@
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
             {{ match ($drawer) {
-                DrawerMode::Table => 'Add table',
-                DrawerMode::Themes => 'Themes',
-                DrawerMode::Saved => 'Saved compositions',
+                DrawerMode::TABLE => 'Add table',
+                DrawerMode::THEMES => 'Themes',
+                DrawerMode::SAVED => 'Saved compositions',
                 default => 'Configure',
             } }}
         </h2>
@@ -34,7 +35,7 @@
         </button>
     </div>
 
-    @if ($drawer === DrawerMode::Table)
+    @if ($drawer === DrawerMode::TABLE)
         <div class="space-y-5">
             <p class="text-[11px] text-slate-400">
                 A skeleton with a head row and the body rows goes under the
@@ -68,8 +69,8 @@
                 </label>
             </div>
 
-            @if ($tableNotice !== null)
-                <p class="text-[11px] text-red-500" role="alert">{{ $tableNotice }}</p>
+            @if ($tableMessage = $this->noticeOn(NoticeSurface::TABLE))
+                <p class="text-[11px] text-red-500" role="alert">{{ $tableMessage }}</p>
             @endif
 
             <div class="flex gap-2">
@@ -90,9 +91,9 @@
                 </button>
             </div>
         </div>
-    @elseif ($drawer === DrawerMode::Themes)
+    @elseif ($drawer === DrawerMode::THEMES)
         @include('livewire.builder._themes')
-    @elseif ($drawer === DrawerMode::Saved)
+    @elseif ($drawer === DrawerMode::SAVED)
         @include('livewire.builder._saved')
     @elseif ($node === null || $descriptor === null)
         <p class="text-xs text-slate-400">Select a node and press its configure button.</p>
@@ -114,6 +115,10 @@
                 <button type="button" wire:click="duplicate('{{ $node['id'] }}')"
                     class="rounded border border-slate-200 px-2 py-1 text-xs hover:bg-slate-50 dark:border-slate-600">Duplicate</button>
             </div>
+
+            @if ($nodeNotice = $this->noticeOn(NoticeSurface::NODE))
+                <p class="text-[11px] text-red-500" role="alert">{{ $nodeNotice }}</p>
+            @endif
 
             @if ($descriptor->acceptsText())
                 <div>
@@ -273,8 +278,8 @@
                     </button>
                 @endif
 
-                @if ($attributeNotice !== null)
-                    <p class="mt-1 text-[11px] text-red-500" role="alert">{{ $attributeNotice }}</p>
+                @if ($attributeMessage = $this->noticeOn(NoticeSurface::ATTRIBUTE))
+                    <p class="mt-1 text-[11px] text-red-500" role="alert">{{ $attributeMessage }}</p>
                 @endif
 
                 <datalist id="attribute-suggestions-{{ $node['id'] }}">

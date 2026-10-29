@@ -34,7 +34,7 @@ it('says why an attribute was refused', function () {
         ->set('attributeName', 'onclick')
         ->set('attributeValue', 'alert(1)')
         ->call('addAttribute')
-        ->assertSet('attributeNotice', 'That attribute is not allowed.');
+        ->assertSet('notice', ['surface' => 'attribute', 'message' => 'That attribute is not allowed.']);
 });
 
 it('clears the notice once an attribute is added', function () {
@@ -46,7 +46,7 @@ it('clears the notice once an attribute is added', function () {
         ->set('attributeName', 'id')
         ->set('attributeValue', 'hero')
         ->call('addAttribute')
-        ->assertSet('attributeNotice', null)
+        ->assertSet('notice', null)
         ->assertSet('tree.nodes.n2.attrs', ['id' => 'hero']);
 });
 

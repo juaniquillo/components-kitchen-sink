@@ -1,3 +1,9 @@
+@use('App\Livewire\Builder\NoticeSurface')
+
+@php
+    $canvasNotice = $this->noticeOn(NoticeSurface::CANVAS) ?? $this->noticeOn(NoticeSurface::TABLE);
+@endphp
+
 <section
     id="builder-canvas-panel"
     class="rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800"
@@ -5,9 +11,9 @@
     x-bind:inert="previewOpen"
     x-on:builder:morphed.window="if (previewOpen && ! $refs.preview.open) $refs.preview.showModal()"
 >
-    @if ($tableNotice !== null)
+    @if ($canvasNotice !== null)
         <p class="mb-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-600 dark:border-red-900 dark:bg-red-500/10 dark:text-red-300" role="alert">
-            {{ $tableNotice }}
+            {{ $canvasNotice }}
         </p>
     @endif
 

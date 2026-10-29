@@ -61,8 +61,8 @@ final readonly class ComponentDescriptor
      */
     public function acceptsText(): bool
     {
-        return $this->contentMode === ContentMode::Text
-            || $this->contentMode === ContentMode::TextAndChildren;
+        return $this->contentMode === ContentMode::TEXT
+            || $this->contentMode === ContentMode::TEXT_AND_CHILDREN;
     }
 
     /**
@@ -70,7 +70,7 @@ final readonly class ComponentDescriptor
      */
     public function acceptsChildren(): bool
     {
-        return $this->contentMode === ContentMode::Children
-            || $this->contentMode === ContentMode::TextAndChildren;
+        return $this->contentMode === ContentMode::CHILDREN
+            || $this->contentMode === ContentMode::TEXT_AND_CHILDREN;
     }
 }

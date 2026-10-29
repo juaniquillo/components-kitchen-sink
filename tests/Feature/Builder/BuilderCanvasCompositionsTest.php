@@ -66,7 +66,7 @@ it('closes the drawer when a composition is loaded', function () {
 
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n2')
         ->call('load', 'simple')
         ->assertSet('drawer', null);
@@ -78,7 +78,7 @@ it('asks for a name before it saves a composition', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
         ->call('save')
-        ->assertSet('drawer', DrawerMode::Saved)
+        ->assertSet('drawer', DrawerMode::SAVED)
         ->assertSet('compositionName', '')
         ->assertSee('data-open="true"', false);
 
@@ -92,7 +92,7 @@ it('keeps the saved compositions drawer open while one is loaded', function () {
         ->call('openSaved')
         ->assertSee('Simple', false)
         ->call('load', 'simple')
-        ->assertSet('drawer', DrawerMode::Saved)
+        ->assertSet('drawer', DrawerMode::SAVED)
         ->assertSee('data-open="true"', false)
         ->assertSet('drawerTarget', null);
 });

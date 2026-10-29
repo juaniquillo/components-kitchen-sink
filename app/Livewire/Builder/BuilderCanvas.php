@@ -87,6 +87,17 @@ class BuilderCanvas extends Component
     public ?string $drawerTarget = null;
 
     /**
+     * The message the last refused action left behind, and where it belongs.
+     *
+     * One notice at a time: a new refusal replaces the one before it, and
+     * every surface renders only the notice that is its own. A successful
+     * action of the same surface takes it away again.
+     *
+     * @var array{surface: string, message: string}|null
+     */
+    public ?array $notice = null;
+
+    /**
      * The number of columns the table form is set to.
      */
     public int $newTableColumns = 3;
@@ -95,14 +106,6 @@ class BuilderCanvas extends Component
      * The number of body rows the table form is set to.
      */
     public int $newTableRows = 2;
-
-    /**
-     * Why the last table operation was refused, if it was.
-     *
-     * The row and column operations reach across a table, and a table that
-     * is not lined up has to say so instead of staying quiet.
-     */
-    public ?string $tableNotice = null;
 
     /**
      * The name given to the composition when it is saved.
@@ -138,19 +141,6 @@ class BuilderCanvas extends Component
      * The text waiting to be added to the node the drawer is configuring.
      */
     public string $textDraft = '';
-
-    /**
-     * Why the last attribute was refused, if it was.
-     *
-     * The guard refuses a name for a reason, and a field that empties itself
-     * without saying why reads like a bug.
-     */
-    public ?string $attributeNotice = null;
-
-    /**
-     * Why the last theme was refused, if it was.
-     */
-    public ?string $themeNotice = null;
 
     /**
      * How many nodes have been created, used to hand out unique ids.
@@ -194,6 +184,34 @@ class BuilderCanvas extends Component
     }
 
     /**
+     * Say why an action was refused, in the place that asked for it.
+     */
+    private function notify(NoticeSurface $surface, string $message): void
+    {
+        $this->notice = ['surface' => $surface->value, 'message' => $message];
+    }
+
+    /**
+     * Take a notice away, or every notice when no surface is named.
+     */
+    private function clearNotice(?NoticeSurface $surface = null): void
+    {
+        if ($surface === null || ($this->notice['surface'] ?? null) === $surface->value) {
+            $this->notice = null;
+        }
+    }
+
+    /**
+     * The message waiting for a surface, if it is the one showing.
+     */
+    public function noticeOn(NoticeSurface $surface): ?string
+    {
+        return $this->notice !== null && $this->notice['surface'] === $surface->value
+            ? $this->notice['message']
+            : null;
+    }
+
+    /**
      * Add a theme, or change the one being edited.
      */
     public function saveTheme(): void
@@ -202,7 +220,7 @@ class BuilderCanvas extends Component
         $variant = trim($this->themeVariant);
 
         if (! ThemeRegistry::allowsName($group) || ! ThemeRegistry::allowsName($variant)) {
-            $this->themeNotice = 'A group and a variant may only hold letters, numbers, dashes and underscores.';
+            $this->notify(NoticeSurface::THEME, 'A group and a variant may only hold letters, numbers, dashes and underscores.');
 
             return;
         }
@@ -210,7 +228,7 @@ class BuilderCanvas extends Component
         $registry = (new ThemeRegistry($this->themes))->with($group, $variant, $this->themeClasses);
 
         if ($registry->classes($group, $variant) === '') {
-            $this->themeNotice = 'A theme needs at least one class.';
+            $this->notify(NoticeSurface::THEME, 'A theme needs at least one class.');
 
             return;
         }
@@ -219,7 +237,7 @@ class BuilderCanvas extends Component
             $this->themes = $registry->groups();
         });
 
-        $this->themeNotice = null;
+        $this->clearNotice(NoticeSurface::THEME);
 
         $this->clearThemeInputs();
     }
@@ -239,12 +257,12 @@ class BuilderCanvas extends Component
         // nodes that use it would be left pointing at nothing, so the old
         // classes are kept and the reason is shown instead.
         if ($sanitized === '') {
-            $this->themeNotice = 'A theme needs at least one class.';
+            $this->notify(NoticeSurface::THEME, 'A theme needs at least one class.');
 
             return;
         }
 
-        $this->themeNotice = null;
+        $this->clearNotice(NoticeSurface::THEME);
 
         $this->transact(function () use ($group, $variant, $sanitized): void {
             $this->themes = (new ThemeRegistry($this->themes))
@@ -262,12 +280,12 @@ class BuilderCanvas extends Component
     public function deleteTheme(string $group, string $variant): void
     {
         if ($this->themeUsage($group, $variant) > 0) {
-            $this->themeNotice = 'This theme is still used by a node, so it cannot be removed.';
+            $this->notify(NoticeSurface::THEME, 'This theme is still used by a node, so it cannot be removed.');
 
             return;
         }
 
-        $this->themeNotice = null;
+        $this->clearNotice(NoticeSurface::THEME);
 
         $this->transact(function () use ($group, $variant): void {
             $this->themes = (new ThemeRegistry($this->themes))->without($group, $variant)->groups();
@@ -354,10 +372,53 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $refusal = $this->sortRefusal($itemId, $parentId);
+
+        if ($refusal !== null) {
+            // The drop is refused, but the node it was about is still the
+            // one the user is looking at.
+            $this->selectedId = $itemId;
+            $this->notify(NoticeSurface::CANVAS, $refusal);
+
+            return;
+        }
+
         $this->transact(function () use ($itemId, $parentId, $position): void {
             $this->tree = TreeMutator::move($this->tree, $itemId, $parentId, $position);
             $this->selectedId = $itemId;
         });
+
+        $this->clearNotice(NoticeSurface::CANVAS);
+    }
+
+    /**
+     * Why a dropped node cannot go where it landed, if it cannot.
+     */
+    private function sortRefusal(string $itemId, string $parentId): ?string
+    {
+        $item = TreeMutator::find($this->tree, $itemId);
+        $parent = TreeMutator::find($this->tree, $parentId);
+
+        if ($item === null || $parent === null) {
+            return 'That node is not on the canvas any more.';
+        }
+
+        if ($itemId === $parentId || in_array($parentId, TreeMutator::descendantsOf($this->tree, $itemId), true)) {
+            return 'A node cannot be moved into itself.';
+        }
+
+        $descriptor = ComponentRegistry::get($parent['type']);
+
+        if ($descriptor !== null && $descriptor->allowsChild($item['type'])) {
+            return null;
+        }
+
+        $itemDescriptor = ComponentRegistry::get($item['type']);
+
+        $itemLabel = $itemDescriptor !== null ? $itemDescriptor->label : $item['type'];
+        $parentLabel = $descriptor !== null ? $descriptor->label : $parent['type'];
+
+        return 'A '.$parentLabel.' cannot hold a '.$itemLabel.'.';
     }
 
     /**
@@ -379,15 +440,17 @@ class BuilderCanvas extends Component
             return;
         }
 
+        $this->clearNotice(NoticeSurface::NODE);
+
         // The draft belongs to the node it was typed for, so it is only kept
         // when the same node is opened again.
-        if ($this->drawer !== DrawerMode::Node || $this->drawerTarget !== $nodeId) {
+        if ($this->drawer !== DrawerMode::NODE || $this->drawerTarget !== $nodeId) {
             $this->textDraft = '';
         }
 
         $this->selectedId = $nodeId;
 
-        $this->openDrawer(DrawerMode::Node, $nodeId);
+        $this->openDrawer(DrawerMode::NODE, $nodeId);
 
         $this->cancelAttribute();
     }
@@ -425,10 +488,12 @@ class BuilderCanvas extends Component
      */
     private function clearConfiguring(): void
     {
-        if ($this->drawer === DrawerMode::Node || $this->drawer === DrawerMode::Table) {
+        if ($this->drawer === DrawerMode::NODE || $this->drawer === DrawerMode::TABLE) {
             $this->drawer = null;
             $this->drawerTarget = null;
         }
+
+        $this->clearNotice(NoticeSurface::NODE);
 
         // The draft belongs to the node it was typed for, and a closed
         // drawer has no node.
@@ -446,7 +511,7 @@ class BuilderCanvas extends Component
     private function openDrawer(DrawerMode $mode, ?string $target = null): void
     {
         $this->drawer = $mode;
-        $this->drawerTarget = $mode === DrawerMode::Node || $mode === DrawerMode::Table ? $target : null;
+        $this->drawerTarget = $mode === DrawerMode::NODE || $mode === DrawerMode::TABLE ? $target : null;
     }
 
     /**
@@ -454,7 +519,7 @@ class BuilderCanvas extends Component
      */
     private function configuringId(): ?string
     {
-        return $this->drawer === DrawerMode::Node ? $this->drawerTarget : null;
+        return $this->drawer === DrawerMode::NODE ? $this->drawerTarget : null;
     }
 
     /**
@@ -462,7 +527,7 @@ class BuilderCanvas extends Component
      */
     private function tableParentId(): ?string
     {
-        return $this->drawer === DrawerMode::Table ? $this->drawerTarget : null;
+        return $this->drawer === DrawerMode::TABLE ? $this->drawerTarget : null;
     }
 
     /**
@@ -470,7 +535,9 @@ class BuilderCanvas extends Component
      */
     public function openThemes(): void
     {
-        $this->openTool(DrawerMode::Themes);
+        $this->openTool(DrawerMode::THEMES);
+
+        $this->clearNotice(NoticeSurface::THEME);
     }
 
     /**
@@ -478,7 +545,7 @@ class BuilderCanvas extends Component
      */
     public function openSaved(): void
     {
-        $this->openTool(DrawerMode::Saved);
+        $this->openTool(DrawerMode::SAVED);
 
         // The name input is the way in of the panel, and a request from
         // the header deserves to land ready to type.
@@ -516,7 +583,7 @@ class BuilderCanvas extends Component
         }
 
         if (! AttributeGuard::allows($name)) {
-            $this->attributeNotice = AttributeGuard::reason($name);
+            $this->notify(NoticeSurface::ATTRIBUTE, AttributeGuard::reason($name));
 
             return;
         }
@@ -572,7 +639,7 @@ class BuilderCanvas extends Component
         $this->attributeName = '';
         $this->attributeValue = '';
         $this->editingAttribute = null;
-        $this->attributeNotice = null;
+        $this->clearNotice(NoticeSurface::ATTRIBUTE);
     }
 
     /**
@@ -599,7 +666,7 @@ class BuilderCanvas extends Component
                 default => 'caption',
             };
 
-            $this->tableNotice = 'This table already has a '.$section.'.';
+            $this->notify(NoticeSurface::TABLE, 'This table already has a '.$section.'.');
 
             return;
         }
@@ -616,7 +683,8 @@ class BuilderCanvas extends Component
             }
 
             $this->selectedId = $node['id'];
-            $this->tableNotice = null;
+            $this->clearNotice(NoticeSurface::TABLE);
+            $this->clearNotice(NoticeSurface::CANVAS);
 
             // A text element is almost always one you are about to type into, so
             // the drawer opens with the text field ready. A container is not.
@@ -724,6 +792,12 @@ class BuilderCanvas extends Component
      */
     public function duplicate(string $nodeId): void
     {
+        if (TreeMutator::find($this->tree, $nodeId) === null) {
+            $this->notify(NoticeSurface::NODE, 'That node is not on the canvas any more.');
+
+            return;
+        }
+
         $this->transact(function () use ($nodeId): void {
             ['tree' => $tree, 'id' => $copyId] = TreeMutator::duplicate(
                 $this->tree,
@@ -736,9 +810,12 @@ class BuilderCanvas extends Component
             // The root has nowhere to go, so it has no copy to select or
             // configure either.
             if ($copyId === null) {
+                $this->notify(NoticeSurface::NODE, 'The root of the composition has nowhere to go.');
+
                 return;
             }
 
+            $this->clearNotice(NoticeSurface::NODE);
             $this->selectedId = $copyId;
 
             // The drawer was showing the original: the copy is what the user is
@@ -769,10 +846,10 @@ class BuilderCanvas extends Component
         $this->closeConfig();
 
         $this->selectedId = $nodeId;
-        $this->tableNotice = null;
+        $this->clearNotice(NoticeSurface::TABLE);
         $this->newTableColumns = 3;
         $this->newTableRows = 2;
-        $this->openDrawer(DrawerMode::Table, $nodeId);
+        $this->openDrawer(DrawerMode::TABLE, $nodeId);
     }
 
     /**
@@ -810,12 +887,12 @@ class BuilderCanvas extends Component
         // The skeleton is only added when the node takes a table, and a
         // quiet refusal has the reason the form stayed open for.
         if (count($this->tree['nodes']) === $count) {
-            $this->tableNotice = 'This node does not take a table.';
+            $this->notify(NoticeSurface::TABLE, 'This node does not take a table.');
 
             return;
         }
 
-        $this->tableNotice = null;
+        $this->clearNotice(NoticeSurface::TABLE);
 
         $this->closeConfig();
     }
@@ -833,7 +910,7 @@ class BuilderCanvas extends Component
             );
         });
 
-        $this->tableNotice = null;
+        $this->clearNotice(NoticeSurface::TABLE);
     }
 
     /**
@@ -849,7 +926,7 @@ class BuilderCanvas extends Component
             );
         });
 
-        $this->tableNotice = null;
+        $this->clearNotice(NoticeSurface::TABLE);
     }
 
     /**
@@ -872,9 +949,11 @@ class BuilderCanvas extends Component
 
         // The operation leaves the tree alone when the column is not well
         // defined, and the reason is shown instead of the cell going quiet.
-        $this->tableNotice = isset($this->tree['nodes'][$cellId])
-            ? 'This table cannot lose a column while one of its cells spans rows or columns.'
-            : null;
+        if (isset($this->tree['nodes'][$cellId])) {
+            $this->notify(NoticeSurface::TABLE, 'This table cannot lose a column while one of its cells spans rows or columns.');
+        } else {
+            $this->clearNotice(NoticeSurface::TABLE);
+        }
     }
 
     /**
@@ -988,6 +1067,8 @@ class BuilderCanvas extends Component
 
             $this->fingerprint = $this->currentFingerprint();
         });
+
+        $this->clearNotice();
     }
 
     /**
@@ -1007,6 +1088,8 @@ class BuilderCanvas extends Component
 
             $this->fingerprint = $this->currentFingerprint();
         });
+
+        $this->clearNotice();
     }
 
     /**

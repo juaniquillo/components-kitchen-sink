@@ -15,7 +15,7 @@ it('offers a table in the menu of the root', function () {
 it('opens the table form for a node that takes a table', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
-        ->assertSet('drawer', DrawerMode::Table)
+        ->assertSet('drawer', DrawerMode::TABLE)
         ->assertSet('drawerTarget', 'n1')
         ->assertSet('newTableColumns', 3)
         ->assertSet('newTableRows', 2)
@@ -28,7 +28,7 @@ it('refuses the table form for a node that cannot hold a table', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
         ->call('tableMode', 'n2')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n2');
 });
 
@@ -37,7 +37,7 @@ it('scaffolds a whole table under the node the form was opened for', function ()
         ->call('tableMode', 'n1')
         ->call('scaffoldTable')
         ->assertSet('drawer', null)
-        ->assertSet('tableNotice', null)
+        ->assertSet('notice', null)
         ->assertSet('tree.nodes.n2.type', 'table.table')
         ->assertSet('tree.nodes.n3.children', ['n4'])
         ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10'])
@@ -80,7 +80,7 @@ it('removes a column from the canvas when a cell asks', function () {
         ->assertSet('tree.nodes.n4.children', ['n6', 'n10'])
         ->assertSet('tree.nodes.n12.children', ['n13', 'n17'])
         ->assertSet('tree.nodes.n19.children', ['n20', 'n24'])
-        ->assertSet('tableNotice', null);
+        ->assertSet('notice', null);
 });
 
 it('clears the selection of a cell the column operation took out', function () {
@@ -128,22 +128,22 @@ it('refuses a column while a cell of the table spans rows or columns', function 
         ->call('addAttribute')
         ->call('deleteColumn', 'n15')
         ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10'])
-        ->assertSet('tableNotice', 'This table cannot lose a column while one of its cells spans rows or columns.');
+        ->assertSet('notice', ['surface' => 'table', 'message' => 'This table cannot lose a column while one of its cells spans rows or columns.']);
 });
 
 it('refuses a head the table already holds', function () {
     $component = Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
         ->call('scaffoldTable')
-        ->assertSet('tableNotice', null);
+        ->assertSet('notice', null);
 
     $before = count($component->instance()->tree['nodes']);
 
     $component
         ->call('add', 'table.thead', 'n2')
-        ->assertSet('tableNotice', 'This table already has a head.')
+        ->assertSet('notice', ['surface' => 'table', 'message' => 'This table already has a head.'])
         ->call('add', 'table.tbody', 'n2')
-        ->assertSet('tableNotice', 'This table already has a body.');
+        ->assertSet('notice', ['surface' => 'table', 'message' => 'This table already has a body.']);
 
     $tree = $component->instance()->tree;
 
@@ -160,7 +160,7 @@ it('takes a foot the table does not hold yet', function () {
     $tree = $component->instance()->tree;
     $table = $tree['nodes']['n2'];
 
-    expect($component->instance()->tableNotice)->toBeNull()
+    expect($component->instance()->notice)->toBeNull()
         ->and(count($table['children']))->toBe(3)
         ->and($tree['nodes'][end($table['children'])]['type'])->toBe('table.tfoot');
 });

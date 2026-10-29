@@ -96,13 +96,13 @@ it('keeps the drawer on a node the undo leaves in place', function () {
         ->call('add', 'paragraph')
         ->call('addText', 'n1', 'Hello');
 
-    expect($component->instance()->drawer)->toBe(DrawerMode::Node)
+    expect($component->instance()->drawer)->toBe(DrawerMode::NODE)
         ->and($component->instance()->drawerTarget)->toBe('n2');
 
     $component->call('undo');
 
     // The text went, but the node the drawer is on survived it.
-    expect($component->instance()->drawer)->toBe(DrawerMode::Node)
+    expect($component->instance()->drawer)->toBe(DrawerMode::NODE)
         ->and($component->instance()->drawerTarget)->toBe('n2')
         ->and($component->instance()->tree['nodes']['n1']['children'])->toBe(['n2']);
 });
@@ -112,7 +112,7 @@ it('closes the drawer for a node the undo took away', function () {
         ->call('add', 'paragraph')
         ->call('add', 'headers.h1');
 
-    expect($component->instance()->drawer)->toBe(DrawerMode::Node)
+    expect($component->instance()->drawer)->toBe(DrawerMode::NODE)
         ->and($component->instance()->drawerTarget)->toBe('n3');
 
     $component->call('undo');

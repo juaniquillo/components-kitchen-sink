@@ -45,7 +45,7 @@ it('says why a theme was refused', function () {
         ->set('themeVariant', 'primary')
         ->set('themeClasses', 'bg-indigo-600')
         ->call('saveTheme')
-        ->assertSet('themeNotice', 'A group and a variant may only hold letters, numbers, dashes and underscores.');
+        ->assertSet('notice', ['surface' => 'theme', 'message' => 'A group and a variant may only hold letters, numbers, dashes and underscores.']);
 });
 
 it('says why a theme with no classes was refused', function () {
@@ -54,7 +54,7 @@ it('says why a theme with no classes was refused', function () {
         ->set('themeVariant', 'primary')
         ->set('themeClasses', '   ')
         ->call('saveTheme')
-        ->assertSet('themeNotice', 'A theme needs at least one class.');
+        ->assertSet('notice', ['surface' => 'theme', 'message' => 'A theme needs at least one class.']);
 });
 
 it('keeps the classes of a theme when the new ones are not classes', function () {
@@ -65,7 +65,7 @@ it('keeps the classes of a theme when the new ones are not classes', function ()
         ->call('saveTheme')
         ->call('updateThemeClasses', 'action', 'primary', '???')
         ->assertSet('themes', ['action' => ['primary' => 'bg-indigo-600']])
-        ->assertSet('themeNotice', 'A theme needs at least one class.');
+        ->assertSet('notice', ['surface' => 'theme', 'message' => 'A theme needs at least one class.']);
 });
 
 it('applies a theme to a node', function () {
@@ -169,7 +169,7 @@ it('says why a theme that is still used cannot be removed', function () {
         ->call('saveTheme')
         ->call('toggleTheme', 'n2', 'action', 'primary')
         ->call('deleteTheme', 'action', 'primary')
-        ->assertSet('themeNotice', 'This theme is still used by a node, so it cannot be removed.')
+        ->assertSet('notice', ['surface' => 'theme', 'message' => 'This theme is still used by a node, so it cannot be removed.'])
         ->assertSet('themes', ['action' => ['primary' => 'bg-indigo-600']]);
 });
 
@@ -179,11 +179,11 @@ it('clears the theme notice when a theme is saved', function () {
         ->set('themeVariant', 'primary')
         ->set('themeClasses', 'bg-indigo-600')
         ->call('saveTheme')
-        ->assertSet('themeNotice', 'A group and a variant may only hold letters, numbers, dashes and underscores.')
+        ->assertSet('notice', ['surface' => 'theme', 'message' => 'A group and a variant may only hold letters, numbers, dashes and underscores.'])
         ->set('themeGroup', 'action')
         ->set('themeVariant', 'primary')
         ->call('saveTheme')
-        ->assertSet('themeNotice', null);
+        ->assertSet('notice', null);
 });
 
 it('writes the themes into the generated code', function () {

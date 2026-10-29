@@ -99,6 +99,6 @@ it('opens the drawer when a text element is added', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
         ->assertSet('selectedId', 'n2')
-        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n2');
 });
