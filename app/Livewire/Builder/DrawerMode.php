@@ -17,5 +17,4 @@ enum DrawerMode: string
     case NODE = 'node';
     case TABLE = 'table';
     case THEMES = 'themes';
-    case SAVED = 'saved';
 }

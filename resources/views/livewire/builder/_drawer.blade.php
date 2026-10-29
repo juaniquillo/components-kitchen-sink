@@ -14,14 +14,12 @@
     aria-label="Builder drawer"
     x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]') && ! document.querySelector(':popover-open')) this.$wire.closeConfig() } }"
     x-on:keydown.escape.window="close()"
-    x-on:builder-focus-name.window="$nextTick(() => $refs.nameInput && $refs.nameInput.focus())"
 >
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
             {{ match ($drawer) {
                 DrawerMode::TABLE => 'Add table',
                 DrawerMode::THEMES => 'Themes',
-                DrawerMode::SAVED => 'Saved compositions',
                 default => 'Configure',
             } }}
         </h2>
@@ -93,8 +91,6 @@
         </div>
     @elseif ($drawer === DrawerMode::THEMES)
         @include('livewire.builder._themes')
-    @elseif ($drawer === DrawerMode::SAVED)
-        @include('livewire.builder._saved')
     @elseif ($node === null || $descriptor === null)
         <p class="text-xs text-slate-400">Select a node and press its configure button.</p>
     @else

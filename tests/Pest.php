@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\TreeMutator;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /*
@@ -19,6 +20,27 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->in('Feature');
+
+/*
+|--------------------------------------------------------------------------
+| Builder Files
+|--------------------------------------------------------------------------
+|
+| The builder writes a workspace file for every component a test opens, and
+| the autosave writes it again on every change. The directory of the worker
+| is emptied around every builder test, so a file left behind by one test is
+| not work another one finds.
+|
+*/
+
+uses()
+    ->in('Feature/Builder')
+    ->beforeEach(function () {
+        Storage::disk('local')->deleteDirectory(builderTestDirectory());
+    })
+    ->afterEach(function () {
+        Storage::disk('local')->deleteDirectory(builderTestDirectory());
+    });
 
 /*
 |--------------------------------------------------------------------------

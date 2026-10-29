@@ -3,38 +3,29 @@
 declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
-use App\Builder\Support\CompositionRepository;
+use App\Builder\Support\WorkspaceRepository;
 use App\Livewire\Builder\BuilderCanvas;
-use App\Livewire\Builder\DrawerMode;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
-afterEach(function () {
-    foreach (Storage::disk('local')->files(builderTestDirectory()) as $file) {
-        Storage::disk('local')->delete($file);
-    }
-});
+it('brings the themes back with a workspace', function () {
+    $workspace = (new WorkspaceRepository)->create('Themed', BuilderNode::tree('n1', 'div'));
 
-it('brings the themes back with a saved composition', function () {
-    Livewire::test(BuilderCanvas::class)
+    Livewire::test(BuilderCanvas::class, ['workspace' => $workspace])
         ->call('add', 'inline.button')
         ->set('themeGroup', 'action')
         ->set('themeVariant', 'primary')
         ->set('themeClasses', 'bg-indigo-600')
         ->call('saveTheme')
-        ->call('toggleTheme', 'n2', 'action', 'primary')
-        ->set('compositionName', 'Themed')
-        ->call('save');
+        ->call('toggleTheme', 'n2', 'action', 'primary');
 
-    Livewire::test(BuilderCanvas::class)
-        ->call('load', 'themed')
+    Livewire::test(BuilderCanvas::class, ['workspace' => $workspace])
         ->assertSet('themes', ['action' => ['primary' => 'bg-indigo-600']])
         ->assertSet('tree.nodes.n2.theme', ['action' => ['primary']]);
 });
 
-it('gives a new component an id that the loaded composition is not using', function () {
-    // The ids of a saved composition have gaps in them, because a node that
-    // was deleted leaves its id behind. There are seven nodes here and the
+it('gives a new component an id that the workspace is not using', function () {
+    // The ids of a workspace have gaps in them, because a node that was
+    // deleted leaves its id behind. There are seven nodes here and the
     // highest id is eight, so the count of the nodes is not enough to know
     // where the next id can start.
     $tree = BuilderNode::tree('n1', 'div');
@@ -49,136 +40,15 @@ it('gives a new component an id that the loaded composition is not using', funct
     $tree['nodes']['n7']['children'] = ['n8'];
     $tree['nodes']['n8'] = BuilderNode::make('n8', BuilderNode::TYPE_TEXT, 'My Button');
 
-    (new CompositionRepository)->save('Gapped', $tree);
+    $workspace = (new WorkspaceRepository)->create('Gapped', $tree);
 
-    Livewire::test(BuilderCanvas::class)
-        ->call('load', 'gapped')
+    Livewire::test(BuilderCanvas::class, ['workspace' => $workspace])
         ->call('add', 'paragraph')
         ->assertSet('tree.nodes.n5.text', 'My Span')
         ->assertSet('tree.nodes.n8.text', 'My Button')
         ->assertSet('tree.nodes.n9.type', 'paragraph')
         ->assertSet('tree.nodes.n1.children', ['n2', 'n9'])
         ->assertSet('tree.nodes.n7.children', ['n8']);
-});
-
-it('closes the drawer when a composition is loaded', function () {
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->assertSet('drawer', DrawerMode::NODE)
-        ->assertSet('drawerTarget', 'n2')
-        ->call('load', 'simple')
-        ->assertSet('drawer', null);
-});
-
-it('asks for a name before it saves a composition', function () {
-    // A save without a name can only fall back to a name the user never
-    // chose, so the drawer is opened on the input that names it instead.
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->call('save')
-        ->assertSet('drawer', DrawerMode::SAVED)
-        ->assertSet('compositionName', '')
-        ->assertSee('data-open="true"', false);
-
-    expect((new CompositionRepository)->all())->toBe([]);
-});
-
-it('keeps the saved compositions drawer open while one is loaded', function () {
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('openSaved')
-        ->assertSee('Simple', false)
-        ->call('load', 'simple')
-        ->assertSet('drawer', DrawerMode::SAVED)
-        ->assertSee('data-open="true"', false)
-        ->assertSet('drawerTarget', null);
-});
-
-it('asks before a load replaces work that is not saved', function () {
-    // A load swaps the whole tree in, so a canvas that holds work which
-    // is not saved has to be asked, the way the reset and the delete of
-    // a composition are. A clean canvas has nothing to lose, and the
-    // load goes ahead without a word.
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('openSaved')
-        ->assertSee("wire:click=\"load('simple')\"", false)
-        ->assertDontSee('wire:confirm="Loading a composition will replace the one on the canvas', false);
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->call('openSaved')
-        ->assertSee('wire:confirm="Loading a composition will replace the one on the canvas. Are you sure?"', false);
-});
-
-it('announces that a save will overwrite an existing composition', function () {
-    // A save is found by its name, so a name the directory already holds
-    // makes the save an overwrite, and the file it replaces is work the
-    // user may have wanted kept. The button asks, and the panel says so
-    // while the name is still being typed.
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('openSaved')
-        ->assertDontSee('wire:confirm="A composition with this name already exists', false)
-        ->assertDontSee('An existing composition with this name will be overwritten.', false)
-        ->set('compositionName', 'Simple')
-        ->assertSee('wire:confirm="A composition with this name already exists and will be overwritten. Are you sure?"', false)
-        ->assertSee('An existing composition with this name will be overwritten.', false);
-
-    // The name is what decides it, not how it is written, so any spelling
-    // that turns into the same slug announces the overwrite as well.
-    Livewire::test(BuilderCanvas::class)
-        ->call('openSaved')
-        ->set('compositionName', 'SIMPLE')
-        ->assertSee('An existing composition with this name will be overwritten.', false);
-});
-
-it('names the canvas after the composition that was loaded', function () {
-    // The name the input was still carrying belongs to the composition that
-    // was on the canvas before: loading another one makes it wrong, and a
-    // save made with it would end up somewhere unexpected.
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    (new CompositionRepository)->save('Other', BuilderNode::tree('n1', 'div'));
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->set('compositionName', 'Simple')
-        ->call('load', 'other')
-        ->assertSet('compositionName', 'Other');
-});
-
-it('is clean when the page opens', function () {
-    Livewire::test(BuilderCanvas::class)
-        ->assertSee('data-dirty="false"', false);
-});
-
-it('is dirty once the composition is changed', function () {
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->assertSee('data-dirty="true"', false);
-});
-
-it('is clean again after a save', function () {
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->set('compositionName', 'Hero')
-        ->call('save')
-        ->assertSee('data-dirty="false"', false);
-});
-
-it('is clean again after a composition is loaded', function () {
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->call('load', 'simple')
-        ->assertSee('data-dirty="false"', false);
 });
 
 it('renders a clean preview without any of the builders additions', function () {

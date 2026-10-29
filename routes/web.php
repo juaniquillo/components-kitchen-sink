@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Builder\Contracts\BuilderNode;
+use App\Builder\Support\WorkspaceRepository;
 use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
@@ -75,11 +77,58 @@ Route::get('/emails/{name}', function (string $name) {
 
 })->name('email.preview');
 
-Route::get('/builder', function (Request $request) {
+Route::get('/builder', function () {
 
-    return view('builder');
+    return view('builder-onboarding');
 
 })->name('builder');
+
+Route::post('/builder', function () {
+
+    $repository = new WorkspaceRepository;
+
+    $id = $repository->create(
+        WorkspaceRepository::DEFAULT_NAME,
+        BuilderNode::tree('n1', 'div'),
+    );
+
+    return redirect()->route('builder.workspace', ['workspace' => $id]);
+
+})->name('builder.store');
+
+Route::post('/builder/open', function (Request $request) {
+
+    $id = WorkspaceRepository::idFromLink((string) $request->input('link', ''));
+
+    if ($id === null) {
+        return back()->with('builder-notice', 'That is not a workspace link. Paste the whole address, or the id at the end of it.');
+    }
+
+    if (! (new WorkspaceRepository)->exists($id)) {
+        return back()->with('builder-notice', 'That workspace is not here any more.');
+    }
+
+    return redirect()->route('builder.workspace', ['workspace' => $id]);
+
+})->name('builder.open');
+
+Route::get('/builder/{workspace}', function (string $workspace) {
+
+    $repository = new WorkspaceRepository;
+
+    if (! WorkspaceRepository::validId($workspace)) {
+        abort(404);
+    }
+
+    if (! $repository->exists($workspace)) {
+        return redirect()
+            ->route('builder')
+            ->with('builder-notice', 'That workspace is not here any more.');
+    }
+
+    return view('builder', ['workspace' => $workspace]);
+
+})->name('builder.workspace');
 
 Route::post('/cruds', function (Request $request) {
     $identifier = $request->input('identifier');

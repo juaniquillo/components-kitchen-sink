@@ -6,18 +6,18 @@ namespace App\Livewire\Builder;
 
 use App\Builder\Components\ComponentDescriptor;
 use App\Builder\Contracts\BuilderNode;
-use App\Builder\Contracts\SavedComposition;
 use App\Builder\Registries\ComponentRegistry;
 use App\Builder\Registries\ThemeRegistry;
 use App\Builder\Support\AttributeGuard;
 use App\Builder\Support\ClassList;
 use App\Builder\Support\CompositionHistory;
-use App\Builder\Support\CompositionRepository;
 use App\Builder\Support\NodeChrome;
 use App\Builder\Support\PhpCodeGenerator;
 use App\Builder\Support\TreeMutator;
 use App\Builder\Support\TreeRenderer;
+use App\Builder\Support\WorkspaceRepository;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -108,9 +108,23 @@ class BuilderCanvas extends Component
     public int $newTableRows = 2;
 
     /**
-     * The name given to the composition when it is saved.
+     * The name of the workspace, as it is being typed.
+     *
+     * The name is part of the workspace and not of the composition: a reset
+     * clears the canvas and leaves the workspace named as it was.
      */
-    public string $compositionName = '';
+    public string $name = '';
+
+    /**
+     * The id of the workspace being edited.
+     *
+     * The address is the whole of the capability: whoever holds the link can
+     * open the workspace, and the file the id names is where the work lives.
+     * It is fixed for the life of the component, so a request cannot point
+     * the autosave at another file.
+     */
+    #[Locked]
+    public string $workspace = '';
 
     /**
      * Whether the preview dialog holds its copy of the composition.
@@ -148,39 +162,110 @@ class BuilderCanvas extends Component
     public int $nodeCounter = 0;
 
     /**
-     * A fingerprint of the composition as the last save, load or reset left
-     * it.
+     * A fingerprint of what was last written to the workspace file.
      *
-     * The composition is dirty when the tree or the themes are not the ones
-     * that were left behind, and the browser is told about it, so it can warn
-     * before the page goes away.
+     * Every request that changes the tree, the themes or the name is written
+     * once, on the way out, and only when this says there is something new.
+     * A request that only opened a panel leaves the file alone.
      */
     public string $fingerprint = '';
 
-    /**
-     * The states the undo can bring back, oldest first.
-     *
-     * A snapshot is the whole of what a composition is — its tree, its
-     * themes, the node being looked at and the name it is saved under —
-     * as json, so an undo puts back exactly what the change replaced.
-     *
-     * @var array<int, string>
-     */
-    public array $undoStack = [];
-
-    /**
-     * The states a redo can bring back, newest first.
-     *
-     * @var array<int, string>
-     */
-    public array $redoStack = [];
-
-    public function mount(): void
+    public function mount(?string $workspace = null): void
     {
-        $this->tree = BuilderNode::tree($this->nextId(), 'div');
+        $repository = new WorkspaceRepository;
+
+        // A component that is put on a page without a workspace is a
+        // workspace of its own. The builder is always editing something, so
+        // the page never has to hold a canvas that goes nowhere.
+        $workspace ??= $repository->create(
+            WorkspaceRepository::DEFAULT_NAME,
+            BuilderNode::tree('n1', 'div'),
+        );
+
+        $found = $repository->find($workspace);
+
+        $this->workspace = $workspace;
+        $this->tree = $found['tree'] ?? BuilderNode::tree('n1', 'div');
+        $this->themes = $found['themes'] ?? [];
+        $this->name = $found['name'] ?? WorkspaceRepository::DEFAULT_NAME;
         $this->selectedId = $this->tree['root'];
+        $this->nodeCounter = $this->highestNodeId();
+
+        if ($found === null) {
+            // The file went away between the route and the mount, so the
+            // address the user followed is written back rather than left
+            // pointing at nothing.
+            $this->persist(force: true);
+
+            return;
+        }
 
         $this->fingerprint = $this->currentFingerprint();
+    }
+
+    /**
+     * Write the workspace once the request is done with it.
+     *
+     * One hook instead of a call in every action: no action can forget to
+     * save, and a request that changed nothing writes nothing. The undo and
+     * the drawer are not part of a workspace, so opening a panel leaves the
+     * file alone.
+     */
+    public function rendered(): void
+    {
+        $this->persist();
+    }
+
+    /**
+     * Write the workspace when it differs from what is on disk.
+     */
+    private function persist(bool $force = false): void
+    {
+        if (! WorkspaceRepository::validId($this->workspace)) {
+            return;
+        }
+
+        $fingerprint = $this->currentFingerprint();
+
+        if (! $force && $fingerprint === $this->fingerprint) {
+            return;
+        }
+
+        (new WorkspaceRepository)->save($this->workspace, $this->name, $this->tree, $this->themes);
+
+        $this->fingerprint = $fingerprint;
+    }
+
+    /**
+     * The undo and redo stacks of this workspace, from the browser session.
+     *
+     * The history belongs to the browser and not to the workspace file: a
+     * shared link opens on the work without the changes someone else made on
+     * their way to it, and a snapshot is not carried on every request.
+     */
+    private function history(): CompositionHistory
+    {
+        $stacks = session()->get($this->historyKey(), []);
+
+        return new CompositionHistory(
+            is_array($stacks['undo'] ?? null) ? $stacks['undo'] : [],
+            is_array($stacks['redo'] ?? null) ? $stacks['redo'] : [],
+        );
+    }
+
+    /**
+     * Put the stacks back in the session.
+     */
+    private function rememberHistory(CompositionHistory $history): void
+    {
+        [$undo, $redo] = $history->stacks();
+
+        session()->put($this->historyKey(), ['undo' => $undo, 'redo' => $redo]);
+    }
+
+    private function historyKey(): string
+    {
+        return 'builder.history.'.$this->workspace;
     }
 
     /**
@@ -538,18 +623,6 @@ class BuilderCanvas extends Component
         $this->openTool(DrawerMode::THEMES);
 
         $this->clearNotice(NoticeSurface::THEME);
-    }
-
-    /**
-     * Open the drawer on the saved compositions panel.
-     */
-    public function openSaved(): void
-    {
-        $this->openTool(DrawerMode::SAVED);
-
-        // The name input is the way in of the panel, and a request from
-        // the header deserves to land ready to type.
-        $this->dispatch('builder-focus-name');
     }
 
     /**
@@ -1009,84 +1082,68 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * Save the composition to disk.
+     * Write the workspace now, and say that it was written.
+     *
+     * The autosave already does this on the way out of every request, so
+     * this is the acknowledgement a save from the keyboard asks for.
      */
     public function save(): void
     {
-        $name = trim($this->compositionName);
-
-        if ($name === '') {
-            // A save without a name has nothing to save under yet, so the
-            // saved compositions panel is opened with the input waiting
-            // for one.
-            $this->openSaved();
-
-            return;
-        }
-
-        $repository = new CompositionRepository;
-
-        $repository->save($name, $this->tree, $this->themes);
-
-        $this->compositionName = $name;
-
-        // What is on the disk is what the canvas holds, so there is nothing
-        // to warn about any more.
-        $this->fingerprint = $this->currentFingerprint();
+        $this->persist(force: true);
 
         $this->dispatch('builder-saved');
     }
 
     /**
-     * Load a saved composition into the canvas.
+     * Start another workspace and go to it.
+     *
+     * The one being left is written first and stays where it is: the link to
+     * it is still the way back.
      */
-    public function load(string $slug): void
+    public function newWorkspace(): void
     {
-        $found = (new CompositionRepository)->findWithThemes($slug);
+        $this->persist();
 
-        if ($found === null) {
-            return;
-        }
+        $id = (new WorkspaceRepository)->create(
+            WorkspaceRepository::DEFAULT_NAME,
+            BuilderNode::tree('n1', 'div'),
+        );
 
-        $this->transact(function () use ($found): void {
-            $this->tree = $found['tree'];
-            $this->themes = $found['themes'];
-            $this->selectedId = $this->tree['root'];
-            $this->nodeCounter = $this->highestNodeId();
+        $this->redirectRoute('builder.workspace', ['workspace' => $id], navigate: true);
+    }
 
-            // The composition that was loaded now owns the canvas: its name is
-            // what saving updates, so a save right after a load does not fall
-            // back on the name the input was still carrying.
-            $this->compositionName = $found['name'];
+    /**
+     * Delete the workspace, and go back to the page that makes them.
+     */
+    public function deleteWorkspace(): void
+    {
+        (new WorkspaceRepository)->delete($this->workspace);
 
-            // The drawer was showing a node of the composition that was on the
-            // canvas, and that node is not necessarily in this one. The drawer
-            // itself stays open, so the list the composition was picked from
-            // keeps showing.
-            $this->clearConfiguring();
+        session()->forget($this->historyKey());
+        session()->flash('builder-notice', 'That workspace was deleted.');
 
-            $this->fingerprint = $this->currentFingerprint();
-        });
+        // What is on the canvas is what the file held, so there is nothing
+        // left to write: without this the autosave would put the file back.
+        $this->fingerprint = $this->currentFingerprint();
 
-        $this->clearNotice();
+        $this->redirectRoute('builder', navigate: true);
     }
 
     /**
      * Clear the canvas and start a new composition.
      *
      * The themes stay: they are a palette that is reused by every
-     * composition, and not part of one.
+     * composition, and not part of one. The workspace keeps its name and its
+     * file, and the reset is a change like any other, so the undo can bring
+     * the canvas back.
      */
     public function resetCanvas(): void
     {
         $this->transact(function (): void {
             $this->tree = BuilderNode::tree($this->nextId(), 'div');
             $this->selectedId = $this->tree['root'];
-            $this->compositionName = '';
 
             $this->closeConfig();
-
-            $this->fingerprint = $this->currentFingerprint();
         });
 
         $this->clearNotice();
@@ -1097,14 +1154,14 @@ class BuilderCanvas extends Component
      */
     public function undo(): void
     {
-        $history = new CompositionHistory($this->undoStack, $this->redoStack);
+        $history = $this->history();
         $snapshot = $history->undo($this->snapshot());
 
         if ($snapshot === null) {
             return;
         }
 
-        [$this->undoStack, $this->redoStack] = $history->stacks();
+        $this->rememberHistory($history);
 
         $this->restore($snapshot);
     }
@@ -1114,14 +1171,14 @@ class BuilderCanvas extends Component
      */
     public function redo(): void
     {
-        $history = new CompositionHistory($this->undoStack, $this->redoStack);
+        $history = $this->history();
         $snapshot = $history->redo($this->snapshot());
 
         if ($snapshot === null) {
             return;
         }
 
-        [$this->undoStack, $this->redoStack] = $history->stacks();
+        $this->rememberHistory($history);
 
         $this->restore($snapshot);
     }
@@ -1135,7 +1192,6 @@ class BuilderCanvas extends Component
             'tree' => $this->tree,
             'themes' => $this->themes,
             'selectedId' => $this->selectedId,
-            'name' => $this->compositionName,
         ]);
     }
 
@@ -1154,10 +1210,10 @@ class BuilderCanvas extends Component
 
         $result = $change();
 
-        $history = new CompositionHistory($this->undoStack, $this->redoStack);
+        $history = $this->history();
         $history->record($before, $this->snapshot());
 
-        [$this->undoStack, $this->redoStack] = $history->stacks();
+        $this->rememberHistory($history);
 
         return $result;
     }
@@ -1176,7 +1232,6 @@ class BuilderCanvas extends Component
         $this->tree = $state['tree'];
         $this->themes = $state['themes'];
         $this->selectedId = $state['selectedId'];
-        $this->compositionName = $state['name'];
 
         // The drawer was showing a node that may not be in the composition
         // the undo brought back, so it is only kept when the node survived.
@@ -1188,11 +1243,21 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * Delete a saved composition.
+     * Whether the undo has anything to bring back.
      */
-    public function delete(string $slug): void
+    #[Computed]
+    public function canUndo(): bool
     {
-        (new CompositionRepository)->delete($slug);
+        return $this->history()->canUndo();
+    }
+
+    /**
+     * Whether the redo has anything to bring back.
+     */
+    #[Computed]
+    public function canRedo(): bool
+    {
+        return $this->history()->canRedo();
     }
 
     /**
@@ -1221,18 +1286,6 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * Whether the composition holds changes that are not saved.
-     *
-     * The page is told about it, so the browser can warn before it goes
-     * away with work that would be lost.
-     */
-    #[Computed]
-    public function dirty(): bool
-    {
-        return $this->fingerprint !== $this->currentFingerprint();
-    }
-
-    /**
      * Whether the canvas holds nothing but its root.
      *
      * The empty canvas shows a hint, so a fresh page says what to do
@@ -1242,20 +1295,6 @@ class BuilderCanvas extends Component
     public function canvasEmpty(): bool
     {
         return ($this->tree['nodes'][$this->tree['root']]['children'] ?? []) === [];
-    }
-
-    /**
-     * Whether saving now would replace an existing composition.
-     *
-     * A save is found by its name, so a name the directory already holds
-     * makes the save an overwrite. The saved panel asks this, so the
-     * overwrite is announced before it happens instead of a save quietly
-     * taking the place of a composition the user may have wanted kept.
-     */
-    #[Computed]
-    public function saveOverwrites(): bool
-    {
-        return (new CompositionRepository)->has($this->compositionName);
     }
 
     /**
@@ -1417,17 +1456,6 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * The compositions saved on disk.
-     *
-     * @return array<int, SavedComposition>
-     */
-    #[Computed]
-    public function saved(): array
-    {
-        return (new CompositionRepository)->all();
-    }
-
-    /**
      * Whether a theme is in the registry.
      */
     private function themeExists(string $group, string $variant): bool
@@ -1453,14 +1481,14 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * A fingerprint of the composition as it is right now.
+     * A fingerprint of the workspace as it is right now.
      *
-     * The tree and the themes are what a composition is made of, so they are
-     * what says whether there is work that is not saved.
+     * The tree, the themes and the name are what a workspace is made of, so
+     * they are what says whether the file is behind.
      */
     private function currentFingerprint(): string
     {
-        return hash('xxh128', json_encode([$this->tree, $this->themes]));
+        return hash('xxh128', json_encode([$this->tree, $this->themes, $this->name]));
     }
 
     /**

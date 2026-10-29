@@ -100,24 +100,6 @@
                 });
             });
         </script>
-
-        <script>
-            /*
-            | Warn before the page goes away with a composition that is not
-            | saved. The builder says on its root element whether there is
-            | work that would be lost, so there is no state to keep here.
-            */
-            window.addEventListener('beforeunload', (event) => {
-                const canvas = document.querySelector('[data-builder-canvas]');
-
-                if (! canvas || canvas.dataset.dirty !== 'true') {
-                    return;
-                }
-
-                event.preventDefault();
-                event.returnValue = '';
-            });
-        </script>
     </x-slot>
 
     <div class="mb-4 text-center">
@@ -129,7 +111,7 @@
     </div>
 
     <div class="mb-4">
-        <livewire:builder.builder-canvas />
+        <livewire:builder.builder-canvas :workspace="$workspace" />
     </div>
 
 </x-layouts.default>

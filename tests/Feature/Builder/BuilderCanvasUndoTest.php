@@ -2,18 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Builder\Contracts\BuilderNode;
-use App\Builder\Support\CompositionRepository;
 use App\Livewire\Builder\BuilderCanvas;
 use App\Livewire\Builder\DrawerMode;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-
-afterEach(function () {
-    foreach (Storage::disk('local')->files(builderTestDirectory()) as $file) {
-        Storage::disk('local')->delete($file);
-    }
-});
 
 it('undoes a change and redoes it', function () {
     $component = Livewire::test(BuilderCanvas::class)
@@ -45,7 +36,7 @@ it('forgets the redo when a new change is made', function () {
         ->call('undo')
         ->call('add', 'headers.h1');
 
-    expect($component->instance()->redoStack)->toBe([]);
+    expect($component->instance()->canRedo())->toBeFalse();
 
     $component->call('redo');
 
@@ -88,7 +79,7 @@ it('does not remember a change that changed nothing', function () {
 
     expect($nodes)->not->toHaveKey('n2')
         ->and(count($nodes))->toBe(1)
-        ->and($component->instance()->undoStack)->toBe([]);
+        ->and($component->instance()->canUndo())->toBeFalse();
 });
 
 it('keeps the drawer on a node the undo leaves in place', function () {
@@ -120,26 +111,6 @@ it('closes the drawer for a node the undo took away', function () {
     expect($component->instance()->drawer)->toBeNull();
 });
 
-it('undoes a load back to the work it replaced', function () {
-    (new CompositionRepository)->save('Simple', BuilderNode::tree('n1', 'div'));
-
-    $component = Livewire::test(BuilderCanvas::class)
-        ->call('add', 'paragraph')
-        ->set('compositionName', 'My work')
-        ->call('load', 'simple');
-
-    expect($component->instance()->compositionName)->toBe('Simple');
-
-    $component->call('undo');
-
-    $instance = $component->instance();
-
-    // The undo gives the name back with the tree: a save made after the
-    // undo would write over the composition the canvas held before.
-    expect($instance->tree['nodes'])->toHaveKey('n2')
-        ->and($instance->compositionName)->toBe('My work');
-});
-
 it('undoes a reset back to the cleared work', function () {
     $component = Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
@@ -169,5 +140,5 @@ it('keeps a limit on what the undo remembers', function () {
     // first five spans still on the canvas, and the ones after it do
     // nothing.
     expect(count($component->instance()->tree['nodes']))->toBe(6)
-        ->and($component->instance()->undoStack)->toBe([]);
+        ->and($component->instance()->canUndo())->toBeFalse();
 });

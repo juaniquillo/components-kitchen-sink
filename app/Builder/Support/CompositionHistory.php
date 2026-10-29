@@ -18,7 +18,6 @@ use App\Builder\Contracts\BuilderNode;
  *     tree: Tree,
  *     themes: array<string, array<string, string>>,
  *     selectedId: string|null,
- *     name: string,
  * }
  *
  * @phpstan-import-type Tree from BuilderNode
@@ -54,7 +53,6 @@ final class CompositionHistory
             $state['tree'],
             $state['themes'],
             $state['selectedId'],
-            $state['name'],
         ]);
 
         return $snapshot === false ? '' : $snapshot;
@@ -69,13 +67,13 @@ final class CompositionHistory
     {
         $state = json_decode($snapshot, true);
 
-        if (! is_array($state) || count($state) !== 4) {
+        if (! is_array($state) || count($state) !== 3) {
             return null;
         }
 
-        [$tree, $themes, $selectedId, $name] = $state;
+        [$tree, $themes, $selectedId] = $state;
 
-        if (! is_array($tree) || ! is_array($themes) || ! is_string($name)) {
+        if (! is_array($tree) || ! is_array($themes)) {
             return null;
         }
 
@@ -86,7 +84,6 @@ final class CompositionHistory
             'tree' => $tree,
             'themes' => $themes,
             'selectedId' => is_string($selectedId) ? $selectedId : null,
-            'name' => $name,
         ];
     }
 

@@ -28,7 +28,7 @@
             <button
                 type="button"
                 wire:click="undo"
-                @disabled($this->undoStack === [])
+                @disabled(! $this->canUndo)
                 title="Undo (Ctrl+Z)"
                 aria-label="Undo"
                 class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
@@ -39,7 +39,7 @@
             <button
                 type="button"
                 wire:click="redo"
-                @disabled($this->redoStack === [])
+                @disabled(! $this->canRedo)
                 title="Redo (Ctrl+Shift+Z)"
                 aria-label="Redo"
                 class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
@@ -62,14 +62,6 @@
                 class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
             >
                 Themes
-            </button>
-
-            <button
-                type="button"
-                wire:click="openSaved"
-                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
-            >
-                Saved
             </button>
 
             <button
@@ -97,7 +89,9 @@
     {{--
         The save confirmation is a native popover: the browser owns the top
         layer, the show and hide states, and the close button below, and the
-        only script is the timer that dismisses it again.
+        only script is the timer that dismisses it again. The workspace is
+        written on its own after every change, so the toast is the answer to
+        a save from the keyboard rather than the only time anything is saved.
     --}}
     <style>
         #builder-canvas-panel {

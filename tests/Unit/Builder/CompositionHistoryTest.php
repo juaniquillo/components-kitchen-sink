@@ -6,15 +6,14 @@ use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\CompositionHistory;
 
 /**
- * A checkpoint that holds nothing but its own name.
+ * A checkpoint that holds nothing but its own marker.
  */
-function historyCheckpoint(string $name): string
+function historyCheckpoint(string $marker): string
 {
     return CompositionHistory::encode([
         'tree' => BuilderNode::tree('n1', 'div'),
-        'themes' => [],
+        'themes' => ['marker' => ['value' => $marker]],
         'selectedId' => 'n1',
-        'name' => $name,
     ]);
 }
 
@@ -23,7 +22,6 @@ it('round trips a composition state', function () {
         'tree' => BuilderNode::tree('n1', 'div'),
         'themes' => ['action' => ['primary' => 'bg-blue-500']],
         'selectedId' => 'n1',
-        'name' => 'Hero',
     ];
 
     expect(CompositionHistory::decode(CompositionHistory::encode($state)))->toBe($state);
@@ -34,7 +32,6 @@ it('decodes a checkpoint that holds no selection', function () {
         'tree' => BuilderNode::tree('n1', 'div'),
         'themes' => [],
         'selectedId' => null,
-        'name' => '',
     ];
 
     expect(CompositionHistory::decode(CompositionHistory::encode($state)))->toBe($state);
@@ -44,8 +41,9 @@ it('refuses a checkpoint it did not write', function () {
     expect(CompositionHistory::decode('not json'))->toBeNull()
         ->and(CompositionHistory::decode('{}'))->toBeNull()
         ->and(CompositionHistory::decode('[]'))->toBeNull()
-        ->and(CompositionHistory::decode('[1,2,3,4]'))->toBeNull()
-        ->and(CompositionHistory::decode('["n1",[],"n1",7]'))->toBeNull();
+        ->and(CompositionHistory::decode('[1,2,3]'))->toBeNull()
+        ->and(CompositionHistory::decode('["n1",[],"n1"]'))->toBeNull()
+        ->and(CompositionHistory::decode('[1,2,3,4]'))->toBeNull();
 });
 
 it('remembers the state a change replaced', function () {

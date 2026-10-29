@@ -1,6 +1,5 @@
 <div
     data-builder-canvas
-    data-dirty="{{ $this->dirty() ? 'true' : 'false' }}"
     x-data="{
         shortcut(event) {
             if (! (event.ctrlKey || event.metaKey)) return;
@@ -8,9 +7,9 @@
             const key = event.key.toLowerCase();
 
             // A save from the keyboard has to work while the name of the
-            // composition is being typed too: naming the composition and
-            // pressing Ctrl+S is the natural flow, and the browser would
-            // open its own save-page dialog otherwise.
+            // workspace is being typed too: naming it and pressing Ctrl+S is
+            // the natural flow, and the browser would open its own save-page
+            // dialog otherwise.
             if (key === 's' && ! event.shiftKey) {
                 event.preventDefault();
                 this.$wire.save();
@@ -33,6 +32,60 @@
     }"
     x-on:keydown.window="shortcut($event)"
 >
+    <header class="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800">
+        <label class="min-w-0 flex-1">
+            <span class="mb-1 block text-[11px] font-medium text-slate-500">Workspace</span>
+
+            <input
+                type="text"
+                wire:model.live.debounce.500ms="name"
+                aria-label="Workspace name"
+                class="w-full max-w-md rounded border border-slate-200 px-2 py-1 text-sm font-semibold dark:border-slate-600 dark:bg-slate-900"
+            />
+        </label>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <p class="hidden text-[11px] text-slate-400 sm:block">Changes save as you go.</p>
+
+            <span class="contents" x-data="{ copied: false }">
+                <button
+                    type="button"
+                    x-on:click="if (navigator.clipboard) navigator.clipboard.writeText(window.location.href).then(() => { copied = true; setTimeout(() => copied = false, 1500) })"
+                    x-text="copied ? 'Copied ✓' : 'Copy link'"
+                    class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+                ></button>
+
+                <span class="sr-only" aria-live="polite" x-text="copied ? 'Link copied' : ''"></span>
+            </span>
+
+            <button
+                type="button"
+                wire:click="newWorkspace"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                New
+            </button>
+
+            <button
+                type="button"
+                wire:click="resetCanvas"
+                wire:confirm="The canvas will be cleared. The undo can bring it back. Are you sure?"
+                class="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
+            >
+                Reset
+            </button>
+
+            <button
+                type="button"
+                wire:click="deleteWorkspace"
+                wire:confirm="This workspace will be deleted for everyone holding the link. Are you sure?"
+                class="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-500/10"
+            >
+                Delete
+            </button>
+        </div>
+    </header>
+
     <div class="space-y-4">
         <div class="grid gap-4 md:grid-cols-[210px_minmax(0,1fr)]">
             @include('livewire.builder._palette')

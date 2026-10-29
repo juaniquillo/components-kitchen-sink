@@ -111,7 +111,7 @@ it('refuses to copy the root, and remembers nothing to undo', function () {
 
     expect(array_keys($instance->tree['nodes']))->toBe(['n1'])
         ->and($instance->selectedId)->toBe('n1')
-        ->and($instance->undoStack)->toBe([]);
+        ->and($instance->canUndo())->toBeFalse();
 });
 
 it('moves a node up and down among its siblings', function () {
@@ -213,9 +213,7 @@ it('says on the drawer whether a tool panel is open', function () {
         ->assertSee('data-open="true"', false)
         ->call('closeConfig')
         ->assertSet('drawer', null)
-        ->assertSee('data-open="false"', false)
-        ->call('openSaved')
-        ->assertSee('data-open="true"', false);
+        ->assertSee('data-open="false"', false);
 });
 
 it('opens the drawer on the tool that was asked for', function () {
@@ -224,8 +222,8 @@ it('opens the drawer on the tool that was asked for', function () {
         ->assertSet('drawer', DrawerMode::THEMES)
         ->call('closeConfig')
         ->assertSet('drawer', null)
-        ->call('openSaved')
-        ->assertSet('drawer', DrawerMode::SAVED);
+        ->call('openThemes')
+        ->assertSet('drawer', DrawerMode::THEMES);
 });
 
 it('gives the tools the whole drawer when a node is asked about', function () {
@@ -241,8 +239,8 @@ it('gives the tools the whole drawer when a node is asked about', function () {
 it('clears the node of the drawer when a tool is asked for', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openConfig', 'n1')
-        ->call('openSaved')
-        ->assertSet('drawer', DrawerMode::SAVED)
+        ->call('openThemes')
+        ->assertSet('drawer', DrawerMode::THEMES)
         ->assertSet('drawerTarget', null);
 });
 
@@ -283,15 +281,16 @@ it('copies the code without assuming the clipboard api is there', function () {
         ->assertSee('execCommand', false);
 });
 
-it('clears the canvas and the name when it is reset', function () {
+it('clears the canvas and keeps the name when it is reset', function () {
+    // The name belongs to the workspace, not to the canvas: a reset starts a
+    // new composition in the same workspace.
     $component = Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
-        ->set('compositionName', 'Hero')
+        ->set('name', 'Hero')
         ->call('resetCanvas')
         ->assertSet('tree.nodes', fn (array $nodes): bool => count($nodes) === 1)
-        ->assertSet('compositionName', '')
-        ->assertSet('drawer', null)
-        ->assertSee('data-dirty="false"', false);
+        ->assertSet('name', 'Hero')
+        ->assertSet('drawer', null);
 
     $tree = $component->instance()->tree;
 

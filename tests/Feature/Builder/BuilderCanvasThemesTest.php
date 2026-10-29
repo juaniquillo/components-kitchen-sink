@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Livewire\Builder\BuilderCanvas;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 it('saves a theme', function () {
@@ -211,10 +210,4 @@ it('keeps the themes when it is reset', function () {
         ->assertSet('themes', [
             'action' => ['primary' => 'bg-indigo-600'],
         ]);
-});
-
-afterEach(function () {
-    foreach (Storage::disk('local')->files(builderTestDirectory()) as $file) {
-        Storage::disk('local')->delete($file);
-    }
 });
