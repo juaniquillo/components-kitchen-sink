@@ -71,27 +71,20 @@ class BuilderCanvas extends Component
     public ?string $selectedId = null;
 
     /**
-     * The id of the node the drawer is configuring.
+     * What the drawer is showing, or null when it is closed.
+     *
+     * A node being configured, the table form for a node, or one of the
+     * tools. The node the mode works on lives in `$drawerTarget`.
      */
-    public ?string $configuringId = null;
+    public ?DrawerMode $drawer = null;
 
     /**
-     * The id of the node the drawer is putting a table under.
+     * The id of the node the drawer is working on, when the mode needs one.
      *
-     * A table is the one component that is not assembled part by part: the
-     * drawer asks for a size and the canvas gets the whole skeleton at once.
+     * The node being configured, or the node a table goes under. The tools
+     * belong to no node, so they carry no target.
      */
-    public ?string $tableModeId = null;
-
-    /**
-     * The tool the drawer is showing when no node is being configured.
-     *
-     * Saved compositions and themes live in the drawer too, so a value
-     * here opens the drawer on one of them instead of a node.
-     *
-     * @var 'themes'|'saved'|null
-     */
-    public ?string $drawerMode = null;
+    public ?string $drawerTarget = null;
 
     /**
      * The number of columns the table form is set to.
@@ -386,19 +379,15 @@ class BuilderCanvas extends Component
             return;
         }
 
-        // The drawer shows one thing at a time, and the table form and the
-        // tools give way to the node that was asked about.
-        $this->tableModeId = null;
-        $this->drawerMode = null;
-
         // The draft belongs to the node it was typed for, so it is only kept
         // when the same node is opened again.
-        if ($this->configuringId !== $nodeId) {
+        if ($this->drawer !== DrawerMode::Node || $this->drawerTarget !== $nodeId) {
             $this->textDraft = '';
         }
 
         $this->selectedId = $nodeId;
-        $this->configuringId = $nodeId;
+
+        $this->openDrawer(DrawerMode::Node, $nodeId);
 
         $this->cancelAttribute();
     }
@@ -424,7 +413,8 @@ class BuilderCanvas extends Component
         $this->clearConfiguring();
 
         // The tools panel goes away with the drawer being closed.
-        $this->drawerMode = null;
+        $this->drawer = null;
+        $this->drawerTarget = null;
     }
 
     /**
@@ -435,8 +425,10 @@ class BuilderCanvas extends Component
      */
     private function clearConfiguring(): void
     {
-        $this->configuringId = null;
-        $this->tableModeId = null;
+        if ($this->drawer === DrawerMode::Node || $this->drawer === DrawerMode::Table) {
+            $this->drawer = null;
+            $this->drawerTarget = null;
+        }
 
         // The draft belongs to the node it was typed for, and a closed
         // drawer has no node.
@@ -446,11 +438,39 @@ class BuilderCanvas extends Component
     }
 
     /**
+     * Put one thing in the drawer.
+     *
+     * The drawer shows one thing at a time, so the target belongs to the
+     * modes that work on a node and is dropped by the ones that do not.
+     */
+    private function openDrawer(DrawerMode $mode, ?string $target = null): void
+    {
+        $this->drawer = $mode;
+        $this->drawerTarget = $mode === DrawerMode::Node || $mode === DrawerMode::Table ? $target : null;
+    }
+
+    /**
+     * The node the drawer is configuring, if it is configuring one.
+     */
+    private function configuringId(): ?string
+    {
+        return $this->drawer === DrawerMode::Node ? $this->drawerTarget : null;
+    }
+
+    /**
+     * The node the table form is putting a table under, if it is showing.
+     */
+    private function tableParentId(): ?string
+    {
+        return $this->drawer === DrawerMode::Table ? $this->drawerTarget : null;
+    }
+
+    /**
      * Open the drawer on the themes panel.
      */
     public function openThemes(): void
     {
-        $this->openTool('themes');
+        $this->openTool(DrawerMode::Themes);
     }
 
     /**
@@ -458,7 +478,7 @@ class BuilderCanvas extends Component
      */
     public function openSaved(): void
     {
-        $this->openTool('saved');
+        $this->openTool(DrawerMode::Saved);
 
         // The name input is the way in of the panel, and a request from
         // the header deserves to land ready to type.
@@ -470,14 +490,12 @@ class BuilderCanvas extends Component
      *
      * The drawer shows one thing at a time, and the node being configured
      * gives way to the tool that was asked for.
-     *
-     * @param  'themes'|'saved'  $mode
      */
-    private function openTool(string $mode): void
+    private function openTool(DrawerMode $mode): void
     {
         $this->clearConfiguring();
 
-        $this->drawerMode = $mode;
+        $this->openDrawer($mode);
     }
 
     /**
@@ -485,7 +503,9 @@ class BuilderCanvas extends Component
      */
     public function addAttribute(): void
     {
-        if ($this->configuringId === null) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId === null) {
             return;
         }
 
@@ -500,8 +520,6 @@ class BuilderCanvas extends Component
 
             return;
         }
-
-        $nodeId = $this->configuringId;
 
         $this->transact(function () use ($nodeId, $name): void {
             $this->tree = TreeMutator::setAttribute($this->tree, $nodeId, $name, $this->attributeValue);
@@ -531,11 +549,11 @@ class BuilderCanvas extends Component
      */
     public function deleteAttribute(string $name): void
     {
-        if ($this->configuringId === null) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId === null) {
             return;
         }
-
-        $nodeId = $this->configuringId;
 
         $this->transact(function () use ($nodeId, $name): void {
             $this->tree = TreeMutator::removeAttribute($this->tree, $nodeId, $name);
@@ -676,7 +694,9 @@ class BuilderCanvas extends Component
      */
     public function addTextToConfiguring(): void
     {
-        if ($this->configuringId === null) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId === null) {
             return;
         }
 
@@ -685,8 +705,6 @@ class BuilderCanvas extends Component
         if ($text === '') {
             return;
         }
-
-        $nodeId = $this->configuringId;
 
         $this->transact(function () use ($nodeId, $text): void {
             $id = $this->nextId();
@@ -730,7 +748,7 @@ class BuilderCanvas extends Component
 
             // The drawer was showing the original: the copy is what the user is
             // about to work on next.
-            if ($this->configuringId === $nodeId) {
+            if ($this->configuringId() === $nodeId) {
                 $this->openConfig($copyId);
             }
         });
@@ -759,7 +777,7 @@ class BuilderCanvas extends Component
         $this->tableNotice = null;
         $this->newTableColumns = 3;
         $this->newTableRows = 2;
-        $this->tableModeId = $nodeId;
+        $this->openDrawer(DrawerMode::Table, $nodeId);
     }
 
     /**
@@ -767,17 +785,17 @@ class BuilderCanvas extends Component
      */
     public function scaffoldTable(): void
     {
-        if ($this->tableModeId === null) {
+        $parentId = $this->tableParentId();
+
+        if ($parentId === null) {
             return;
         }
 
-        if (TreeMutator::find($this->tree, $this->tableModeId) === null) {
+        if (TreeMutator::find($this->tree, $parentId) === null) {
             $this->closeConfig();
 
             return;
         }
-
-        $parentId = $this->tableModeId;
 
         $columns = max(1, min(99, $this->newTableColumns));
         $rows = max(1, min(99, $this->newTableRows));
@@ -879,7 +897,9 @@ class BuilderCanvas extends Component
             $this->selectedId = $this->tree['root'];
         }
 
-        if ($this->configuringId !== null && in_array($this->configuringId, $removedIds, true)) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId !== null && in_array($nodeId, $removedIds, true)) {
             $this->closeConfig();
         }
     }
@@ -1082,7 +1102,9 @@ class BuilderCanvas extends Component
 
         // The drawer was showing a node that may not be in the composition
         // the undo brought back, so it is only kept when the node survived.
-        if ($this->configuringId !== null && TreeMutator::find($this->tree, $this->configuringId) === null) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId !== null && TreeMutator::find($this->tree, $nodeId) === null) {
             $this->clearConfiguring();
         }
     }
@@ -1264,11 +1286,13 @@ class BuilderCanvas extends Component
     #[Computed]
     public function configuring(): ?array
     {
-        if ($this->configuringId === null) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId === null) {
             return null;
         }
 
-        return TreeMutator::find($this->tree, $this->configuringId);
+        return TreeMutator::find($this->tree, $nodeId);
     }
 
     /**
@@ -1305,11 +1329,13 @@ class BuilderCanvas extends Component
     #[Computed]
     public function textSegments(): array
     {
-        if ($this->configuringId === null) {
+        $nodeId = $this->configuringId();
+
+        if ($nodeId === null) {
             return [];
         }
 
-        return TreeMutator::textSegments($this->tree, $this->configuringId);
+        return TreeMutator::textSegments($this->tree, $nodeId);
     }
 
     /**

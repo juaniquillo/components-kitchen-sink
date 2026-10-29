@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Builder\BuilderCanvas;
+use App\Livewire\Builder\DrawerMode;
 use Livewire\Livewire;
 
 it('starts with an empty div as the root', function () {
@@ -93,7 +94,8 @@ it('puts the drawer on the copy of the node it duplicated', function () {
         ->set('textDraft', 'still typing')
         ->call('duplicate', 'n2')
         ->assertSet('selectedId', 'n3')
-        ->assertSet('configuringId', 'n3')
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n3')
         ->assertSet('textDraft', '')
         ->assertSet('tree.nodes.n1.children', ['n2', 'n3']);
 });
@@ -113,7 +115,7 @@ it('closes the drawer when the node it was showing is deleted', function () {
         ->call('add', 'paragraph')
         ->call('openConfig', 'n2')
         ->call('remove', 'n2')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('closes the drawer when a node it was showing is deleted with its parent', function () {
@@ -122,7 +124,7 @@ it('closes the drawer when a node it was showing is deleted with its parent', fu
         ->call('add', 'inline.link', 'n2')
         ->call('openConfig', 'n3')
         ->call('remove', 'n2')
-        ->assertSet('configuringId', null)
+        ->assertSet('drawer', null)
         ->assertSet('selectedId', 'n1');
 });
 
@@ -130,21 +132,22 @@ it('leaves the drawer closed when a container is added', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'div')
         ->assertSet('selectedId', 'n2')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('does not open the drawer when the component could not be added', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'form.text')
         ->call('add', 'table.td', 'n2')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('opens the drawer for a node', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'headers.h1')
         ->call('openConfig', 'n2')
-        ->assertSet('configuringId', 'n2')
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n2')
         ->assertSet('selectedId', 'n2');
 });
 
@@ -195,7 +198,7 @@ it('says on the drawer whether a tool panel is open', function () {
         ->call('openThemes')
         ->assertSee('data-open="true"', false)
         ->call('closeConfig')
-        ->assertSet('drawerMode', null)
+        ->assertSet('drawer', null)
         ->assertSee('data-open="false"', false)
         ->call('openSaved')
         ->assertSee('data-open="true"', false);
@@ -204,11 +207,11 @@ it('says on the drawer whether a tool panel is open', function () {
 it('opens the drawer on the tool that was asked for', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openThemes')
-        ->assertSet('drawerMode', 'themes')
+        ->assertSet('drawer', DrawerMode::Themes)
         ->call('closeConfig')
-        ->assertSet('drawerMode', null)
+        ->assertSet('drawer', null)
         ->call('openSaved')
-        ->assertSet('drawerMode', 'saved');
+        ->assertSet('drawer', DrawerMode::Saved);
 });
 
 it('gives the tools the whole drawer when a node is asked about', function () {
@@ -217,16 +220,16 @@ it('gives the tools the whole drawer when a node is asked about', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openThemes')
         ->call('openConfig', 'n1')
-        ->assertSet('drawerMode', null)
-        ->assertSet('configuringId', 'n1');
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n1');
 });
 
 it('clears the node of the drawer when a tool is asked for', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openConfig', 'n1')
         ->call('openSaved')
-        ->assertSet('configuringId', null)
-        ->assertSet('drawerMode', 'saved');
+        ->assertSet('drawer', DrawerMode::Saved)
+        ->assertSet('drawerTarget', null);
 });
 
 it('closes the drawer', function () {
@@ -234,20 +237,21 @@ it('closes the drawer', function () {
         ->call('add', 'headers.h1')
         ->call('openConfig', 'n2')
         ->call('closeConfig')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('ignores a request to configure a node that does not exist', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('openConfig', 'nope')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('configures the selected node when there is no button to press', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'form.text')
         ->call('configureSelected')
-        ->assertSet('configuringId', 'n2');
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n2');
 });
 
 it('generates the PHP that reproduces the tree', function () {
@@ -272,7 +276,7 @@ it('clears the canvas and the name when it is reset', function () {
         ->call('resetCanvas')
         ->assertSet('tree.nodes', fn (array $nodes): bool => count($nodes) === 1)
         ->assertSet('compositionName', '')
-        ->assertSet('configuringId', null)
+        ->assertSet('drawer', null)
         ->assertSee('data-dirty="false"', false);
 
     $tree = $component->instance()->tree;
@@ -286,8 +290,8 @@ it('gives the configuration back when a node is asked about', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
         ->call('openConfig', 'n1')
-        ->assertSet('tableModeId', null)
-        ->assertSet('configuringId', 'n1')
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n1')
         ->assertSee('data-open="true"', false);
 });
 

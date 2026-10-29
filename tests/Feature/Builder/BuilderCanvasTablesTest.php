@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Builder\BuilderCanvas;
+use App\Livewire\Builder\DrawerMode;
 use Livewire\Livewire;
 
 it('offers a table in the menu of the root', function () {
@@ -14,24 +15,28 @@ it('offers a table in the menu of the root', function () {
 it('opens the table form for a node that takes a table', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
-        ->assertSet('tableModeId', 'n1')
+        ->assertSet('drawer', DrawerMode::Table)
+        ->assertSet('drawerTarget', 'n1')
         ->assertSet('newTableColumns', 3)
         ->assertSet('newTableRows', 2)
         ->assertSee('data-open="true"', false);
 });
 
 it('refuses the table form for a node that cannot hold a table', function () {
+    // The paragraph is what the drawer was already showing, and the refused
+    // form does not take its place.
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
         ->call('tableMode', 'n2')
-        ->assertSet('tableModeId', null);
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n2');
 });
 
 it('scaffolds a whole table under the node the form was opened for', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('tableMode', 'n1')
         ->call('scaffoldTable')
-        ->assertSet('tableModeId', null)
+        ->assertSet('drawer', null)
         ->assertSet('tableNotice', null)
         ->assertSet('tree.nodes.n2.type', 'table.table')
         ->assertSet('tree.nodes.n3.children', ['n4'])
@@ -97,7 +102,7 @@ it('closes the drawer of a cell the column operation took out', function () {
         ->call('scaffoldTable')
         ->call('openConfig', 'n22')
         ->call('deleteColumn', 'n15')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('leaves the selection alone when the column is refused', function () {

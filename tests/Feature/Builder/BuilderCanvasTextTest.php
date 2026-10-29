@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Builder\BuilderCanvas;
+use App\Livewire\Builder\DrawerMode;
 use Livewire\Livewire;
 
 it('adds a text segment to a node', function () {
@@ -98,5 +99,6 @@ it('opens the drawer when a text element is added', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
         ->assertSet('selectedId', 'n2')
-        ->assertSet('configuringId', 'n2');
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n2');
 });

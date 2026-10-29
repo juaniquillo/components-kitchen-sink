@@ -1,7 +1,9 @@
+@use('App\Livewire\Builder\DrawerMode')
+
 @php
     $node = $this->configuring;
     $descriptor = $this->configuringDescriptor;
-    $open = $configuringId !== null || $tableModeId !== null || $drawerMode !== null;
+    $open = $drawer !== null;
 @endphp
 
 <aside
@@ -15,7 +17,12 @@
 >
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-            {{ $tableModeId !== null ? 'Add table' : ($drawerMode === 'themes' ? 'Themes' : ($drawerMode === 'saved' ? 'Saved compositions' : 'Configure')) }}
+            {{ match ($drawer) {
+                DrawerMode::Table => 'Add table',
+                DrawerMode::Themes => 'Themes',
+                DrawerMode::Saved => 'Saved compositions',
+                default => 'Configure',
+            } }}
         </h2>
 
         <button
@@ -27,11 +34,11 @@
         </button>
     </div>
 
-    @if ($tableModeId !== null)
+    @if ($drawer === DrawerMode::Table)
         <div class="space-y-5">
             <p class="text-[11px] text-slate-400">
                 A skeleton with a head row and the body rows goes under the
-                node <span class="font-medium text-slate-600 dark:text-slate-300">{{ $tableModeId }}</span>.
+                node <span class="font-medium text-slate-600 dark:text-slate-300">{{ $drawerTarget }}</span>.
                 Every cell holds a dash until something is typed into it.
             </p>
 
@@ -83,9 +90,9 @@
                 </button>
             </div>
         </div>
-    @elseif ($drawerMode === 'themes')
+    @elseif ($drawer === DrawerMode::Themes)
         @include('livewire.builder._themes')
-    @elseif ($drawerMode === 'saved')
+    @elseif ($drawer === DrawerMode::Saved)
         @include('livewire.builder._saved')
     @elseif ($node === null || $descriptor === null)
         <p class="text-xs text-slate-400">Select a node and press its configure button.</p>

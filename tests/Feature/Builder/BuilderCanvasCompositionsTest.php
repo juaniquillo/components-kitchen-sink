@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\CompositionRepository;
 use App\Livewire\Builder\BuilderCanvas;
+use App\Livewire\Builder\DrawerMode;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -65,9 +66,10 @@ it('closes the drawer when a composition is loaded', function () {
 
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
-        ->assertSet('configuringId', 'n2')
+        ->assertSet('drawer', DrawerMode::Node)
+        ->assertSet('drawerTarget', 'n2')
         ->call('load', 'simple')
-        ->assertSet('configuringId', null);
+        ->assertSet('drawer', null);
 });
 
 it('asks for a name before it saves a composition', function () {
@@ -76,7 +78,7 @@ it('asks for a name before it saves a composition', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
         ->call('save')
-        ->assertSet('drawerMode', 'saved')
+        ->assertSet('drawer', DrawerMode::Saved)
         ->assertSet('compositionName', '')
         ->assertSee('data-open="true"', false);
 
@@ -90,9 +92,9 @@ it('keeps the saved compositions drawer open while one is loaded', function () {
         ->call('openSaved')
         ->assertSee('Simple', false)
         ->call('load', 'simple')
-        ->assertSet('drawerMode', 'saved')
+        ->assertSet('drawer', DrawerMode::Saved)
         ->assertSee('data-open="true"', false)
-        ->assertSet('configuringId', null);
+        ->assertSet('drawerTarget', null);
 });
 
 it('asks before a load replaces work that is not saved', function () {
