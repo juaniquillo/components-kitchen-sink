@@ -1,5 +1,10 @@
 # TODO
 
+## Cruds (`/cruds`)
+
+- [ ] **Input Group WC.** Fix `resources\js\form-group.js` Web Component. Right now 
+      it's buggy if the user submits the form without clicking any of the inputs
+
 ## Builder (`/builder`)
 
 ### Theme system
@@ -27,3 +32,7 @@
 - [ ] **Navigation contrast.** The shared nav's `text-blue-500` on the slate-700 body
       is 2.81:1, the only axe violation left on the builder page. `dark:text-blue-300`
       or a darker light-mode base.
+
+## Design System
+
+To be discussed. 
