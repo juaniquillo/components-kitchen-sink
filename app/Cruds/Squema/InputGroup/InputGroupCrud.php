@@ -76,7 +76,7 @@ class InputGroupCrud implements Crud
 
         $form = ComponentBuilder::make(ComponentEnum::FORM)
             ->setContents($inputs->toArray())
-            ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER, '#'.self::IDENTIFIER]))
+            ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER]).'#'.self::IDENTIFIER)
             ->setAttribute('enctype', 'multipart/form-data')
             ->setThemes([
                 'display' => 'grid',
