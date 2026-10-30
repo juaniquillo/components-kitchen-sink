@@ -15,8 +15,8 @@
     @unless ($open) inert @endunless
     x-data="{ close() { if (this.$el.dataset.open === 'true' && ! document.querySelector('dialog[open]') && ! document.querySelector(':popover-open')) this.$wire.closeConfig() } }"
     x-on:keydown.escape.window="close()"
-    x-on:builder-drawer-opened.window="$nextTick(() => $refs.close?.focus())"
-    x-on:builder-drawer-closed.window="$nextTick(() => document.getElementById('builder-canvas-panel')?.focus())"
+    x-on:builder-drawer-opened.window="$nextTick(() => $refs.close?.focus({ preventScroll: true }))"
+    x-on:builder-drawer-closed.window="$nextTick(() => document.getElementById('builder-canvas-panel')?.focus({ preventScroll: true }))"
 >
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
