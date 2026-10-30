@@ -2,7 +2,6 @@ const formGroupStyles = new CSSStyleSheet();
 
 formGroupStyles.replaceSync(`
 
-  
   .error-message {
     color: var(--error-message-color, red);
   }
@@ -14,8 +13,8 @@ formGroupStyles.replaceSync(`
 `);
 
 class FormGroup extends HTMLElement {
-  #input;
-  #submitButton;
+  #inputs = [];
+  #abortController = null;
 
   constructor() {
     super();
@@ -23,7 +22,7 @@ class FormGroup extends HTMLElement {
     this.shadowRoot.adoptedStyleSheets = [formGroupStyles];
     this.shadowRoot.innerHTML = `
       <slot></slot>
-      <span class="error-message" 
+      <span class="error-message"
             aria-live="polite"
             part="error-message">
       </span>
@@ -35,69 +34,84 @@ class FormGroup extends HTMLElement {
     this.handleInvalid = this.handleInvalid.bind(this);
     this.handleInput = this.handleInput.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
-
-    this.#submitButton = document.getElementById('form_group_wc_button');
   }
 
-  handleInvalid(e) {
-    e.preventDefault();
+  handleInvalid(event) {
+    // turn off the browser validation popup and show
+    // the message below the field instead. `invalid` fires
+    // on every invalid control when a submit is blocked,
+    // whatever triggered the submit, so this is also what
+    // validates a form nobody has touched yet.
+    event.preventDefault();
+    this.update();
   }
 
   handleInput() {
-    if(this.#input) {
-      this.#errorMessage.textContent = '';
-    }
+    // hide the error message while the user is typing
+    this.setMessage('');
+    this.setAriaInvalid(false);
   }
 
   handleBlur() {
-    // if input is NOT valid, show an error message
-    if(this.#input && !this.#input.validity.valid) {
-      this.#errorMessage.textContent = this.#customErrorMessage[this.#getFirstInvalid(this.#input.validity)];
-    }
+    // if an input is NOT valid, show an error message
+    this.update();
   }
 
   connectedCallback() {
-    this.#input = this.querySelector("input, textarea");
+    // a group holds every control of one field, so all of them
+    // are wired: a radio group, for example, is only valid once
+    // one of its buttons is checked.
+    this.#inputs = [...this.querySelectorAll("input, textarea, select")];
 
-    if(this.#input) {
-      // turn off the browser validation popup
-      this.#input.addEventListener('invalid', this.handleInvalid)
-      
-      // hide error messages while user is typing
-      this.#input.addEventListener('input', this.handleInput)
-      
-      // validate and show error messages when a user leaves a field
-      this.#input.addEventListener('blur', this.handleBlur)
+    // connecting again replaces the listeners instead of doubling them
+    this.#abortController?.abort();
+    this.#abortController = new AbortController();
+    const { signal } = this.#abortController;
 
-      // handle form submission
-      if(this.#submitButton) {
-        this.#submitButton.addEventListener('click', () => {
-          // trigger blur to validate field
-          this.#input.focus();
-          this.#input.blur();
-          // if input is valid, clear error message
-          
-        });
-      }
-
+    for (const input of this.#inputs) {
+      input.addEventListener('invalid', this.handleInvalid, { signal });
+      input.addEventListener('input', this.handleInput, { signal });
+      input.addEventListener('blur', this.handleBlur, { signal });
     }
   }
 
   disconnectedCallback() {
     // clean up all event listeners
-    if(this.#input) {
-      this.#input.removeEventListener('invalid',  this.handleInvalid)
-      this.#input.removeEventListener('input', this.handleInput)
-      this.#input.removeEventListener('blur', this.handleBlur)
+    this.#abortController?.abort();
+    this.#abortController = null;
+  }
 
-      // form submission listener cleanup
-      if(this.#submitButton) {
-        this.#submitButton.removeEventListener('click', () => {
-          this.#input.focus();
-          this.#input.blur();
-        });
+  update() {
+    const invalid = this.#inputs.find((input) => !input.validity.valid);
+
+    if (!invalid) {
+      this.setMessage('');
+      this.setAriaInvalid(false);
+
+      return;
+    }
+
+    const key = this.#getFirstInvalid(invalid.validity);
+
+    this.setMessage((key && this.#customErrorMessage[key]) || 'This field is invalid');
+    this.setAriaInvalid(true);
+  }
+
+  setMessage(text) {
+    const message = this.#errorMessage;
+
+    if (message.textContent !== text) {
+      message.textContent = text;
+    }
+  }
+
+  setAriaInvalid(invalid) {
+    for (const input of this.#inputs) {
+      if (invalid) {
+        input.setAttribute('aria-invalid', 'true');
+      } else {
+        input.removeAttribute('aria-invalid');
       }
-
     }
   }
 
@@ -106,11 +120,13 @@ class FormGroup extends HTMLElement {
   }
 
   #getFirstInvalid(validityState) {
-    for(const key in validityState) {
-      if(validityState[key]) {
+    for (const key in validityState) {
+      if (validityState[key] === true) {
         return key;
       }
     }
+
+    return null;
   }
 
   get #customErrorMessage() {
@@ -124,8 +140,7 @@ class FormGroup extends HTMLElement {
       patternMismatch: this.getAttribute('pattern-mismatch-message') || 'This fields value does not match the pattern',
     }
   }
-}  
-
+}
 
 
 
