@@ -2,8 +2,9 @@
 
 ## Cruds (`/cruds`)
 
-- [ ] **Input Group WC.** Fix `resources\js\form-group.js` Web Component. Right now 
-      it's buggy if the user submits the form without clicking any of the inputs
+- [x] **Input Group WC.** Fix `resources\js\form-group.js` Web Component. Right now 
+      it's buggy if the user submits the form without clicking any of the inputs.
+      Here's the CRUD's folder: `app\Cruds\Squema\InputGroup`.
 
 ## Builder (`/builder`)
 
