@@ -8,6 +8,7 @@ use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Builders\SvgLocalThemeComponentBuilder;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
@@ -62,12 +63,13 @@ class SvgReuse implements Component
             ->setViewBox(0, 0, 200, 80)
             ->setSize(200, 80)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::TEXT)
-                    ->setAttributes(['x' => '100', 'y' => '40', 'text-anchor' => 'middle', 'font-size' => '20', 'class' => 'fill-slate-600 dark:fill-slate-200'])
+                SvgLocalThemeComponentBuilder::make(SvgComponentEnum::TEXT)
+                    ->setTheme('fill', 'muted')
+                    ->setAttributes(['x' => '100', 'y' => '40', 'text-anchor' => 'middle', 'font-size' => '20'])
                     ->setContents([
                         'Hello, ',
-                        SvgComponentBuilder::make(SvgComponentEnum::TSPAN)
-                            ->setAttribute('class', 'fill-blue-600 dark:fill-blue-300')
+                        SvgLocalThemeComponentBuilder::make(SvgComponentEnum::TSPAN)
+                            ->setTheme('fill', 'accent')
                             ->setAttribute('font-weight', 'bold')
                             ->setContent('SVG'),
                     ]),

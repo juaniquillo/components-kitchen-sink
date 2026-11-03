@@ -75,7 +75,9 @@ it('renders the reuse and the caption as two svgs', function () {
         ->toContain('<title')
         ->toContain('<desc')
         ->and($caption)->toContain('<text')
-        ->toContain('<tspan');
+        ->toContain('<tspan')
+        ->toContain('fill-slate-600')
+        ->toContain('fill-blue-600');
 });
 
 it('paints the themed icons with the app fill group', function () {
