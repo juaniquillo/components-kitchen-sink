@@ -64,7 +64,7 @@ use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 
 $rect = SvgShape::rect(10, 10, 80, 50)->setFill('#3b82f6');
 
-// Path data builder for the `d` attribute (curves stay raw until needed):
+// Path data builder for the `d` attribute (prefer the command methods; raw() for anything else):
 use Juaniquillo\SvgBackendComponents\Shapes\SvgPath;
 
 $path = SvgShape::path(
@@ -72,8 +72,9 @@ $path = SvgShape::path(
 )->setFill('none');
 
 // Resolves themes from the app's resources/views/_themes/tailwind/ instead of package defaults.
+// Group names are app-defined; this app paints SVG through its `fill` group.
 $themed = SvgLocalThemeComponentBuilder::make(SvgComponentEnum::PATH)
-    ->setTheme('color', 'success');
+    ->setTheme('fill', 'muted');
 ```
 
 ## Themes
@@ -82,7 +83,7 @@ Apply Tailwind variants with `setTheme()` / `setThemes()`. Theme files live in t
 
 ```php
 $path = SvgComponentBuilder::make(SvgComponentEnum::PATH)
-    ->setTheme('color', 'success');
+    ->setTheme('fill', 'muted');
 ```
 
 ## Rendering
@@ -102,5 +103,5 @@ SvgRenderer::make($component)->saveTo('path/to/icon.svg');
 - Always use `SvgComponentEnum` cases, never raw element name strings.
 - Attributes are scalar (`setAttribute()` / `setAttributes()`); nested elements go through `setContent()` / `setContents()`.
 - Prefer `SvgShape` presets for rect/circle/ellipse/line/polyline/polygon/path over `SvgComponentBuilder::make()` + raw geometry.
-- Prefer `SvgPath` over hand-written `d` strings; use `raw()` only for curves/arcs the builder lacks.
+- Prefer `SvgPath` command methods over hand-written `d` strings; use `raw()` only for anything the builder lacks.
 - Prefer presentation aliases (`setFill()`, `setStroke()`, `setStrokeWidth()`, `setOpacity()`) over raw `setAttribute()` for those names.
