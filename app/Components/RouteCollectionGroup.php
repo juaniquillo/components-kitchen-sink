@@ -24,6 +24,8 @@ use App\Components\Groups\Slate\SlateDropDownMenu;
 use App\Components\Groups\Slate\SlateTables;
 use App\Components\Groups\Slate\SlateTabs;
 use App\Components\Groups\Svg\SvgBasicShapes;
+use App\Components\Groups\Svg\SvgBrandIcons;
+use App\Components\Groups\Svg\SvgMedia;
 use App\Components\Groups\Svg\SvgPaint;
 use App\Components\Groups\Svg\SvgPaths;
 use App\Components\Groups\Svg\SvgReuse;
@@ -99,7 +101,9 @@ class RouteCollectionGroup
                     new SvgPaths,
                     new SvgPaint,
                     new SvgReuse,
+                    new SvgMedia,
                     new SvgThemedIcons,
+                    new SvgBrandIcons,
                 ]),
                 'assets' => [],
             ],

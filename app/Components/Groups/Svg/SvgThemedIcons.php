@@ -8,6 +8,7 @@ use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\SvgBackendComponents\Builders\SvgLocalThemeComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
 class SvgThemedIcons implements Component
@@ -44,8 +45,7 @@ class SvgThemedIcons implements Component
             ->setSize(56)
             ->setTheme('fill', $variant)
             ->setContent(
-                SvgLocalThemeComponentBuilder::make(SvgComponentEnum::PATH)
-                    ->setAttribute('d', $d)
+                SvgShape::path($d)
             );
     }
 }

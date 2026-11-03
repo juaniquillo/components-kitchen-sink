@@ -20,6 +20,7 @@ class SvgReuse implements Component
     {
         return [
             'reuse' => self::reuse(),
+            'symbol' => self::symbol(),
             'caption' => self::caption(),
         ];
     }
@@ -53,6 +54,34 @@ class SvgReuse implements Component
                         SvgComponentBuilder::make(SvgComponentEnum::USE)
                             ->setAttributes(['href' => '#dot', 'x' => '90', 'y' => '50']),
                     ]),
+            ]);
+    }
+
+    public static function symbol(): BackendComponent
+    {
+        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 200, 100)
+            ->setSize(200, 100)
+            ->setContents([
+                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                    ->setContents([
+                        SvgComponentBuilder::make(SvgComponentEnum::SYMBOL)
+                            ->setAttribute('id', 'badge')
+                            ->setViewBox(0, 0, 24, 24)
+                            ->setContent(
+                                SvgShape::path('M12 2l3 7h7l-6 4 2 7-6-4-6 4 2-7-6-4h7z')
+                                    ->setFill('#f59e0b')
+                            ),
+                    ]),
+                SvgComponentBuilder::make(SvgComponentEnum::USE)
+                    ->setAttribute('href', '#badge')
+                    ->setAttributes(['x' => '34', 'y' => '26'])
+                    ->setSize(48),
+                SvgComponentBuilder::make(SvgComponentEnum::USE)
+                    ->setAttribute('href', '#badge')
+                    ->setAttributes(['x' => '118', 'y' => '38'])
+                    ->setSize(24),
             ]);
     }
 

@@ -21,6 +21,7 @@ class SvgPaint implements Component
             'gradients' => self::gradients(),
             'clip and pattern' => self::clipAndPattern(),
             'opacity' => self::opacity(),
+            'mask' => self::mask(),
         ];
     }
 
@@ -77,7 +78,9 @@ class SvgPaint implements Component
                                 SvgShape::circle(50, 50, 40),
                             ]),
                         SvgComponentBuilder::make(SvgComponentEnum::PATTERN)
-                            ->setAttributes(['id' => 'dots', 'width' => '12', 'height' => '12', 'patternUnits' => 'userSpaceOnUse'])
+                            ->setAttribute('id', 'dots')
+                            ->setAttribute('patternUnits', 'userSpaceOnUse')
+                            ->setSize(12)
                             ->setContents([
                                 SvgShape::circle(3, 3, 2)
                                     ->setFill('#3b82f6'),
@@ -104,6 +107,36 @@ class SvgPaint implements Component
                 SvgShape::circle(115, 50, 40)
                     ->setFill('#f59e0b')
                     ->setOpacity(0.6),
+            ]);
+    }
+
+    public static function mask(): BackendComponent
+    {
+        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 200, 100)
+            ->setSize(200, 100)
+            ->setContents([
+                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                    ->setContents([
+                        SvgComponentBuilder::make(SvgComponentEnum::RADIAL_GRADIENT)
+                            ->setAttribute('id', 'mask-fade')
+                            ->setContents([
+                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                    ->setAttributes(['offset' => '30%', 'stop-color' => '#ffffff']),
+                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                    ->setAttributes(['offset' => '100%', 'stop-color' => '#000000']),
+                            ]),
+                        SvgComponentBuilder::make(SvgComponentEnum::MASK)
+                            ->setAttribute('id', 'fade')
+                            ->setContents([
+                                SvgShape::rect(10, 10, 180, 80)
+                                    ->setFill('url(#mask-fade)'),
+                            ]),
+                    ]),
+                SvgShape::rect(10, 10, 180, 80)
+                    ->setFill('#3b82f6')
+                    ->setAttribute('mask', 'url(#fade)'),
             ]);
     }
 }

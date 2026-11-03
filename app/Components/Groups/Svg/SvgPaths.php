@@ -21,6 +21,7 @@ class SvgPaths implements Component
         return [
             'paths' => self::paths(),
             'drawn' => self::drawn(),
+            'commands' => self::commands(),
         ];
     }
 
@@ -71,6 +72,35 @@ class SvgPaths implements Component
                     ->setStrokeWidth(4),
                 SvgShape::rect(85, 65, 30, 35)
                     ->setFill('#4f46e5'),
+            ]);
+    }
+
+    public static function commands(): BackendComponent
+    {
+        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 200, 120)
+            ->setSize(200, 120)
+            ->setContents([
+                SvgShape::path(
+                    SvgPath::start(30, 100)
+                        ->lineToRelative(0, -50)
+                        ->arcTo(40, 40, 0, false, true, 110, 50)
+                        ->lineToRelative(0, 50)
+                        ->close()
+                )
+                    ->setFill('#e0e7ff')
+                    ->setStroke('#4f46e5')
+                    ->setStrokeWidth(4),
+                SvgShape::path(
+                    SvgPath::start(130, 90)
+                        ->quadraticTo(140, 55, 150, 90)
+                        ->smoothQuadraticTo(170, 90)
+                        ->smoothQuadraticTo(190, 90)
+                )
+                    ->setFill('none')
+                    ->setStroke('#64748b')
+                    ->setStrokeWidth(4),
             ]);
     }
 }
