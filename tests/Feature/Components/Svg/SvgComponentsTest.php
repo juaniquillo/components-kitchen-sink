@@ -7,6 +7,10 @@ use App\Components\Groups\Svg\SvgPaint;
 use App\Components\Groups\Svg\SvgPaths;
 use App\Components\Groups\Svg\SvgReuse;
 use App\Components\Groups\Svg\SvgThemedIcons;
+use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
+use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
+use Juaniquillo\SvgBackendComponents\SvgRenderer;
 
 it('has the expected group names', function () {
     expect(SvgBasicShapes::NAME)->toBe('SVG Basic Shapes')
@@ -31,6 +35,9 @@ it('renders the basic shapes as one svg', function () {
 
     expect($html)->toContain('<svg')
         ->toContain('xmlns="http://www.w3.org/2000/svg"')
+        ->toContain('viewBox="0 0 200 120"')
+        ->toContain('width="200"')
+        ->toContain('height="120"')
         ->toContain('<rect')
         ->toContain('<circle')
         ->toContain('<ellipse')
@@ -85,7 +92,9 @@ it('paints the themed icons with the app fill group', function () {
         $html = (string) $this->blade('{{ $svg }}', ['svg' => $icon]);
 
         expect($html)->toContain('<svg')
-            ->toContain('<path');
+            ->toContain('<path')
+            ->toContain('width="56"')
+            ->toContain('height="56"');
     }
 
     $icons = SvgThemedIcons::list();
@@ -102,4 +111,26 @@ it('registers the svg group on the components pages', function () {
     $this->get('/components/svg')
         ->assertOk()
         ->assertSee('<svg', false);
+});
+
+it('exports a standalone document, adding xmlns when the root lacks it', function () {
+    $path = storage_path('framework/testing/svg/showcase.svg');
+    @unlink($path);
+
+    $bare = SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        ->setViewBox(0, 0, 10, 10)
+        ->setSize(10)
+        ->setContent(SvgShape::circle(5, 5, 4));
+
+    expect(SvgRenderer::make($bare)->saveTo($path))->toBe($path)
+        ->and(file_get_contents($path))
+        ->toContain('xmlns="http://www.w3.org/2000/svg"')
+        ->toEndWith("\n");
+
+    SvgRenderer::make($bare)->saveTo($path, prolog: true);
+
+    expect(file_get_contents($path))
+        ->toStartWith('<?xml version="1.0" encoding="UTF-8"?>');
+
+    @unlink($path);
 });

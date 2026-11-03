@@ -43,7 +43,7 @@ class SvgPaths implements Component
                 SvgShape::polygon('130,100 150,60 170,100')
                     ->setFill('#f59e0b'),
                 SvgShape::path(
-                    SvgPath::start(120, 30)->raw('C 140 10, 170 10, 185 30')
+                    SvgPath::start(120, 30)->curveTo(140, 10, 170, 10, 185, 30)
                 )
                     ->setFill('none')
                     ->setStroke('#64748b')
