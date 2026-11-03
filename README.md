@@ -1,6 +1,6 @@
 # Laravel Backend Component Kitchen Sink
 
-A demonstration project showcasing the **`laravel-backend-component`** package and experimenting with new ways to use its components with Livewire 4, Flux UI, Bootstrap, and Slate.
+A demonstration project showcasing the **`laravel-backend-component`** package and experimenting with new ways to use its components with Livewire 4, Flux UI, Bootstrap, Slate, and SVG.
 
 ## Project Overview
 
@@ -13,6 +13,7 @@ This is a Laravel 13 kitchen sink application that demonstrates various patterns
 - **Tailwind CSS v4** - Styling
 - **juaniquillo/laravel-backend-component** - Backend component system
 - **juaniquillo/flux-backend-components** - Flux component builder, enum, and backend component
+- **juaniquillo/svg-backend-components** - SVG builder, enum, and backend component
 - **juaniquillo/mjml-backend-components** - MJML email builder, enum, and compiler drivers
 - **juaniquillo/crud-assistant** - CRUD form factories and input collections
 - **juaniquillo/input-component-action** - Input value/validation processing
@@ -40,10 +41,15 @@ Components are organized into groups registered in `App\Components\RouteCollecti
 | **Flux UI** | Modals (3), Buttons (6), Skeletons (5), Cards (6), Tables (7), Inputs (10) |
 | **Bootstrap** | Button (5), Badge (9), Card (2), Carousel (3), Tables (7) |
 | **Slate** | Dialog (2), Tabs (1), Drop Down Menus (1), Buttons (9), Carousel (2), Tables (1) |
+| **SVG** | Basic Shapes (1), Paths and Polygons (2), Paint and Patterns (3), Reuse and Text (2), Themed Icons (4) |
 
 #### Third-Party Slate Components
 
 The Slate group is built with `juaniquillo/slate-backend-components`, which adapts the `BackendComponent` contract to render Slate's anonymous Blade components. Components are composed with the `SlateComponentEnum` (over 200 cases) and `SlateComponentBuilder`, using helpers like `SlateOverlayUtil` (dialogs), `SlateTabsUtil` (tabs), and `SlateUITableUtil` (tables). Each `SlateBackendComponent` resolves through `backend-component::_utilities.resolve-third-party-component`, which delegates to `<x-dynamic-component>`. The Slate group also registers its own stylesheet (`resources/css/slate.css`) as a per-group asset.
+
+#### Third-Party SVG Components
+
+The SVG group is built with `juaniquillo/svg-backend-components`, which adapts the `BackendComponent` contract to SVG elements. Components are composed with the `SvgComponentEnum` (`SVG`, `G`, `PATH`, `CIRCLE`, …) and `SvgComponentBuilder`, with roots built fluently via `make(SvgComponentEnum::SVG)->setXmlns()->setViewBox()->setSize()->setContents()`. Geometry uses `SvgShape` presets (`rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, `path`), path data uses the `SvgPath` builder (`start()->lineTo()->close()`, `raw()` for curves), and paint uses the aliases `setFill()` / `setStroke()` / `setStrokeWidth()` / `setOpacity()`. Each `SvgBackendComponent` renders through the `svg::` view context, or standalone via `SvgRenderer::make($component)->toSvg()`. The Themed Icons box uses `SvgLocalThemeComponentBuilder` so the paint comes from the app's own `fill` theme group (`fill-indigo-600 dark:fill-indigo-300`, …) instead of hardcoded fills.
 
 ### Emails
 
@@ -320,7 +326,7 @@ Visit `/cruds` to see all available CRUD types. Each card links to its respectiv
 
 ### Exploring Components
 
-Visit `/components` for links to every registered component group. Each group page (e.g. `/components/slate`) renders the full variant list for that group: Backend Components, Flux UI, Bootstrap, and Slate.
+Visit `/components` for links to every registered component group. Each group page (e.g. `/components/slate`) renders the full variant list for that group: Backend Components, Flux UI, Bootstrap, Slate, and SVG.
 
 ### Authentication
 
@@ -363,7 +369,7 @@ vendor/bin/pest --filter="undoes a change"
 
 This project experiments with the `juaniquillo/laravel-backend-component` package. Key integration points:
 
-- **`BackendComponent` interface** - Implemented by `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) and `SlateBackendComponent` (from `juaniquillo/slate-backend-components`)
+- **`BackendComponent` interface** - Implemented by `FluxBackendComponent` (from `juaniquillo/flux-backend-components`), `SlateBackendComponent` (from `juaniquillo/slate-backend-components`), and `SvgBackendComponent` (from `juaniquillo/svg-backend-components`)
 - **`ComponentBuilder`** - Fluent builder for creating component trees
 - **`ComponentEnum`** - Enumeration of all available component types
 - **Theme system** - Default theme manager with configurable themes, plus app-level Tailwind theme files
@@ -387,6 +393,7 @@ Existing adapters serve as reference implementations:
 
 - `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) - Flux-styled backend components using `FluxComponentEnum` and `FluxComponentBuilder`
 - `SlateBackendComponent` (from `juaniquillo/slate-backend-components`) - Resolves `SlateComponentEnum` cases to `slate::*` views through `x-dynamic-component`
+- `SvgBackendComponent` (from `juaniquillo/svg-backend-components`) - SVG elements from `SvgComponentEnum` composed with `SvgComponentBuilder`, rendered through the `svg::` view context
 
 ## License
 

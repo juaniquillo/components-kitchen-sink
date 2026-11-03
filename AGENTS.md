@@ -87,7 +87,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Always use curly braces for control structures, even for single-line bodies.
 - Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
 - Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
-- Use ALL CAPS for Enum keys: `case CANVAS = 'canvas';`, `case BEST_LAKE = 'best_lake';`. The value keeps its lowercase form, the case name is shouty. This applies to enums this application writes; vendor enums keep the convention they ship with.
+- Follow existing application Enum naming conventions.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
 
@@ -169,7 +169,6 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
 - Rerun a test after each change to it.
 - Run `vendor/bin/pest` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
-- After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
 
 === juaniquillo/laravel-backend-component/core rules ===
 

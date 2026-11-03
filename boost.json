@@ -9,7 +9,8 @@
     "mcp": true,
     "packages": [
         "livewire/blaze",
-        "juaniquillo/laravel-backend-component"
+        "juaniquillo/laravel-backend-component",
+        "juaniquillo/svg-backend-components"
     ],
     "sail": false,
     "skills": [
@@ -20,6 +21,7 @@
         "livewire-development",
         "tailwindcss-development",
         "backend-component",
+        "svg-backend-development",
         "blaze-optimize",
         "email-html-mjml",
         "flux-backend-development",

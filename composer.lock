@@ -1516,12 +1516,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/svg-backend-components.git",
-                "reference": "9eaeb0ccb6dd95494cbab64a76a2178fb07cd6b9"
+                "reference": "3220426da62851d54dfbdf19e25a81676809743f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/svg-backend-components/zipball/9eaeb0ccb6dd95494cbab64a76a2178fb07cd6b9",
-                "reference": "9eaeb0ccb6dd95494cbab64a76a2178fb07cd6b9",
+                "url": "https://api.github.com/repos/juaniquillo/svg-backend-components/zipball/3220426da62851d54dfbdf19e25a81676809743f",
+                "reference": "3220426da62851d54dfbdf19e25a81676809743f",
                 "shasum": ""
             },
             "require": {
@@ -1577,7 +1577,7 @@
                 "issues": "https://github.com/juaniquillo/svg-backend-components/issues",
                 "source": "https://github.com/juaniquillo/svg-backend-components/tree/main"
             },
-            "time": "2026-10-29T02:49:07+00:00"
+            "time": "2026-11-03T01:51:28+00:00"
         },
         {
             "name": "laravel/framework",
@@ -2000,16 +2000,16 @@
         },
         {
             "name": "league/commonmark",
-            "version": "2.10.4",
+            "version": "2.10.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/commonmark.git",
-                "reference": "40821b7606d8d946bac57dbd2290076c722e3a65"
+                "reference": "8eb53e906fd60c67038d22f1f1cab420ed58b8be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/40821b7606d8d946bac57dbd2290076c722e3a65",
-                "reference": "40821b7606d8d946bac57dbd2290076c722e3a65",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/8eb53e906fd60c67038d22f1f1cab420ed58b8be",
+                "reference": "8eb53e906fd60c67038d22f1f1cab420ed58b8be",
                 "shasum": ""
             },
             "require": {
@@ -2103,7 +2103,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-17T19:59:50+00:00"
+            "time": "2026-10-31T13:35:37+00:00"
         },
         {
             "name": "league/config",
@@ -7397,16 +7397,16 @@
         },
         {
             "name": "filp/whoops",
-            "version": "2.18.7",
+            "version": "2.19.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filp/whoops.git",
-                "reference": "50670ba239926c50f2073e868f6672f775cd57ec"
+                "reference": "2915c807d7af61d8fb5c31d90c57af91d30f29fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/50670ba239926c50f2073e868f6672f775cd57ec",
-                "reference": "50670ba239926c50f2073e868f6672f775cd57ec",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/2915c807d7af61d8fb5c31d90c57af91d30f29fc",
+                "reference": "2915c807d7af61d8fb5c31d90c57af91d30f29fc",
                 "shasum": ""
             },
             "require": {
@@ -7456,7 +7456,7 @@
             ],
             "support": {
                 "issues": "https://github.com/filp/whoops/issues",
-                "source": "https://github.com/filp/whoops/tree/2.18.7"
+                "source": "https://github.com/filp/whoops/tree/2.19.1"
             },
             "funding": [
                 {
@@ -7464,7 +7464,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-18T13:17:38+00:00"
+            "time": "2026-11-02T12:00:00+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",
@@ -7713,16 +7713,16 @@
         },
         {
             "name": "laravel/boost",
-            "version": "v2.10.3",
+            "version": "v2.10.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/boost.git",
-                "reference": "75c269a8a53e931c7252e7cd562e1a209356a7c6"
+                "reference": "9cd5e7d81300b5dee4c8b1619ec4b36f4a6367fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/boost/zipball/75c269a8a53e931c7252e7cd562e1a209356a7c6",
-                "reference": "75c269a8a53e931c7252e7cd562e1a209356a7c6",
+                "url": "https://api.github.com/repos/laravel/boost/zipball/9cd5e7d81300b5dee4c8b1619ec4b36f4a6367fd",
+                "reference": "9cd5e7d81300b5dee4c8b1619ec4b36f4a6367fd",
                 "shasum": ""
             },
             "require": {
@@ -7741,7 +7741,7 @@
                 "laravel/pint": "^1.27.0",
                 "mockery/mockery": "^1.6.12",
                 "orchestra/testbench": "^9.15.0|^10.6|^11.0",
-                "pestphp/pest": "^2.36.0|^3.8.4|^4.1.5",
+                "pestphp/pest": "^2.36.0|^3.8.4|^4.1.5|^5.3.3",
                 "phpstan/phpstan": "^2.1.27",
                 "rector/rector": "^2.1"
             },
@@ -7776,7 +7776,7 @@
                 "issues": "https://github.com/laravel/boost/issues",
                 "source": "https://github.com/laravel/boost"
             },
-            "time": "2026-10-07T19:07:19+00:00"
+            "time": "2026-10-29T18:31:16+00:00"
         },
         {
             "name": "laravel/mcp",
@@ -9131,16 +9131,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.4.0",
+            "version": "2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "e3647094ed8f0f1f67393d812b793a5143e25af3"
+                "reference": "af8e840551031d254cfdb3a18a62c3470a309c10"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/e3647094ed8f0f1f67393d812b793a5143e25af3",
-                "reference": "e3647094ed8f0f1f67393d812b793a5143e25af3",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/af8e840551031d254cfdb3a18a62c3470a309c10",
+                "reference": "af8e840551031d254cfdb3a18a62c3470a309c10",
                 "shasum": ""
             },
             "require": {
@@ -9172,9 +9172,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.4.0"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.4.1"
             },
-            "time": "2026-10-28T20:28:58+00:00"
+            "time": "2026-10-30T19:36:28+00:00"
         },
         {
             "name": "phpstan/phpstan",

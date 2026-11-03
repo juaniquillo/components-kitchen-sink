@@ -81,9 +81,9 @@
 
 .component-container {
     --gap: 1rem;
+    display: grid;
+    gap: var(--gap);
     @media (min-width: 576px) {
-        display: grid;
-        gap: var(--gap);
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     }
 }

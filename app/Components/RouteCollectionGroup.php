@@ -23,6 +23,11 @@ use App\Components\Groups\Slate\SlateDialog;
 use App\Components\Groups\Slate\SlateDropDownMenu;
 use App\Components\Groups\Slate\SlateTables;
 use App\Components\Groups\Slate\SlateTabs;
+use App\Components\Groups\Svg\SvgBasicShapes;
+use App\Components\Groups\Svg\SvgPaint;
+use App\Components\Groups\Svg\SvgPaths;
+use App\Components\Groups\Svg\SvgReuse;
+use App\Components\Groups\Svg\SvgThemedIcons;
 use App\Menu\Concerns\Links;
 
 class RouteCollectionGroup
@@ -86,6 +91,17 @@ class RouteCollectionGroup
                     new SlateAccordion,
                 ]),
                 'assets' => ['resources/css/slate.css'],
+            ],
+            'svg' => [
+                'name' => 'SVG Backend Components',
+                'components' => ComponentCollection::make()->addComponents([
+                    new SvgBasicShapes,
+                    new SvgPaths,
+                    new SvgPaint,
+                    new SvgReuse,
+                    new SvgThemedIcons,
+                ]),
+                'assets' => [],
             ],
         ];
     }

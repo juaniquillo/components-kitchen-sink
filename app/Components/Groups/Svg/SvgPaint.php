@@ -1,0 +1,109 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Components\Groups\Svg;
+
+use App\Components\ContainerOptions;
+use App\Components\Contracts\Component;
+use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
+use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
+
+class SvgPaint implements Component
+{
+    const NAME = 'SVG Paint and Patterns';
+
+    public static function list(): array
+    {
+        return [
+            'gradients' => self::gradients(),
+            'clip and pattern' => self::clipAndPattern(),
+            'opacity' => self::opacity(),
+        ];
+    }
+
+    public static function options(): ContainerOptions
+    {
+        return new ContainerOptions;
+    }
+
+    public static function gradients(): BackendComponent
+    {
+        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 200, 100)
+            ->setSize(200, 100)
+            ->setContents([
+                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                    ->setContents([
+                        SvgComponentBuilder::make(SvgComponentEnum::LINEAR_GRADIENT)
+                            ->setAttributes(['id' => 'fade', 'x1' => '0', 'y1' => '0', 'x2' => '1', 'y2' => '0'])
+                            ->setContents([
+                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                    ->setAttributes(['offset' => '0%', 'stop-color' => '#3b82f6']),
+                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                    ->setAttributes(['offset' => '100%', 'stop-color' => '#a855f7']),
+                            ]),
+                        SvgComponentBuilder::make(SvgComponentEnum::RADIAL_GRADIENT)
+                            ->setAttributes(['id' => 'glow'])
+                            ->setContents([
+                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                    ->setAttributes(['offset' => '0%', 'stop-color' => '#fde047']),
+                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                    ->setAttributes(['offset' => '100%', 'stop-color' => '#f97316']),
+                            ]),
+                    ]),
+                SvgShape::rect(10, 10, 85, 80)
+                    ->setFill('url(#fade)'),
+                SvgShape::circle(150, 50, 40)
+                    ->setFill('url(#glow)'),
+            ]);
+    }
+
+    public static function clipAndPattern(): BackendComponent
+    {
+        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 200, 100)
+            ->setSize(200, 100)
+            ->setContents([
+                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                    ->setContents([
+                        SvgComponentBuilder::make(SvgComponentEnum::CLIP_PATH)
+                            ->setAttributes(['id' => 'round'])
+                            ->setContents([
+                                SvgShape::circle(50, 50, 40),
+                            ]),
+                        SvgComponentBuilder::make(SvgComponentEnum::PATTERN)
+                            ->setAttributes(['id' => 'dots', 'width' => '12', 'height' => '12', 'patternUnits' => 'userSpaceOnUse'])
+                            ->setContents([
+                                SvgShape::circle(3, 3, 2)
+                                    ->setFill('#3b82f6'),
+                            ]),
+                    ]),
+                SvgShape::rect(10, 10, 80, 80)
+                    ->setFill('#f97316')
+                    ->setAttribute('clip-path', 'url(#round)'),
+                SvgShape::rect(110, 10, 80, 80)
+                    ->setFill('url(#dots)'),
+            ]);
+    }
+
+    public static function opacity(): BackendComponent
+    {
+        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 200, 100)
+            ->setSize(200, 100)
+            ->setContents([
+                SvgShape::circle(85, 50, 40)
+                    ->setFill('#3b82f6')
+                    ->setOpacity(0.6),
+                SvgShape::circle(115, 50, 40)
+                    ->setFill('#f59e0b')
+                    ->setOpacity(0.6),
+            ]);
+    }
+}
