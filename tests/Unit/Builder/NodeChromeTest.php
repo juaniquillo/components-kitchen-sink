@@ -481,7 +481,7 @@ it('offers text to a component that only takes text', function () {
     $menu = $chrome->getContents()[4] ?? null;
     $parts = $menu->getContents();
 
-    expect($parts)->toHaveCount(2)
+    expect($parts)->toHaveCount(3)
         ->and($parts[0]->getContents())->toBe(['Text']);
 });
 
@@ -490,14 +490,37 @@ it('offers both text and components to a node that takes both', function () {
 
     $menu = $chrome->getContents()[4] ?? null;
 
-    expect($menu?->getContents())->toHaveCount(4);
+    expect($menu?->getContents())->toHaveCount(5);
 
     // The band of table operations comes first, then the text entry, the
-    // component list and the field the new text is typed into.
+    // component list, the way back out of the entry and the field the new
+    // text is typed into.
     $parts = $menu?->getContents() ?? [];
 
     expect(method_exists($parts[2] ?? null, 'getContents') ? implode(' ', array_map(
         fn ($item): string => $item->getAttributes()['x-on:click'] ?? '',
         $parts[2]->getContents(),
     )) : '')->toContain('add(');
+});
+
+it('backs out of text entry without losing the options', function () {
+    // Typing text replaced every option of the menu, and the field stayed
+    // in place after the menu had closed, so the options were gone for
+    // good. The entry now has a way back of its own, the escape key backs
+    // out as well, and a menu that closes forgets the entry altogether.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $menu = $chrome->getContents()[4] ?? null;
+
+    $parts = $menu?->getContents() ?? [];
+
+    $back = $parts[3] ?? null;
+    $input = $parts[4] ?? null;
+
+    expect($chrome->getAttributes()['x-data'] ?? '')->toContain('back()')
+        ->and($menu?->getAttributes()['x-on:beforetoggle'] ?? '')->toContain("newState === 'closed'")
+        ->and($back?->getContents())->toBe(['← Back'])
+        ->and($back?->getAttributes()['x-show'] ?? '')->toBe('textMode')
+        ->and($back?->getAttributes()['x-on:click'] ?? '')->toBe('back()')
+        ->and($input?->getAttributes()['x-on:keydown.escape.stop.prevent'] ?? '')->toBe('back()');
 });

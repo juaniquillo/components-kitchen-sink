@@ -185,7 +185,7 @@ ComponentBuilder::make(ComponentEnum::PARAGRAPH)
     ]);
 ```
 
-Internally a text segment is a node of its own, so it can be edited and removed like anything else. The **add content** menu has a **Text** entry at the top; picking it reveals an input where the segment is typed. The drawer lists the text segments of the node being configured.
+Internally a text segment is a node of its own, so it can be edited and removed like anything else. The **add content** menu has a **Text** entry at the top; picking it reveals an input where the segment is typed. The entry is a mode of the menu rather than a menu of its own: a **← Back** entry sits above the input, `Escape` goes back as well, and closing the menu drops the entry, so the options are always what the menu opens with. `Escape` inside the entry backs out of the entry rather than closing the menu. The drawer lists the text segments of the node being configured.
 
 The one wrinkle: `wire:sort` reports a position among the *draggable* items, and a text segment is not draggable, so a move has to skip over them.
 
@@ -287,7 +287,7 @@ A class typed into the themes panel appears on the canvas at once — the browse
 | `Ctrl`/`⌘` + `S` | Writes the workspace now and shows the toast |
 | `Ctrl`/`⌘` + `Z` | Undo |
 | `Ctrl`/`⌘` + `Shift` + `Z`, or `Ctrl`/`⌘` + `Y` | Redo |
-| `Escape` | Closes the drawer, a menu, or the preview dialog |
+| `Escape` | Backs out of the text entry, then closes the drawer, a menu, or the preview dialog |
 
 The undo keys belong to the field while the focus is in an input, so typing keeps the browser's own undo. Dragging needs a pointer: the keyboard way to move a node is **Up** / **Down** in the drawer.
 

@@ -97,10 +97,10 @@ class RouteCollectionGroup
             'svg' => [
                 'name' => 'SVG Backend Components',
                 'components' => ComponentCollection::make()->addComponents([
-                    new SvgBasicShapes,
                     new SvgPaths,
                     new SvgPaint,
                     new SvgReuse,
+                    new SvgBasicShapes,
                     new SvgMedia,
                     new SvgThemedIcons,
                     new SvgBrandIcons,

@@ -328,12 +328,17 @@ final class NodeChrome
      * The delete button arms itself and deletes on a second click, so a
      * misclick on a small target cannot destroy anything. The menu of the
      * chrome is a popover, and the browser owns its open state.
+     *
+     * Text entry is a mode of the menu rather than a menu of its own, so
+     * back() leaves it and forgets the draft: every way out of the entry
+     * returns the menu to its options, and every open starts there.
      */
     private static function alpine(string $id): string
     {
         return "{ textMode: false, draft: '', armed: false, arm() { "
             ."if (this.armed) { this.\$wire.remove('".$id."'); this.armed = false; return } "
-            .'this.armed = true; setTimeout(() => this.armed = false, 4000) } }';
+            .'this.armed = true; setTimeout(() => this.armed = false, 4000) }, '
+            ."back() { this.textMode = false; this.draft = '' } }";
     }
 
     /**
@@ -461,6 +466,10 @@ final class NodeChrome
      * component list only where it takes children: a list or a table row
      * has somewhere to put an item, but nowhere to put a run of text.
      *
+     * Text entry is a mode: it hides the options and shows the field with
+     * an entry that goes back, and the escape key goes back as well. Either
+     * way the options are what the menu shows again.
+     *
      * @param  array<int, string>  $allowed
      * @param  array<int, string>  $childTypes
      */
@@ -474,6 +483,10 @@ final class NodeChrome
             'role' => 'group',
             'aria-label' => 'Add content',
             'style' => 'position-anchor: --bw-add-'.$node['id'],
+            // A menu that closes while the text is being typed would reopen
+            // showing the field and nothing else, so closing the menu drops
+            // the entry as well.
+            'x-on:beforetoggle' => "if (\$event.newState === 'closed') { back() }",
             'class' => 'bw-menu w-56 max-h-64 overflow-y-auto rounded-md border border-slate-300 bg-white p-1 shadow-lg dark:border-slate-600 dark:bg-slate-800',
         ]);
 
@@ -498,6 +511,7 @@ final class NodeChrome
         }
 
         if ($acceptsText) {
+            $contents[] = self::textBack();
             $contents[] = self::textInput($node['id']);
         }
 
@@ -669,7 +683,32 @@ final class NodeChrome
     }
 
     /**
+     * The entry that leaves text entry and returns to the options.
+     */
+    private static function textBack(): MainBackendComponent
+    {
+        $option = new MainBackendComponent(ComponentEnum::BUTTON);
+
+        $option->setAttributes([
+            'type' => 'button',
+            'wire:sort:ignore' => '',
+            'x-show' => 'textMode',
+            'x-cloak' => '',
+            'x-on:click' => 'back()',
+            'class' => 'mb-1 block w-full cursor-pointer rounded px-2 py-1 text-left text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-300',
+        ]);
+
+        $option->setContent('← Back');
+
+        return $option;
+    }
+
+    /**
      * The field the new text is typed into.
+     *
+     * The escape key leaves the entry rather than the menu: the browser
+     * closes a popover on that key, and the default is held back so the
+     * options are one key away.
      */
     private static function textInput(string $id): MainBackendComponent
     {
@@ -680,7 +719,8 @@ final class NodeChrome
             'x-cloak' => '',
             'x-ref' => 'textInput',
             'x-model' => 'draft',
-            'x-on:keydown.enter.prevent' => "\$wire.addText('".$id."', draft).then(() => { draft = ''; textMode = false })",
+            'x-on:keydown.escape.stop.prevent' => 'back()',
+            'x-on:keydown.enter.prevent' => "\$wire.addText('".$id."', draft).then(() => back())",
             'placeholder' => 'Text',
             'class' => 'w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900',
         ]);
