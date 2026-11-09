@@ -6,9 +6,8 @@ namespace App\Cruds\Actions\Validation;
 
 use Juaniquillo\CrudAssistant\Action;
 use Juaniquillo\CrudAssistant\Contracts\ActionInterface;
-use Juaniquillo\CrudAssistant\Contracts\DataContainerInterface;
+use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
-use Juaniquillo\CrudAssistant\InputCollection;
 
 /**
  * Laravel validation messages action.
@@ -17,12 +16,10 @@ class LaravelValidationMessagesAction extends Action implements ActionInterface
 {
     /**
      * Execute action on input.
-     *
-     * @return DataContainerInterface
      */
-    public function execute(InputCollection|InputInterface|\IteratorAggregate $input)
+    public function execute(InputCollectionInterface|InputInterface $input): void
     {
-        $recipe = $input->getRecipe(static::class);
+        $recipe = $input->getRecipe(static::getIdentifier());
         $output = $this->getOutput();
 
         if ($recipe) {
@@ -35,7 +32,5 @@ class LaravelValidationMessagesAction extends Action implements ActionInterface
                 }
             }
         }
-
-        return $output;
     }
 }

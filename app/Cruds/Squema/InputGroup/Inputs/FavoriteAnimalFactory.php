@@ -21,6 +21,7 @@ use Juaniquillo\InputComponentAction\Contracts\ThemeBag;
 use Juaniquillo\InputComponentAction\Groups\DefaultInputGroup;
 use Juaniquillo\InputComponentAction\Groups\InputLabelErrorGroup;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
+use Juaniquillo\InputComponentAction\Recipes\RadioComponentRecipe;
 
 class FavoriteAnimalFactory
 {
@@ -121,7 +122,7 @@ class FavoriteAnimalFactory
             $input = new DefaultInput($radio['name'], $radio['label']);
 
             $input->setRecipe(
-                new InputComponentRecipe(
+                new RadioComponentRecipe(
                     // Set input value
                     inputValue: $radio['value'] ?? $radio['name'],
                     // Set input name with the same name and the required attribute

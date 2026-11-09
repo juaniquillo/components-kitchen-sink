@@ -22,10 +22,8 @@ class LaravelValidationLabelsRecipe implements RecipeInterface
      */
     public Closure $callback;
 
-    /**
-     * Recipe action
-     *
-     * @var string
-     */
-    protected $action = LaravelValidationLabelsAction::class;
+    public function __construct()
+    {
+        $this->action = LaravelValidationLabelsAction::class;
+    }
 }

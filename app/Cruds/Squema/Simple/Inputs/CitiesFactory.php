@@ -14,8 +14,8 @@ use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultDisableBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
-use Juaniquillo\InputComponentAction\Groups\SoleInputGroup;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
+use Juaniquillo\InputComponentAction\Recipes\SelectOptionComponentRecipe;
 
 class CitiesFactory
 {
@@ -62,21 +62,12 @@ class CitiesFactory
 
             $option = new DefaultInput($optionArray['name'], $optionArray['label']);
 
-            $optionRecipe = new InputComponentRecipe(
-                inputGroup: new SoleInputGroup,
+            $optionRecipe = new SelectOptionComponentRecipe(
                 inputValue: $optionArray['value'] ?? $optionArray['name'],
-                selectable: true,
-                useParentValue: true,
-                labelAsInputContent: true,
-                disableBag: (new DefaultDisableBag)
-                    ->setDisableWrapper()
-                    ->setDisableDefaultNameAttribute(),
                 themeBag: (new DefaultThemeBag)
                     // reset default theme
                     // for the options
                     ->setInputTheme([]),
-                componentBag: (new DefaultComponentBag)
-                    ->setInputType(ComponentEnum::OPTION)
             );
 
             $option->setRecipe($optionRecipe);

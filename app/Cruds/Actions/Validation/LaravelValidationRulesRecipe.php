@@ -12,14 +12,9 @@ final class LaravelValidationRulesRecipe implements RecipeInterface
 {
     use IsRecipe;
 
-    /**
-     * Recipe action
-     *
-     * @var string
-     */
-    protected $action = LaravelValidationRulesAction::class;
-
     public function __construct(
         public readonly array|Closure|null $rules
-    ) {}
+    ) {
+        $this->action = LaravelValidationRulesAction::class;
+    }
 }

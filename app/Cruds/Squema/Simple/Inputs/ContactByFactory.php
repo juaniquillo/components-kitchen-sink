@@ -17,6 +17,7 @@ use Juaniquillo\InputComponentAction\Bags\DefaultDisableBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Groups\InputLabelErrorGroup;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
+use Juaniquillo\InputComponentAction\Recipes\RadioComponentRecipe;
 
 class ContactByFactory
 {
@@ -136,12 +137,8 @@ class ContactByFactory
 
             }
 
-            $optionRecipe = new InputComponentRecipe(
-                componentBag: (new DefaultComponentBag)
-                    ->setInputType(ComponentEnum::RADIO_INPUT),
+            $optionRecipe = new RadioComponentRecipe(
                 inputValue: $optionArray['value'] ?? $optionArray['name'],
-                checkable: true,
-                useParentValue: true,
                 disableBag: (new DefaultDisableBag)
                     ->setDisableError(),
                 inputGroup: new InputLabelErrorGroup,

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Cruds\Actions\Validation;
 
+use Juaniquillo\CrudAssistant\Concerns\IsRecipe;
 use Juaniquillo\CrudAssistant\Contracts\RecipeInterface;
-use Juaniquillo\CrudAssistant\RecipeContainer;
 
-class LaravelValidationMessagesRecipe extends RecipeContainer implements RecipeInterface
+class LaravelValidationMessagesRecipe implements RecipeInterface
 {
-    /**
-     * Recipe action
-     *
-     * @var string
-     */
-    protected $action = LaravelValidationMessagesAction::class;
+    use IsRecipe;
+
+    public function __construct()
+    {
+        $this->action = LaravelValidationMessagesAction::class;
+    }
 }

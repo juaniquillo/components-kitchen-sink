@@ -6,7 +6,6 @@ namespace App\Cruds\Concerns;
 
 use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Contracts\AttributeBag;
-use Juaniquillo\InputComponentAction\Contracts\LabelAttributes;
 use Juaniquillo\InputComponentAction\Recipes\InputComponentRecipe;
 
 trait IsLivewireInput
@@ -18,7 +17,7 @@ trait IsLivewireInput
         );
     }
 
-    public static function getLivewireAttributeBag(string $group, array|string $name, (AttributeBag&LabelAttributes)|null $bag = null): AttributeBag
+    public static function getLivewireAttributeBag(string $group, array|string $name, ?AttributeBag $bag = null): AttributeBag
     {
         $directiveAndId = self::getLivewireDirectiveAndId($group, $name);
 
