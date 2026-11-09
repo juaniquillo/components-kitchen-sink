@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d23cf1e5636aa4d5b5d5a0feddad5df6",
+    "content-hash": "bd01da2db16318bbf6acc231b7940c2a",
     "packages": [
         {
             "name": "brick/math",
@@ -1130,31 +1130,28 @@
         },
         {
             "name": "juaniquillo/crud-assistant",
-            "version": "0.2.0",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/crud-assistant.git",
-                "reference": "536559c2e08d1b6fb1eed224f1632394855c0893"
+                "reference": "c248ce227043c05ec2524ea102f1eb8ed033da15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/crud-assistant/zipball/536559c2e08d1b6fb1eed224f1632394855c0893",
-                "reference": "536559c2e08d1b6fb1eed224f1632394855c0893",
+                "url": "https://api.github.com/repos/juaniquillo/crud-assistant/zipball/c248ce227043c05ec2524ea102f1eb8ed033da15",
+                "reference": "c248ce227043c05ec2524ea102f1eb8ed033da15",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.2"
+                "php": "^8.3"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.68",
                 "phpstan/phpstan": "^2.1",
-                "phpunit/phpunit": "^9.5"
+                "phpunit/phpunit": "^12"
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "helpers/helpers.php"
-                ],
                 "psr-4": {
                     "Juaniquillo\\CrudAssistant\\": "src"
                 }
@@ -1177,9 +1174,9 @@
                 "crud-assistant"
             ],
             "support": {
-                "source": "https://github.com/juaniquillo/crud-assistant/tree/0.2.0"
+                "source": "https://github.com/juaniquillo/crud-assistant/tree/0.3.0"
             },
-            "time": "2026-09-09T19:27:47+00:00"
+            "time": "2026-11-06T21:11:35+00:00"
         },
         {
             "name": "juaniquillo/flux-backend-components",
@@ -1255,20 +1252,15 @@
         {
             "name": "juaniquillo/input-component-action",
             "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/juaniquillo/input-component-action.git",
-                "reference": "89971d171c972b4aeb25e0bbd65a3c32ba5c1284"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/input-component-action/zipball/89971d171c972b4aeb25e0bbd65a3c32ba5c1284",
-                "reference": "89971d171c972b4aeb25e0bbd65a3c32ba5c1284",
-                "shasum": ""
+                "type": "path",
+                "url": "C:/Users/juani/Code/packages/input-component-action",
+                "reference": "02948fa44487f7ddb20603a5834975528ff8bad6"
             },
             "require": {
-                "juaniquillo/crud-assistant": "^0.2.0",
+                "juaniquillo/crud-assistant": "^0.3.0",
                 "juaniquillo/laravel-backend-component": "@dev",
+                "php": "^8.3",
                 "spatie/laravel-package-tools": "^1.92"
             },
             "require-dev": {
@@ -1277,7 +1269,6 @@
                 "orchestra/testbench": "^10.9",
                 "pestphp/pest": "^4.4"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -1291,7 +1282,37 @@
                     "Juaniquillo\\InputComponentAction\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Tests\\": "tests/",
+                    "Workbench\\App\\": "workbench/app/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@composer run prepare"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "test": [
+                    "vendor/bin/pest"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --coverage"
+                ],
+                "format": [
+                    "vendor/bin/pint"
+                ],
+                "qa": [
+                    "@composer run format",
+                    "@composer run analyse",
+                    "@composer run test"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -1303,11 +1324,10 @@
             ],
             "description": "Form input component creation and management action for Crud Assistant",
             "homepage": "https://github.com/juaniquillo/input-component-action",
-            "support": {
-                "issues": "https://github.com/juaniquillo/input-component-action/issues",
-                "source": "https://github.com/juaniquillo/input-component-action/tree/main"
-            },
-            "time": "2026-09-11T20:03:26+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
         },
         {
             "name": "juaniquillo/laravel-backend-component",

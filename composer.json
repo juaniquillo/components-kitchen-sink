@@ -8,6 +8,18 @@
         "framework"
     ],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "C:/Users/juani/Code/packages/input-component-action",
+            "options": {
+                "symlink": true,
+                "versions": {
+                    "juaniquillo/input-component-action": "dev-main"
+                }
+            }
+        }
+    ],
     "require": {
         "php": "^8.3",
         "ext-zip": "*",
