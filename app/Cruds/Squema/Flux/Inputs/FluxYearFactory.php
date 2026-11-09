@@ -8,6 +8,7 @@ use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\CrudAssistant\Inputs\DefaultInput;
+use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 use Juaniquillo\InputComponentAction\Bags\DefaultAttributeBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
@@ -27,7 +28,7 @@ class FluxYearFactory
         $input->setRecipe(
             new InputComponentRecipe(
                 componentBag: (new DefaultComponentBag)
-                    ->setInputType('select'),
+                    ->setInputType(FluxComponentEnum::SELECT),
                 attributeBag: (new DefaultAttributeBag)
                     ->setInputAttributes([
                         'label' => self::LABEL,
@@ -73,8 +74,7 @@ class FluxYearFactory
                     // for the options
                     ->setInputTheme([]),
                 componentBag: (new DefaultComponentBag)
-                    ->setInputType('select.option')
-                // ->setInputComponent(FluxBackendComponent::class)
+                    ->setInputType(FluxComponentEnum::OPTION)
             );
 
             $option->setRecipe($optionRecipe);

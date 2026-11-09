@@ -18,6 +18,7 @@ use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
 use Juaniquillo\FluxBackendComponents\FluxBackendComponent;
+use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
 use Juaniquillo\InputComponentAction\Containers\InputComponentOutput;
@@ -54,7 +55,7 @@ class FluxCrud implements Crud
                 ->setDefaultComponentBag(
                     (new DefaultComponentBag)
                         // Input
-                        ->setInputType('input')
+                        ->setInputType(FluxComponentEnum::TEXT_INPUT)
                         ->setInputComponent(
                             function (string|BackedEnum $type, ThemeManager $manager) {
                                 return new FluxBackendComponent($type, $manager);
