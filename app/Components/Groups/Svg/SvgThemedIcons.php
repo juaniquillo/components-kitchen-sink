@@ -7,7 +7,7 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgLocalThemeComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgLocalThemeComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
@@ -39,7 +39,7 @@ class SvgThemedIcons implements Component
      */
     public static function icon(string $d, string $variant): BackendComponent
     {
-        return SvgLocalThemeComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgLocalThemeComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 24, 24)
             ->setSize(56)

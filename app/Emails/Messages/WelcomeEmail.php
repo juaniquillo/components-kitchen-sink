@@ -7,8 +7,8 @@ namespace App\Emails\Messages;
 use App\Emails\Contracts\EmailInterface;
 use App\Mail\SendWelcomeEmail;
 use Illuminate\Contracts\Mail\Mailable;
-use Juaniquillo\MjmlBackendComponents\Builders\MjmlComponentBuilder;
 use Juaniquillo\MjmlBackendComponents\Enums\MjmlComponentEnum;
+use Juaniquillo\MjmlBackendComponents\Factories\MjmlComponentFactory;
 use Juaniquillo\MjmlBackendComponents\MjmlBackendComponent;
 
 class WelcomeEmail implements EmailInterface
@@ -31,15 +31,15 @@ class WelcomeEmail implements EmailInterface
 
     public static function build(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::document([
-            MjmlComponentBuilder::head([
-                MjmlComponentBuilder::make(MjmlComponentEnum::TITLE)
+        return MjmlComponentFactory::document([
+            MjmlComponentFactory::head([
+                MjmlComponentFactory::make(MjmlComponentEnum::TITLE)
                     ->setContent('Welcome to the platform'),
-                MjmlComponentBuilder::preview('Welcome to our platform!'),
-                MjmlComponentBuilder::font('Inter', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'),
+                MjmlComponentFactory::preview('Welcome to our platform!'),
+                MjmlComponentFactory::font('Inter', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'),
                 self::globalAttributes(),
             ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::BODY)
+            MjmlComponentFactory::make(MjmlComponentEnum::BODY)
                 ->setAttributes([
                     'background-color' => '#eef2f7',
                     'width' => '600px',
@@ -66,16 +66,16 @@ class WelcomeEmail implements EmailInterface
 
     private static function column(array $contents, array $attributes = []): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::make(MjmlComponentEnum::COLUMN)
+        return MjmlComponentFactory::make(MjmlComponentEnum::COLUMN)
             ->setAttributes($attributes)
             ->setContents($contents);
     }
 
     private static function masthead(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::make(MjmlComponentEnum::IMAGE)
+                MjmlComponentFactory::make(MjmlComponentEnum::IMAGE)
                     ->setAttributes([
                         'src' => asset('images/mail/yellow-lightning-bolt.png'),
                         'alt' => 'The Workbench',
@@ -84,7 +84,7 @@ class WelcomeEmail implements EmailInterface
                         'align' => 'center',
                         'padding' => '0 24px 4px',
                     ]),
-                MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER),
+                MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER),
             ]),
         ], [
             'background-color' => '#ffffff',
@@ -94,22 +94,22 @@ class WelcomeEmail implements EmailInterface
 
     private static function hero(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::text('Hi <strong>{{ $name }}</strong>,', [
+                MjmlComponentFactory::text('Hi <strong>{{ $name }}</strong>,', [
                     'align' => 'center',
                     'font-size' => '17px',
                 ]),
-                MjmlComponentBuilder::text('Welcome aboard!', [
+                MjmlComponentFactory::text('Welcome aboard!', [
                     'mj-class' => 'h1',
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::text('We are excited to have you on board. Get started by exploring your new dashboard and discovering all the features available to you.', [
+                MjmlComponentFactory::text('We are excited to have you on board. Get started by exploring your new dashboard and discovering all the features available to you.', [
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::make(MjmlComponentEnum::SPACER)
+                MjmlComponentFactory::make(MjmlComponentEnum::SPACER)
                     ->setAttribute('height', '8px'),
-                MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+                MjmlComponentFactory::make(MjmlComponentEnum::BUTTON)
                     ->setAttributes([
                         'href' => 'https://example.com/dashboard',
                         'align' => 'center',
@@ -124,13 +124,13 @@ class WelcomeEmail implements EmailInterface
 
     private static function prop(string $heading, string $body): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::text($heading, [
+                MjmlComponentFactory::text($heading, [
                     'mj-class' => 'h2',
                     'padding' => '8px 24px 0',
                 ]),
-                MjmlComponentBuilder::text($body, [
+                MjmlComponentFactory::text($body, [
                     'padding' => '0 24px 8px',
                 ]),
             ]),
@@ -142,18 +142,18 @@ class WelcomeEmail implements EmailInterface
 
     private static function ctaBand(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::text('Ready when you are', [
+                MjmlComponentFactory::text('Ready when you are', [
                     'mj-class' => 'h2',
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::text('Your workspace is set up and waiting. Jump in whenever you like — we will keep things warm.', [
+                MjmlComponentFactory::text('Your workspace is set up and waiting. Jump in whenever you like — we will keep things warm.', [
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::make(MjmlComponentEnum::SPACER)
+                MjmlComponentFactory::make(MjmlComponentEnum::SPACER)
                     ->setAttribute('height', '8px'),
-                MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+                MjmlComponentFactory::make(MjmlComponentEnum::BUTTON)
                     ->setAttributes([
                         'href' => 'https://example.com/dashboard',
                         'align' => 'center',
@@ -168,10 +168,10 @@ class WelcomeEmail implements EmailInterface
 
     private static function footer(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER),
-                MjmlComponentBuilder::text('You are receiving this because you created an account at example.com.', [
+                MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER),
+                MjmlComponentFactory::text('You are receiving this because you created an account at example.com.', [
                     'mj-class' => 'meta',
                     'align' => 'center',
                 ]),
@@ -184,19 +184,19 @@ class WelcomeEmail implements EmailInterface
 
     private static function globalAttributes(string $buttonColor = '#4f46e5'): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::attributes([
-            MjmlComponentBuilder::make(MjmlComponentEnum::ALL)
+        return MjmlComponentFactory::attributes([
+            MjmlComponentFactory::make(MjmlComponentEnum::ALL)
                 ->setAttributes([
                     'font-family' => 'Inter, Arial, sans-serif',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::TEXT)
+            MjmlComponentFactory::make(MjmlComponentEnum::TEXT)
                 ->setAttributes([
                     'color' => '#334155',
                     'font-size' => '15px',
                     'line-height' => '24px',
                     'padding' => '8px 24px',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+            MjmlComponentFactory::make(MjmlComponentEnum::BUTTON)
                 ->setAttributes([
                     'background-color' => $buttonColor,
                     'color' => '#ffffff',
@@ -205,13 +205,13 @@ class WelcomeEmail implements EmailInterface
                     'border-radius' => '8px',
                     'inner-padding' => '12px 28px',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER)
+            MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER)
                 ->setAttributes([
                     'border-color' => '#e2e8f0',
                     'border-width' => '1px',
                     'padding' => '16px 24px',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+            MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS)
                 ->setAttributes([
                     'name' => 'h1',
                     'font-size' => '26px',
@@ -219,7 +219,7 @@ class WelcomeEmail implements EmailInterface
                     'font-weight' => '700',
                     'color' => '#0f172a',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+            MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS)
                 ->setAttributes([
                     'name' => 'h2',
                     'font-size' => '19px',
@@ -227,7 +227,7 @@ class WelcomeEmail implements EmailInterface
                     'font-weight' => '700',
                     'color' => '#0f172a',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+            MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS)
                 ->setAttributes([
                     'name' => 'meta',
                     'font-size' => '12px',

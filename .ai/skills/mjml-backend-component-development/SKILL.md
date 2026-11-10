@@ -1,6 +1,6 @@
 ---
 name: mjml-backend-component-development
-description: Build responsive HTML emails in PHP with juaniquillo/mjml-backend-components, compose MJML trees via the builder and enum, configure node/v8js compiler drivers, and test with Pest.
+description: Build responsive HTML emails in PHP with juaniquillo/mjml-backend-components, compose MJML trees via the factory and enum, configure node/v8js compiler drivers, and test with Pest.
 ---
 
 # MJML Backend Component Development
@@ -17,19 +17,19 @@ Use this skill when the user needs to:
 
 ## Creating Components
 
-Components are created via the builder, starting with `MjmlComponentBuilder::make()` or a shorthand:
+Components are created via the factory, starting with `MjmlComponentFactory::make()` or a shorthand:
 
 ```php
-use Juaniquillo\MjmlBackendComponents\Builders\MjmlComponentBuilder;
+use Juaniquillo\MjmlBackendComponents\Factories\MjmlComponentFactory;
 use Juaniquillo\MjmlBackendComponents\Enums\MjmlComponentEnum;
 
-$email = MjmlComponentBuilder::document([
-    MjmlComponentBuilder::head([
-        MjmlComponentBuilder::preview('Your weekly digest'),
+$email = MjmlComponentFactory::document([
+    MjmlComponentFactory::head([
+        MjmlComponentFactory::preview('Your weekly digest'),
     ]),
-    MjmlComponentBuilder::make(MjmlComponentEnum::BODY)->setContents([
-        MjmlComponentBuilder::section(
-            [MjmlComponentBuilder::text('Hello!', ['color' => '#333'])],
+    MjmlComponentFactory::make(MjmlComponentEnum::BODY)->setContents([
+        MjmlComponentFactory::section(
+            [MjmlComponentFactory::text('Hello!', ['color' => '#333'])],
             ['background-color' => '#ffffff']
         ),
     ]),
@@ -45,18 +45,18 @@ $email = MjmlComponentBuilder::document([
 | **Content** | `TEXT`, `IMAGE`, `BUTTON`, `DIVIDER`, `RAW` |
 | **Head config** | `ATTRIBUTES`, `STYLE`, `FONT`, `TITLE`, `PREVIEW` |
 
-Shorthands exist for `document`, `head`, `preview`, `font`, `attributes`, `style`, `section`, and `text`. Every other case is built through the generic `MjmlComponentBuilder::make()` path — do not invent new shorthand names.
+Shorthands exist for `document`, `head`, `preview`, `font`, `attributes`, `style`, `section`, and `text`. Every other case is built through the generic `MjmlComponentFactory::make()` path — do not invent new shorthand names.
 
 ## Setting Content and Attributes
 
 Use **`setContent()`** for a single item and **`setContents()`** for multiple items; **`setAttribute()`** for one attribute and **`setAttributes()`** for a batch:
 
 ```php
-$section = MjmlComponentBuilder::make(MjmlComponentEnum::SECTION)
+$section = MjmlComponentFactory::make(MjmlComponentEnum::SECTION)
     ->setAttributes(['background-color' => '#ffffff'])
     ->setContents([
-        MjmlComponentBuilder::text('Hello!'),
-        MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER),
+        MjmlComponentFactory::text('Hello!'),
+        MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER),
     ]);
 ```
 

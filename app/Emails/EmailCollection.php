@@ -10,9 +10,9 @@ use App\Emails\Messages\NewsletterEmail;
 use App\Emails\Messages\NotificationEmail;
 use App\Emails\Messages\WelcomeEmail;
 use App\Emails\Presenters\EmailPresenter;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 final class EmailCollection
 {
@@ -62,7 +62,7 @@ final class EmailCollection
     {
         $emails = $emails ?: self::present();
 
-        $container = ComponentBuilder::make(ComponentEnum::DIV)
+        $container = ComponentFactory::make(ComponentEnum::DIV)
             ->setTheme('margin', 'top-md')
             ->setTheme('text', 'center')
             ->setTheme('padding', 'sm')

@@ -7,11 +7,11 @@ namespace App\Emails\Presenters;
 use App\Emails\Contracts\EmailInterface;
 use App\Emails\Contracts\EmailPresenterInterface;
 use Illuminate\Support\Str;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
-use Juaniquillo\BackendComponents\Builders\LocalComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalComponentFactory;
+use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
 final class EmailPresenter implements EmailPresenterInterface
@@ -20,25 +20,25 @@ final class EmailPresenter implements EmailPresenterInterface
     {
         $modalName = 'email-modal-'.Str::slug($email::name());
 
-        return ComponentBuilder::make(ComponentEnum::COLLECTION)
+        return ComponentFactory::make(ComponentEnum::COLLECTION)
             ->setContents([
-                FluxComponentBuilder::make(FluxComponentEnum::MODAL_TRIGGER)
+                FluxComponentFactory::make(FluxComponentEnum::MODAL_TRIGGER)
                     ->setAttribute('name', $modalName)
                     ->setContent(
-                        ComponentBuilder::make(ComponentEnum::BUTTON)
+                        ComponentFactory::make(ComponentEnum::BUTTON)
                             ->setTheme('action', 'default')
                             ->setTheme('padding', 'xs')
                             ->setTheme('border-radius', 'sm')
                             ->setContent($email::name())
                     ),
-                FluxComponentBuilder::make(FluxComponentEnum::MODAL)
+                FluxComponentFactory::make(FluxComponentEnum::MODAL)
                     ->setAttribute('name', $modalName)
                     ->setTheme('modal', [
                         'default',
                         '3xl',
                     ])
                     ->setContent(
-                        FluxComponentBuilder::make(FluxComponentEnum::HEADING)
+                        FluxComponentFactory::make(FluxComponentEnum::HEADING)
                             ->setTheme('padding', 'bottom-sm')
                             ->setTheme('display', 'flex')
                             ->setTheme('flex', [
@@ -50,7 +50,7 @@ final class EmailPresenter implements EmailPresenterInterface
                             ->setAttribute('size', 'lg')
                             ->setContent($email::name())
                             ->setContent(
-                                FluxComponentBuilder::make(FluxComponentEnum::LINK)
+                                FluxComponentFactory::make(FluxComponentEnum::LINK)
                                     ->setContent('Open in new tab')
                                     ->setAttribute('href', $previewUrl)
                                     ->setAttribute('size', 'sm')
@@ -58,7 +58,7 @@ final class EmailPresenter implements EmailPresenterInterface
                             )
                     )
                     ->setContent(
-                        LocalComponentBuilder::make('iframe')
+                        LocalComponentFactory::make('iframe')
                             ->setTheme('iframe', 'default')
                             ->setAttributes([
                                 'src' => $previewUrl,

@@ -7,7 +7,7 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
@@ -29,7 +29,7 @@ class SvgBasicShapes implements Component
 
     public static function shapes(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 120)
             ->setSize(200, 120)

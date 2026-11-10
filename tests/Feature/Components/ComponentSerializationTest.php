@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Components\Individual\DivComponent;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\BackendComponents\Deserializers\ComponentDeserializer;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 it('serializes a simple button to array', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click me')
         ->setAttribute('class', 'btn');
 
@@ -25,12 +25,12 @@ it('serializes a simple button to array', function () {
 });
 
 it('restores a button from array', function () {
-    $original = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $original = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click me')
         ->setAttribute('class', 'btn');
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     expect($restored)->toBeInstanceOf(BackendComponent::class);
 
@@ -41,7 +41,7 @@ it('restores a button from array', function () {
 });
 
 it('serializes a div with content to array', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Hello World')
         ->setAttribute('id', 'greeting');
 
@@ -56,12 +56,12 @@ it('serializes a div with content to array', function () {
 });
 
 it('restores a div from array', function () {
-    $original = ComponentBuilder::make(ComponentEnum::DIV)
+    $original = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Hello World')
         ->setAttribute('id', 'greeting');
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -70,12 +70,12 @@ it('restores a div from array', function () {
 });
 
 it('serializes nested components to array', function () {
-    $card = ComponentBuilder::make(ComponentEnum::DIV)
+    $card = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('class', 'card')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::H2)
+            ComponentFactory::make(ComponentEnum::H2)
                 ->setContent('Title'),
-            ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+            ComponentFactory::make(ComponentEnum::PARAGRAPH)
                 ->setContent('Body text'),
         ]);
 
@@ -87,17 +87,17 @@ it('serializes nested components to array', function () {
 });
 
 it('restores nested components from array', function () {
-    $original = ComponentBuilder::make(ComponentEnum::DIV)
+    $original = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('class', 'card')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::H2)
+            ComponentFactory::make(ComponentEnum::H2)
                 ->setContent('Title'),
-            ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+            ComponentFactory::make(ComponentEnum::PARAGRAPH)
                 ->setContent('Body text'),
         ]);
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -107,7 +107,7 @@ it('restores nested components from array', function () {
 });
 
 it('serializes themed component to array', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Styled')
         ->setTheme('action', 'success');
 
@@ -120,12 +120,12 @@ it('serializes themed component to array', function () {
 });
 
 it('restores themed component from array', function () {
-    $original = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $original = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Styled')
         ->setTheme('action', 'success');
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -133,7 +133,7 @@ it('restores themed component from array', function () {
 });
 
 it('serializes component with multiple attributes', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttributes([
             'id' => 'test',
             'class' => 'container',
@@ -150,7 +150,7 @@ it('serializes component with multiple attributes', function () {
 });
 
 it('restores component with multiple attributes from array', function () {
-    $original = ComponentBuilder::make(ComponentEnum::DIV)
+    $original = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttributes([
             'id' => 'test',
             'class' => 'container',
@@ -159,7 +159,7 @@ it('restores component with multiple attributes from array', function () {
         ]);
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -170,11 +170,11 @@ it('restores component with multiple attributes from array', function () {
 });
 
 it('serializes deeply nested components', function () {
-    $deep = ComponentBuilder::make(ComponentEnum::DIV)
+    $deep = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent(
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::SPAN)
+                    ComponentFactory::make(ComponentEnum::SPAN)
                         ->setContent('Deep')
                 )
         );
@@ -186,17 +186,17 @@ it('serializes deeply nested components', function () {
 });
 
 it('restores deeply nested components', function () {
-    $original = ComponentBuilder::make(ComponentEnum::DIV)
+    $original = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent(
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::SPAN)
+                    ComponentFactory::make(ComponentEnum::SPAN)
                         ->setContent('Deep')
                 )
         );
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -204,7 +204,7 @@ it('restores deeply nested components', function () {
 });
 
 it('serializes component with empty content', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV);
+    $div = ComponentFactory::make(ComponentEnum::DIV);
 
     $array = $div->toArray();
 
@@ -215,10 +215,10 @@ it('serializes component with empty content', function () {
 });
 
 it('restores component with empty content', function () {
-    $original = ComponentBuilder::make(ComponentEnum::DIV);
+    $original = ComponentFactory::make(ComponentEnum::DIV);
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -227,7 +227,7 @@ it('restores component with empty content', function () {
 });
 
 it('serializes component with multiple themes', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Multi-theme')
         ->setThemes([
             'action' => 'success',
@@ -242,7 +242,7 @@ it('serializes component with multiple themes', function () {
 });
 
 it('restores component with multiple themes', function () {
-    $original = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $original = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Multi-theme')
         ->setThemes([
             'action' => 'success',
@@ -250,7 +250,7 @@ it('restores component with multiple themes', function () {
         ]);
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -258,13 +258,13 @@ it('restores component with multiple themes', function () {
 });
 
 it('serializes table component', function () {
-    $table = ComponentBuilder::make(ComponentEnum::TABLE)
+    $table = ComponentFactory::make(ComponentEnum::TABLE)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::THEAD)
+            ComponentFactory::make(ComponentEnum::THEAD)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::TH)->setContent('Name')
+                            ComponentFactory::make(ComponentEnum::TH)->setContent('Name')
                         )
                 ),
         ]);
@@ -276,19 +276,19 @@ it('serializes table component', function () {
 });
 
 it('restores table component', function () {
-    $original = ComponentBuilder::make(ComponentEnum::TABLE)
+    $original = ComponentFactory::make(ComponentEnum::TABLE)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::THEAD)
+            ComponentFactory::make(ComponentEnum::THEAD)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::TH)->setContent('Name')
+                            ComponentFactory::make(ComponentEnum::TH)->setContent('Name')
                         )
                 ),
         ]);
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 
@@ -296,11 +296,11 @@ it('restores table component', function () {
 });
 
 it('serializes form component', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('action', '/submit')
         ->setAttribute('method', 'POST')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('name', 'email'),
         ]);
 
@@ -314,16 +314,16 @@ it('serializes form component', function () {
 });
 
 it('restores form component', function () {
-    $original = ComponentBuilder::make(ComponentEnum::FORM)
+    $original = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('action', '/submit')
         ->setAttribute('method', 'POST')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('name', 'email'),
         ]);
 
     $array = $original->toArray();
-    $restored = ComponentFactory::fromArray($array);
+    $restored = ComponentDeserializer::fromArray($array);
 
     $html = $restored->toHtml();
 

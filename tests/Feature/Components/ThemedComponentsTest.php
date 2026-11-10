@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\View\ViewException;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 it('applies a single theme variant to a button', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Submit')
         ->setTheme('action', 'success');
 
@@ -19,7 +19,7 @@ it('applies a single theme variant to a button', function () {
 });
 
 it('applies multiple theme variants from the same theme file', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Submit')
         ->setTheme('table', ['th', 'th-dark']);
 
@@ -30,7 +30,7 @@ it('applies multiple theme variants from the same theme file', function () {
 });
 
 it('applies multiple themes to a button', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Submit')
         ->setThemes([
             'action' => 'success',
@@ -44,7 +44,7 @@ it('applies multiple themes to a button', function () {
 });
 
 it('applies theme to a div component', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Themed content')
         ->setTheme('modal', 'default');
 
@@ -55,7 +55,7 @@ it('applies theme to a div component', function () {
 });
 
 it('applies theme to a heading', function () {
-    $h1 = ComponentBuilder::make(ComponentEnum::H1)
+    $h1 = ComponentFactory::make(ComponentEnum::H1)
         ->setContent('Styled Title')
         ->setTheme('text', 'lg');
 
@@ -66,7 +66,7 @@ it('applies theme to a heading', function () {
 });
 
 it('applies theme to a paragraph', function () {
-    $p = ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+    $p = ComponentFactory::make(ComponentEnum::PARAGRAPH)
         ->setContent('Styled paragraph text')
         ->setTheme('text', 'sm');
 
@@ -77,7 +77,7 @@ it('applies theme to a paragraph', function () {
 });
 
 it('applies theme to an input', function () {
-    $input = ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+    $input = ComponentFactory::make(ComponentEnum::TEXT_INPUT)
         ->setAttribute('name', 'email')
         ->setTheme('inputs', 'text');
 
@@ -88,7 +88,7 @@ it('applies theme to an input', function () {
 });
 
 it('applies theme to a link', function () {
-    $link = ComponentBuilder::make(ComponentEnum::LINK)
+    $link = ComponentFactory::make(ComponentEnum::LINK)
         ->setContent('Styled link')
         ->setAttribute('href', '/test')
         ->setTheme('action', 'link');
@@ -101,13 +101,13 @@ it('applies theme to a link', function () {
 });
 
 it('applies theme to a table', function () {
-    $table = ComponentBuilder::make(ComponentEnum::TABLE)
+    $table = ComponentFactory::make(ComponentEnum::TABLE)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::THEAD)
+            ComponentFactory::make(ComponentEnum::THEAD)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::TH)
+                            ComponentFactory::make(ComponentEnum::TH)
                                 ->setContent('Header')
                                 ->setTheme('table', 'th')
                         )
@@ -121,13 +121,13 @@ it('applies theme to a table', function () {
 });
 
 it('applies theme to nested components', function () {
-    $card = ComponentBuilder::make(ComponentEnum::DIV)
+    $card = ComponentFactory::make(ComponentEnum::DIV)
         ->setTheme('modal', 'default')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::H2)
+            ComponentFactory::make(ComponentEnum::H2)
                 ->setContent('Card Title')
                 ->setTheme('text', 'lg'),
-            ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+            ComponentFactory::make(ComponentEnum::PARAGRAPH)
                 ->setContent('Card body text')
                 ->setTheme('text', 'sm'),
         ]);
@@ -140,7 +140,7 @@ it('applies theme to nested components', function () {
 });
 
 it('applies theme to button with existing class', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Submit')
         ->setAttribute('class', 'existing-class')
         ->setTheme('action', 'success');
@@ -153,7 +153,7 @@ it('applies theme to button with existing class', function () {
 });
 
 it('applies theme to div with existing attributes', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Content')
         ->setAttribute('id', 'my-div')
         ->setAttribute('data-testid', 'content')
@@ -167,7 +167,7 @@ it('applies theme to div with existing attributes', function () {
 });
 
 it('applies multiple themes to a div', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Multi-themed content')
         ->setThemes([
             'modal' => 'default',
@@ -181,7 +181,7 @@ it('applies multiple themes to a div', function () {
 });
 
 it('applies theme to a form', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('action', '/submit')
         ->setTheme('display', 'flex');
 
@@ -192,7 +192,7 @@ it('applies theme to a form', function () {
 });
 
 it('applies theme to a select', function () {
-    $select = ComponentBuilder::make(ComponentEnum::SELECT)
+    $select = ComponentFactory::make(ComponentEnum::SELECT)
         ->setAttribute('name', 'choice')
         ->setTheme('display', 'block');
 
@@ -203,7 +203,7 @@ it('applies theme to a select', function () {
 });
 
 it('applies theme to a textarea', function () {
-    $textarea = ComponentBuilder::make(ComponentEnum::TEXTAREA)
+    $textarea = ComponentFactory::make(ComponentEnum::TEXTAREA)
         ->setAttribute('name', 'message')
         ->setTheme('inputs', 'textarea');
 
@@ -214,7 +214,7 @@ it('applies theme to a textarea', function () {
 });
 
 it('renders component without theme', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('No theme');
 
     $html = (string) $this->blade('{{ $button }}', ['button' => $button]);
@@ -226,14 +226,14 @@ it('renders component without theme', function () {
 it('handles non-existent theme gracefully', function () {
     $this->expectException(ViewException::class);
 
-    ComponentBuilder::make(ComponentEnum::BUTTON)
+    ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Test')
         ->setTheme('nonexistent', 'variant')
         ->toHtml();
 });
 
 it('applies theme to a label', function () {
-    $label = ComponentBuilder::make(ComponentEnum::LABEL)
+    $label = ComponentFactory::make(ComponentEnum::LABEL)
         ->setAttribute('for', 'email')
         ->setContent('Email')
         ->setTheme('color', 'default');
@@ -246,7 +246,7 @@ it('applies theme to a label', function () {
 });
 
 it('applies theme to a list item', function () {
-    $li = ComponentBuilder::make(ComponentEnum::LI)
+    $li = ComponentFactory::make(ComponentEnum::LI)
         ->setContent('List item')
         ->setTheme('lists', 'disc');
 
@@ -257,12 +257,12 @@ it('applies theme to a list item', function () {
 });
 
 it('applies theme to a detail element', function () {
-    $details = ComponentBuilder::make(ComponentEnum::DETAILS)
+    $details = ComponentFactory::make(ComponentEnum::DETAILS)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::SUMMARY)
+            ComponentFactory::make(ComponentEnum::SUMMARY)
                 ->setContent('Summary')
                 ->setTheme('display', 'block'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent('Details content'),
         ]);
 

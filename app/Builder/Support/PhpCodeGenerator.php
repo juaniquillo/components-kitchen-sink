@@ -12,12 +12,12 @@ use App\Builder\Registries\ComponentRegistry;
  *
  * The output is meant to be pasted straight into a project:
  *
- *     ComponentBuilder::make(ComponentEnum::DIV)
+ *     ComponentFactory::make(ComponentEnum::DIV)
  *         ->setAttributes([
  *             'id' => 'hero',
  *         ])
  *         ->setContents([
- *             ComponentBuilder::make(ComponentEnum::H1)
+ *             ComponentFactory::make(ComponentEnum::H1)
  *                 ->setContent('Welcome'),
  *         ]);
  *
@@ -60,7 +60,7 @@ final class PhpCodeGenerator
      */
     private function componentImport(): string
     {
-        return 'use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder as ComponentBuilder;';
+        return 'use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory as ComponentFactory;';
     }
 
     /**
@@ -103,7 +103,7 @@ final class PhpCodeGenerator
             return '// unknown component type: '.$node['type'];
         }
 
-        $lines = ['ComponentBuilder::make(ComponentEnum::'.$type.')'];
+        $lines = ['ComponentFactory::make(ComponentEnum::'.$type.')'];
 
         $attributes = $this->attributes($node);
         if ($attributes !== []) {

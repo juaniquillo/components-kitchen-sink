@@ -7,7 +7,7 @@ namespace App\Components\Groups\Slate;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\SlateBackendComponents\Factories\SlateComponentFactory;
 use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateDropDownMenu implements Component
@@ -28,32 +28,32 @@ class SlateDropDownMenu implements Component
 
     public static function simple(): BackendComponent
     {
-        $dropdown = SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU);
+        $dropdown = SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU);
 
         $dropdown->setContent(
-            SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_TRIGGER)
+            SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_TRIGGER)
                 ->setContent(
-                    SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+                    SlateComponentFactory::make(SlateComponentEnum::BUTTON)
                         ->setAttribute('variant', 'outline')
                         ->setContent('Open')
                 )
         );
 
         $dropdown->setContent(
-            SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_CONTENT)
+            SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_CONTENT)
                 ->setAttribute('class', 'w-48')
                 ->setContents([
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_LABEL)
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_LABEL)
                         ->setContent('My Account'),
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_SEPARATOR),
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_SEPARATOR),
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
                         ->setContent('Profile'),
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
                         ->setContent('Billing'),
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
                         ->setContent('Settings'),
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_SEPARATOR),
-                    SlateComponentBuilder::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_SEPARATOR),
+                    SlateComponentFactory::make(SlateComponentEnum::DROPDOWN_MENU_ITEM)
                         ->setAttribute('variant', 'destructive')
                         ->setContent('Log out'),
                 ])

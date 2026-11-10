@@ -6,11 +6,11 @@ namespace App\Components\Groups\Flux;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
-use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
+use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
 class FluxUIModals implements Component
@@ -33,19 +33,19 @@ class FluxUIModals implements Component
 
     public static function modalDefault(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::COLLECTION)
+        return ComponentFactory::make(ComponentEnum::COLLECTION)
             ->setContents([
-                'button' => FluxComponentBuilder::make(FluxComponentEnum::MODAL_TRIGGER)
+                'button' => FluxComponentFactory::make(FluxComponentEnum::MODAL_TRIGGER)
                     ->setAttribute('name', 'flux-modal-test')
                     ->setContent(
-                        FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
+                        FluxComponentFactory::make(FluxComponentEnum::BUTTON)
                             ->setTheme('cursor', 'pointer')
                             ->setContent('Open Modal')
                     ),
-                'modal' => FluxComponentBuilder::make(FluxComponentEnum::MODAL)
+                'modal' => FluxComponentFactory::make(FluxComponentEnum::MODAL)
                     ->setAttribute('name', 'flux-modal-test')
                     ->setContent(
-                        ComponentBuilder::make(ComponentEnum::DIV)
+                        ComponentFactory::make(ComponentEnum::DIV)
                             ->setTheme('padding', 'md')
                             ->setContent('This is a Flux Modal'),
 
@@ -55,42 +55,42 @@ class FluxUIModals implements Component
 
     public static function modalConfirm(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::COLLECTION)
+        return ComponentFactory::make(ComponentEnum::COLLECTION)
             ->setContents([
-                'button' => FluxComponentBuilder::make(FluxComponentEnum::MODAL_TRIGGER)
+                'button' => FluxComponentFactory::make(FluxComponentEnum::MODAL_TRIGGER)
                     ->setAttribute('name', 'flux-modal-confirm')
                     ->setContent(
-                        FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
+                        FluxComponentFactory::make(FluxComponentEnum::BUTTON)
                             ->setTheme('cursor', 'pointer')
                             ->setAttribute('variant', 'danger')
                             ->setContent('Confirm')
                     ),
-                'modal' => FluxComponentBuilder::make(FluxComponentEnum::MODAL)
+                'modal' => FluxComponentFactory::make(FluxComponentEnum::MODAL)
                     ->setAttribute('name', 'flux-modal-confirm')
                     // ->setAttribute(':dismissible', 'false')
                     ->setContent(
-                        LocalThemeComponentBuilder::make(ComponentEnum::DIV)
+                        LocalThemeComponentFactory::make(ComponentEnum::DIV)
                             ->setTheme('modal', 'flux-spacing')
                             ->setTheme('padding', 'x-md')
                             ->setContents([
-                                FluxComponentBuilder::make(FluxComponentEnum::HEADING)
+                                FluxComponentFactory::make(FluxComponentEnum::HEADING)
                                     ->setContent('Delete project?'),
-                                FluxComponentBuilder::make(FluxComponentEnum::TEXT)
+                                FluxComponentFactory::make(FluxComponentEnum::TEXT)
                                     ->setAttribute('margin', 'top-xs')
                                     ->setContents([
-                                        ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+                                        ComponentFactory::make(ComponentEnum::PARAGRAPH)
                                             ->setContent('You\'re about to delete this project.'),
                                     ]),
 
-                                FluxComponentBuilder::make(FluxComponentEnum::SPACER),
-                                FluxComponentBuilder::make(FluxComponentEnum::MODAL_CLOSE)
+                                FluxComponentFactory::make(FluxComponentEnum::SPACER),
+                                FluxComponentFactory::make(FluxComponentEnum::MODAL_CLOSE)
                                     ->setContent(
-                                        FluxComponentBuilder::make('button')
+                                        FluxComponentFactory::make('button')
                                             ->setAttribute('variant', 'ghost')
                                             ->setContent('Cancel'),
 
                                     ),
-                                FluxComponentBuilder::make('button')
+                                FluxComponentFactory::make('button')
                                     ->setAttribute('type', 'submit')
                                     ->setAttribute('variant', 'danger')
                                     ->setContent('Delete project'),
@@ -102,21 +102,21 @@ class FluxUIModals implements Component
 
     public static function modalFlyout(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::COLLECTION)
+        return ComponentFactory::make(ComponentEnum::COLLECTION)
             ->setContents([
-                'button' => FluxComponentBuilder::make('modal.trigger')
+                'button' => FluxComponentFactory::make('modal.trigger')
                     ->setAttribute('name', 'flux-modal-flyout')
                     ->setContent(
-                        FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
+                        FluxComponentFactory::make(FluxComponentEnum::BUTTON)
                             ->setTheme('cursor', 'pointer')
                             ->setContent('Open side panel')
                     ),
-                'modal' => FluxComponentBuilder::make(FluxComponentEnum::MODAL)
+                'modal' => FluxComponentFactory::make(FluxComponentEnum::MODAL)
                     ->setAttribute('name', 'flux-modal-flyout')
                     ->setAttribute('variant', 'flyout')
                     ->setAttribute('position', 'left')
                     ->setContent(
-                        ComponentBuilder::make(ComponentEnum::DIV)
+                        ComponentFactory::make(ComponentEnum::DIV)
                             ->setTheme('padding', 'md')
                             ->setContent('This is a Flux panel'),
                     ),

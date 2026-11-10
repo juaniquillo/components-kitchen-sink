@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\BackendComponents\Builders\LocalComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\LocalComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\BackendComponents\Themes\LocalThemeManager;
 
 it('renders the local iframe with its attributes', function () {
     // The email preview embeds an email in one of these, the way
     // EmailPresenter builds it.
-    $html = (string) $this->blade('{{ $component }}', ['component' => LocalComponentBuilder::make('iframe')
+    $html = (string) $this->blade('{{ $component }}', ['component' => LocalComponentFactory::make('iframe')
         ->setTheme('iframe', 'default')
         ->setAttributes([
             'src' => 'http://example.test/mail/x',

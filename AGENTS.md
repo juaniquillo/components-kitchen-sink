@@ -184,14 +184,14 @@ Components implement Laravel's `Htmlable`.
 
 ### Creating components
 
-Use the `ComponentBuilder` with a `ComponentEnum`:
+Use the `ComponentFactory` with a `ComponentEnum`:
 
 ```php
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
-$button = ComponentBuilder::make(ComponentEnum::BUTTON);
-$div    = ComponentBuilder::make(ComponentEnum::DIV);
+$button = ComponentFactory::make(ComponentEnum::BUTTON);
+$div    = ComponentFactory::make(ComponentEnum::DIV);
 // Or directly, second param controls theme resolution:
 $div = new MainBackendComponent('div');                        // package themes
 $div = new MainBackendComponent('div', new LocalThemeManager); // app-local themes
@@ -202,7 +202,7 @@ $div = new MainBackendComponent('div', new LocalThemeManager); // app-local them
 Use **`setContent()`** for a single item and **`setContents()`** for multiple items at once:
 
 ```php
-$div = ComponentBuilder::make(ComponentEnum::DIV)
+$div = ComponentFactory::make(ComponentEnum::DIV)
     ->setContent('Hello');                // single (no key)
     ->setContent('World', 'key_1');       // single with key
     ->setContents([...]);                 // batch (ignores keys)
@@ -218,7 +218,7 @@ $div->unsetContent('key_1');              // Remove by key
 Use **`setAttribute()`** for a single attribute and **`setAttributes()`** for multiple at once:
 
 ```php
-$div = ComponentBuilder::make(ComponentEnum::DIV)
+$div = ComponentFactory::make(ComponentEnum::DIV)
     ->setAttribute('id', 'my-id');        // single
     ->setAttribute('class', 'custom-class');
     ->setAttributes(['data-foo' => 'bar']); // batch
@@ -239,7 +239,7 @@ return [
 ```
 
 ```php
-$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+$button = ComponentFactory::make(ComponentEnum::BUTTON)
     ->setTheme('action', 'success')                       // single variant
     ->setTheme('table', ['th', 'th-dark'])                // array of variant keys
     ->setThemes(['action' => 'success', 'size' => 'lg']); // batch
@@ -248,7 +248,7 @@ $button = ComponentBuilder::make(ComponentEnum::BUTTON)
 Themes accumulate by default, calling `setTheme` with the same name appends rather than replaces:
 
 ```php
-$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+$button = ComponentFactory::make(ComponentEnum::BUTTON)
     ->setTheme('action', 'success')
     ->setTheme('action', 'error');
 // theme['action'] = ['success', 'error']
@@ -260,7 +260,7 @@ $button->setTheme('action', 'link', overwrite: true);
 
 ### Individual components
 
-`DivComponent` is both a utility **and** a blueprint for creating new targeted component classes that bypass the enum/builder entirely. To create a new individual component, duplicate the `DivComponent` pattern:
+`DivComponent` is both a utility **and** a blueprint for creating new targeted component classes that bypass the enum/factory entirely. To create a new individual component, duplicate the `DivComponent` pattern:
 
 1. Put the class in `src/Components/Individual/`
 2. Implement `BackendComponent`, `IndividualComponent`, `ThemeComponent`, `Htmlable` (omit `ContentsComponent`+`HasContent` for self-closing elements)
@@ -316,11 +316,11 @@ use Juaniquillo\BackendComponents\Utils\ModalUtil;
 
 $modal = ModalUtil::make(
     content: 'Hello World',
-    button: ComponentBuilder::make(ComponentEnum::BUTTON)
+    button: ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Open')
         ->setAttribute('@click', 'showModal = true'),
-    title: ComponentBuilder::make(ComponentEnum::H2)->setContent('Title'),
-    footer: ComponentBuilder::make(ComponentEnum::DIV)->setContent('Footer'),
+    title: ComponentFactory::make(ComponentEnum::H2)->setContent('Title'),
+    footer: ComponentFactory::make(ComponentEnum::DIV)->setContent('Footer'),
 )
     ->setAttribute('id', 'my-modal')
     ->setTheme('modal', 'lg')
@@ -330,7 +330,7 @@ $modal = ModalUtil::make(
 ### Settings
 
 ```php
-$component = ComponentBuilder::make(ComponentEnum::DIV)
+$component = ComponentFactory::make(ComponentEnum::DIV)
     ->setSetting('transition', 'fade')
     ->setSettings(['setting_1' => 'value_1']);
 ```
@@ -338,7 +338,7 @@ $component = ComponentBuilder::make(ComponentEnum::DIV)
 ### Livewire
 
 ```php
-ComponentBuilder::make('my-livewire-component')
+ComponentFactory::make('my-livewire-component')
     ->setLivewire()
     ->setLivewireKey('my-key')
     ->setLivewireParams(['param' => 'value']);
@@ -363,9 +363,9 @@ Every component resolves its template through `getViewPath()`:
 
 | Component | `getViewPath()` |
 |---|---|
-| `ComponentBuilder::make(ComponentEnum::DIV)` | `backend-component::components.div` |
-| `ComponentBuilder::make(ComponentEnum::DIV)->useLocal()` | `components.div` |
-| `ComponentBuilder::make('img')->setPath('inline')` | `backend-component::components.inline.img` |
+| `ComponentFactory::make(ComponentEnum::DIV)` | `backend-component::components.div` |
+| `ComponentFactory::make(ComponentEnum::DIV)->useLocal()` | `components.div` |
+| `ComponentFactory::make('img')->setPath('inline')` | `backend-component::components.inline.img` |
 
 Templates are plain views that receive `$attributes`, `$slot` and `$settings`:
 
@@ -381,30 +381,30 @@ Self-closing tags (input, img, col) use `/>` instead. Use `{{ $attributes->merge
 
 ### Local resolution
 
-For apps consuming the package, three builders control which `resources/views/` directory resolves components and themes:
+For apps consuming the package, three factories control which `resources/views/` directory resolves components and themes:
 
-- **`ComponentBuilder`**, package views for both components and themes
-- **`LocalComponentBuilder`**, app views for both components and themes
-- **`LocalThemeComponentBuilder`**, package views for components, app views for themes
+- **`ComponentFactory`**, package views for both components and themes
+- **`LocalComponentFactory`**, app views for both components and themes
+- **`LocalThemeComponentFactory`**, package views for components, app views for themes
 
 ```php
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
-use Juaniquillo\BackendComponents\Builders\LocalComponentBuilder;
-use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 
-$package     = ComponentBuilder::make(ComponentEnum::BUTTON);                  // package both
-$local       = LocalComponentBuilder::make(ComponentEnum::BUTTON);              // app both
-$localTheme  = LocalThemeComponentBuilder::make(ComponentEnum::BUTTON);         // package comp + app theme
+$package     = ComponentFactory::make(ComponentEnum::BUTTON);                  // package both
+$local       = LocalComponentFactory::make(ComponentEnum::BUTTON);              // app both
+$localTheme  = LocalThemeComponentFactory::make(ComponentEnum::BUTTON);         // package comp + app theme
 
-// ComponentBuilder also supports ->useLocal() as a shorthand for LocalComponentBuilder
-$component   = ComponentBuilder::make(ComponentEnum::BUTTON)->useLocal();
+// ComponentFactory also supports ->useLocal() as a shorthand for LocalComponentFactory
+$component   = ComponentFactory::make(ComponentEnum::BUTTON)->useLocal();
 ```
 
 ### Serialization
 
 ```php
 $array = $component->toArray();
-$restored = ComponentFactory::fromArray($array);
+$restored = ComponentDeserializer::fromArray($array);
 ```
 
 ### Cached components
@@ -420,6 +420,7 @@ $html = $button->getCachedHtml();   // served from cache
 $button->clearCache();              // invalidates
 
 $button->setCacheDirectory('/custom/path'); // override default
+$button->setCacheStore(Cache::store('redis')); // inject any PSR-16 store
 $button->disableCache();                    // bypass cache
 ```
 

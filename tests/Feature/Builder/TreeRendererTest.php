@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\TreeRenderer;
-use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 
 it('renders a node with the text it holds', function () {
     $tree = treeWithText('n1', 'paragraph', 'Hello');
@@ -195,7 +195,7 @@ it('puts the same classes on the node as the package does', function () {
     $preview = (new TreeRenderer(['padding' => ['top-sm' => 'pt-3', 'bottom-sm' => 'pb-3']]))
         ->render($tree, null, clean: true);
 
-    $button = LocalThemeComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = LocalThemeComponentFactory::make(ComponentEnum::BUTTON)
         ->setThemes(['padding' => ['top-sm', 'bottom-sm']]);
 
     $rendered = (string) $this->blade('{{ $button }}', ['button' => $button]);

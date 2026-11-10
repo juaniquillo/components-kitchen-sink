@@ -7,8 +7,8 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
-use Juaniquillo\SvgBackendComponents\Builders\SvgLocalThemeComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
+use Juaniquillo\SvgBackendComponents\Factories\SvgLocalThemeComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
@@ -32,26 +32,26 @@ class SvgReuse implements Component
 
     public static function reuse(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                SvgComponentFactory::make(SvgComponentEnum::DEFS)
                     ->setContents([
                         SvgShape::circle(0, 0, 15)
                             ->setAttribute('id', 'dot')
                             ->setFill('#06b6d4'),
                     ]),
-                SvgComponentBuilder::make(SvgComponentEnum::G)
+                SvgComponentFactory::make(SvgComponentEnum::G)
                     ->setStroke('#64748b')
                     ->setStrokeWidth(2)
                     ->setContents([
-                        SvgComponentBuilder::make(SvgComponentEnum::TITLE)->setContent('Reused dots'),
-                        SvgComponentBuilder::make(SvgComponentEnum::DESC)->setContent('The same circle, placed twice with use.'),
-                        SvgComponentBuilder::make(SvgComponentEnum::USE)
+                        SvgComponentFactory::make(SvgComponentEnum::TITLE)->setContent('Reused dots'),
+                        SvgComponentFactory::make(SvgComponentEnum::DESC)->setContent('The same circle, placed twice with use.'),
+                        SvgComponentFactory::make(SvgComponentEnum::USE)
                             ->setAttributes(['href' => '#dot', 'x' => '30', 'y' => '50']),
-                        SvgComponentBuilder::make(SvgComponentEnum::USE)
+                        SvgComponentFactory::make(SvgComponentEnum::USE)
                             ->setAttributes(['href' => '#dot', 'x' => '90', 'y' => '50']),
                     ]),
             ]);
@@ -59,14 +59,14 @@ class SvgReuse implements Component
 
     public static function symbol(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                SvgComponentFactory::make(SvgComponentEnum::DEFS)
                     ->setContents([
-                        SvgComponentBuilder::make(SvgComponentEnum::SYMBOL)
+                        SvgComponentFactory::make(SvgComponentEnum::SYMBOL)
                             ->setAttribute('id', 'badge')
                             ->setViewBox(0, 0, 24, 24)
                             ->setContent(
@@ -74,11 +74,11 @@ class SvgReuse implements Component
                                     ->setFill('#f59e0b')
                             ),
                     ]),
-                SvgComponentBuilder::make(SvgComponentEnum::USE)
+                SvgComponentFactory::make(SvgComponentEnum::USE)
                     ->setAttribute('href', '#badge')
                     ->setAttributes(['x' => '34', 'y' => '26'])
                     ->setSize(48),
-                SvgComponentBuilder::make(SvgComponentEnum::USE)
+                SvgComponentFactory::make(SvgComponentEnum::USE)
                     ->setAttribute('href', '#badge')
                     ->setAttributes(['x' => '118', 'y' => '38'])
                     ->setSize(24),
@@ -87,17 +87,17 @@ class SvgReuse implements Component
 
     public static function caption(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 80)
             ->setSize(200, 80)
             ->setContents([
-                SvgLocalThemeComponentBuilder::make(SvgComponentEnum::TEXT)
+                SvgLocalThemeComponentFactory::make(SvgComponentEnum::TEXT)
                     ->setTheme('fill', 'muted')
                     ->setAttributes(['x' => '100', 'y' => '40', 'text-anchor' => 'middle', 'font-size' => '20'])
                     ->setContents([
                         'Hello, ',
-                        SvgLocalThemeComponentBuilder::make(SvgComponentEnum::TSPAN)
+                        SvgLocalThemeComponentFactory::make(SvgComponentEnum::TSPAN)
                             ->setTheme('fill', 'accent')
                             ->setAttribute('font-weight', 'bold')
                             ->setContent('SVG'),

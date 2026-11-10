@@ -6,10 +6,10 @@ namespace App\Components\Groups\Flux;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\FluxBackendComponents\Builders\FluxLocalThemeComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\FluxBackendComponents\Factories\FluxLocalThemeComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
 class FluxUISkeletons implements Component
@@ -50,49 +50,49 @@ class FluxUISkeletons implements Component
     /** @param array<int|string, BackendComponent> $contents */
     public static function container(array $contents): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setTheme('padding', 'xs')
             ->setContents($contents);
     }
 
     public static function basic(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
             ->setTheme('skeleton', ['w-48', 'h-4']);
     }
 
     public static function pulse(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
             ->setAttribute('animate', 'pulse')
             ->setTheme('skeleton', ['w-48', 'h-4']);
     }
 
     public static function shimmer(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
             ->setAttribute('animate', 'shimmer')
             ->setTheme('skeleton', ['w-48', 'h-4']);
     }
 
     public static function textLines(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_GROUP)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_GROUP)
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_LINE)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_LINE)
                     ->setAttribute('animate', 'pulse')
                     ->setAttribute('size', 'lg')
             )
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_LINE)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_LINE)
                     ->setAttribute('animate', 'pulse')
             )
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_LINE)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_LINE)
                     ->setAttribute('animate', 'pulse')
             )
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_LINE)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_LINE)
                     ->setAttribute('animate', 'pulse')
                     ->setTheme('skeleton', 'w-2/3')
             );
@@ -100,21 +100,21 @@ class FluxUISkeletons implements Component
 
     public static function cardSkeleton(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::CARD)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::CARD)
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_GROUP)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_GROUP)
                     ->setContent(
-                        FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+                        FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
                             ->setAttribute('animate', 'pulse')
                             ->setTheme('skeleton', ['w-full', 'h-40', 'rounded-lg'])
                     )
                     ->setContent(
-                        FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+                        FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
                             ->setAttribute('animate', 'pulse')
                             ->setTheme('skeleton', ['mt-4', 'w-3/4', 'h-4'])
                     )
                     ->setContent(
-                        FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+                        FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
                             ->setAttribute('animate', 'pulse')
                             ->setTheme('skeleton', ['mt-2', 'w-1/2', 'h-4'])
                     )
@@ -123,19 +123,19 @@ class FluxUISkeletons implements Component
 
     public static function avatarWithText(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON_GROUP)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON_GROUP)
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
                     ->setAttribute('animate', 'pulse')
                     ->setTheme('skeleton', ['w-10', 'h-10', 'rounded-full'])
             )
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
                     ->setAttribute('animate', 'pulse')
                     ->setTheme('skeleton', ['w-32', 'h-4'])
             )
             ->setContent(
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SKELETON)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::SKELETON)
                     ->setAttribute('animate', 'pulse')
                     ->setTheme('skeleton', ['w-48', 'h-3'])
             );

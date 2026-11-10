@@ -271,7 +271,7 @@ it('generates the PHP that reproduces the tree', function () {
         ->call('add', 'headers.h1')
         ->call('addText', 'n2', 'Title');
 
-    expect($component->instance()->code())->toContain('ComponentBuilder::make(ComponentEnum::H1)')
+    expect($component->instance()->code())->toContain('ComponentFactory::make(ComponentEnum::H1)')
         ->toContain("'Title',");
 });
 

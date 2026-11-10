@@ -6,9 +6,9 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\SlateBackendComponents\Utils\SlateTabsUtil;
 
 class SlateTabs implements Component
@@ -35,13 +35,13 @@ class SlateTabs implements Component
             tabs: [
                 'account' => [
                     'label' => 'Account',
-                    'content' => ComponentBuilder::make(ComponentEnum::DIV)
+                    'content' => ComponentFactory::make(ComponentEnum::DIV)
                         ->setTheme('text', 'center')
                         ->setContent('This is account'),
                 ],
                 'password' => [
                     'label' => 'Password',
-                    'content' => ComponentBuilder::make(ComponentEnum::DIV)
+                    'content' => ComponentFactory::make(ComponentEnum::DIV)
                         ->setTheme('text', 'center')
                         ->setContent('This is password'),
                 ],

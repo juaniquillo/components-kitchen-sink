@@ -21,20 +21,20 @@ Use this skill when the user needs to:
 
 ## Creating Components
 
-Components are created via the builder, always starting with `ComponentBuilder::make()`:
+Components are created via the factory, always starting with `ComponentFactory::make()`:
 
 ```php
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 
 // Simple components
-$button = ComponentBuilder::make(ComponentEnum::BUTTON);
-$div = ComponentBuilder::make(ComponentEnum::DIV);
-$input = ComponentBuilder::make(ComponentEnum::TEXT_INPUT);
-$table = ComponentBuilder::make(ComponentEnum::TABLE);
+$button = ComponentFactory::make(ComponentEnum::BUTTON);
+$div = ComponentFactory::make(ComponentEnum::DIV);
+$input = ComponentFactory::make(ComponentEnum::TEXT_INPUT);
+$table = ComponentFactory::make(ComponentEnum::TABLE);
 
 // By string name (path)
-$custom = ComponentBuilder::make('inline.button');
+$custom = ComponentFactory::make('inline.button');
 ```
 
 ### All available components
@@ -57,16 +57,16 @@ $custom = ComponentBuilder::make('inline.button');
 Use **`setContent()`** for a single item and **`setContents()`** for multiple items at once:
 
 ```php
-$div = ComponentBuilder::make(ComponentEnum::DIV)
+$div = ComponentFactory::make(ComponentEnum::DIV)
     ->setContent('Hello')                               // single (no key)
     ->setContent('World', 'key_1')                      // single with key
     ->setContents([                                      // batch (ignores keys)
-        ComponentBuilder::make(ComponentEnum::SPAN)->setContent('A'),
-        ComponentBuilder::make(ComponentEnum::SPAN)->setContent('B'),
+        ComponentFactory::make(ComponentEnum::SPAN)->setContent('A'),
+        ComponentFactory::make(ComponentEnum::SPAN)->setContent('B'),
     ])
     ->setContents([                                      // batch with keys (overwrites existing)
-        'item_1' => ComponentBuilder::make(ComponentEnum::SPAN)->setContent('A'),
-        'item_2' => ComponentBuilder::make(ComponentEnum::SPAN)->setContent('B'),
+        'item_1' => ComponentFactory::make(ComponentEnum::SPAN)->setContent('A'),
+        'item_2' => ComponentFactory::make(ComponentEnum::SPAN)->setContent('B'),
     ], overwrite: true);
 ```
 
@@ -75,7 +75,7 @@ $div = ComponentBuilder::make(ComponentEnum::DIV)
 Use **`setAttribute()`** for a single attribute and **`setAttributes()`** for multiple at once:
 
 ```php
-$div = ComponentBuilder::make(ComponentEnum::DIV)
+$div = ComponentFactory::make(ComponentEnum::DIV)
     ->setAttribute('id', 'my-id')
     ->setAttribute('class', 'custom-class')
     ->setAttributes(['data-foo' => 'bar', 'style' => 'display:none']);
@@ -86,13 +86,13 @@ $div = ComponentBuilder::make(ComponentEnum::DIV)
 Components can be nested by passing them as content:
 
 ```php
-$card = ComponentBuilder::make(ComponentEnum::DIV)
+$card = ComponentFactory::make(ComponentEnum::DIV)
     ->setAttribute('class', 'card')
     ->setContent(
-        ComponentBuilder::make(ComponentEnum::H2)->setContent('Card Title')
+        ComponentFactory::make(ComponentEnum::H2)->setContent('Card Title')
     )
     ->setContent(
-        ComponentBuilder::make(ComponentEnum::PARAGRAPH)->setContent('Card body text')
+        ComponentFactory::make(ComponentEnum::PARAGRAPH)->setContent('Card body text')
     );
 ```
 
@@ -112,15 +112,15 @@ return [
 
 ```php
 // Apply a single theme variant
-$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+$button = ComponentFactory::make(ComponentEnum::BUTTON)
     ->setTheme('action', 'success');
 
 // Apply multiple variant keys from the same theme file
-$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+$button = ComponentFactory::make(ComponentEnum::BUTTON)
     ->setTheme('table', ['th', 'th-dark']);
 
 // Apply multiple themes
-$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+$button = ComponentFactory::make(ComponentEnum::BUTTON)
     ->setThemes([
         'action' => 'success',
         'size' => 'lg',
@@ -132,7 +132,7 @@ $button = ComponentBuilder::make(ComponentEnum::BUTTON)
 Themes accumulate by default — calling `setTheme` with the same name appends rather than replaces:
 
 ```php
-$button = ComponentBuilder::make(ComponentEnum::BUTTON)
+$button = ComponentFactory::make(ComponentEnum::BUTTON)
     ->setTheme('action', 'success')
     ->setTheme('action', 'error');
 // theme['action'] = ['success', 'error']
@@ -144,7 +144,7 @@ $button->setTheme('action', 'link', overwrite: true);
 
 ## Individual Components
 
-`DivComponent` is both a utility **and** a blueprint for creating new targeted component classes that bypass the enum/builder entirely. To create a new individual component, duplicate the `DivComponent` pattern:
+`DivComponent` is both a utility **and** a blueprint for creating new targeted component classes that bypass the enum/factory entirely. To create a new individual component, duplicate the `DivComponent` pattern:
 
 1. Put the class in `src/Components/Individual/`
 2. Implement `BackendComponent`, `IndividualComponent`, `ThemeComponent`, `Htmlable` (omit `ContentsComponent`+`HasContent` for self-closing elements)
@@ -173,11 +173,11 @@ use Juaniquillo\BackendComponents\Utils\ModalUtil;
 
 $modal = ModalUtil::make(
     content: 'Hello World',
-    button: ComponentBuilder::make(ComponentEnum::BUTTON)
+    button: ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Open')
         ->setAttribute('@click', 'showModal = true'),
-    title: ComponentBuilder::make(ComponentEnum::H2)->setContent('Title'),
-    footer: ComponentBuilder::make(ComponentEnum::DIV)->setContent('Footer'),
+    title: ComponentFactory::make(ComponentEnum::H2)->setContent('Title'),
+    footer: ComponentFactory::make(ComponentEnum::DIV)->setContent('Footer'),
 )
     ->setAttribute('id', 'my-modal')
     ->setTheme('modal', 'lg')
@@ -216,7 +216,7 @@ $table = TableUtil::make(
 Wrap any component as a Livewire wrapper:
 
 ```php
-$livewire = ComponentBuilder::make(ComponentEnum::DIV)
+$livewire = ComponentFactory::make(ComponentEnum::DIV)
     ->setLivewire()
     ->setLivewireKey('unique-key')
     ->setLivewireParams(['userId' => 1, 'team' => 'engineering']);
@@ -224,27 +224,27 @@ $livewire = ComponentBuilder::make(ComponentEnum::DIV)
 
 ## Local Resolution
 
-For apps consuming the package, three builders control whether components/themes resolve from the package or the app's `resources/views/`:
+For apps consuming the package, three factories control whether components/themes resolve from the package or the app's `resources/views/`:
 
 ```php
-use Juaniquillo\BackendComponents\Builders\LocalComponentBuilder;
-use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
+use Juaniquillo\BackendComponents\Factories\LocalComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 
 // Resolves BOTH components and themes from the app's views
-$local = LocalComponentBuilder::make(ComponentEnum::BUTTON);
+$local = LocalComponentFactory::make(ComponentEnum::BUTTON);
 
 // Resolves THEMES from the app's views, components from the package
-$localTheme = LocalThemeComponentBuilder::make(ComponentEnum::BUTTON);
+$localTheme = LocalThemeComponentFactory::make(ComponentEnum::BUTTON);
 
-// ComponentBuilder::make()->useLocal() is equivalent to LocalComponentBuilder
-$component = ComponentBuilder::make(ComponentEnum::BUTTON)->useLocal();
+// ComponentFactory::make()->useLocal() is equivalent to LocalComponentFactory
+$component = ComponentFactory::make(ComponentEnum::BUTTON)->useLocal();
 ```
 
 | Builder | Component path | Theme path |
 |---|---|---|
-| `ComponentBuilder` | package `views/components/` | package `views/_themes/tailwind/` |
-| `LocalComponentBuilder` | app `views/components/` | app `views/_themes/tailwind/` |
-| `LocalThemeComponentBuilder` | package `views/components/` | app `views/_themes/tailwind/` |
+| `ComponentFactory` | package `views/components/` | package `views/_themes/tailwind/` |
+| `LocalComponentFactory` | app `views/components/` | app `views/_themes/tailwind/` |
+| `LocalThemeComponentFactory` | package `views/components/` | app `views/_themes/tailwind/` |
 
 ## Serialization
 
@@ -257,7 +257,7 @@ use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 $array = $component->toArray();
 
 // Restore
-$restored = ComponentFactory::fromArray($array);
+$restored = ComponentDeserializer::fromArray($array);
 ```
 
 This works recursively for nested content, themes, settings, and Livewire state.

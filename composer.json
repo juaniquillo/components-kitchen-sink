@@ -8,25 +8,13 @@
         "framework"
     ],
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "path",
-            "url": "C:/Users/juani/Code/packages/input-component-action",
-            "options": {
-                "symlink": true,
-                "versions": {
-                    "juaniquillo/input-component-action": "dev-main"
-                }
-            }
-        }
-    ],
     "require": {
         "php": "^8.3",
         "ext-zip": "*",
         "electrik/slate": "^3.0",
         "juaniquillo/crud-assistant": "@dev",
         "juaniquillo/flux-backend-components": "@dev",
-        "juaniquillo/input-component-action": "@dev",
+        "juaniquillo/input-component-action": "^0.2",
         "juaniquillo/laravel-backend-component": "@dev",
         "juaniquillo/mjml-backend-components": "@dev",
         "juaniquillo/slate-backend-components": "@dev",

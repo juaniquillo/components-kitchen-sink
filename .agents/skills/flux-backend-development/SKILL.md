@@ -48,15 +48,15 @@ $card = (new FluxBackendComponent(FluxComponentEnum::CARD))
 Fluent factories when preferred over `new`:
 
 ```php
-use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
-use Juaniquillo\FluxBackendComponents\Builders\FluxLocalThemeComponentBuilder;
+use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
+use Juaniquillo\FluxBackendComponents\Factories\FluxLocalThemeComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
-$button = FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
+$button = FluxComponentFactory::make(FluxComponentEnum::BUTTON)
     ->setContent('Save changes');
 
 // Resolves themes from the app's resources/views/_themes/tailwind/ instead of package defaults.
-$themed = FluxLocalThemeComponentBuilder::make(FluxComponentEnum::BUTTON)
+$themed = FluxLocalThemeComponentFactory::make(FluxComponentEnum::BUTTON)
     ->setTheme('color', 'success');
 ```
 
@@ -123,7 +123,7 @@ Props merge into the rendered output (winning over attributes on collision) but 
 Apply Tailwind variants with `setTheme()` / `setThemes()`. Theme files live in the app's `resources/views/_themes/tailwind/` (one Blade file per group returning a variant array):
 
 ```php
-$button = FluxComponentBuilder::make(FluxComponentEnum::BUTTON)
+$button = FluxComponentFactory::make(FluxComponentEnum::BUTTON)
     ->setTheme('color', 'success');
 ```
 

@@ -6,9 +6,9 @@ namespace App\Components\Groups\Bootstrap;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 class BootstrapCard implements Component
 {
@@ -29,7 +29,7 @@ class BootstrapCard implements Component
 
     public static function simple(): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setAttributes([
                 'class' => 'card',
             ])
@@ -44,7 +44,7 @@ class BootstrapCard implements Component
 
     public static function noImage(): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setAttributes([
                 'class' => 'card',
             ])
@@ -59,7 +59,7 @@ class BootstrapCard implements Component
 
     public static function placeholder(string $alt = ''): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::IMG)
+        return ComponentFactory::make(ComponentEnum::IMG)
             ->setAttributes([
                 'alt' => $alt,
                 'src' => 'https://placehold.co/400x200',
@@ -69,28 +69,28 @@ class BootstrapCard implements Component
 
     public static function body(array $contents): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setAttribute('class', 'card-body')
             ->setContents($contents);
     }
 
     public static function title(string $title): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::H5)
+        return ComponentFactory::make(ComponentEnum::H5)
             ->setAttribute('class', 'card-title')
             ->setContent($title);
     }
 
     public static function subTitle(string $subTitle): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::H6)
+        return ComponentFactory::make(ComponentEnum::H6)
             ->setAttribute('class', 'card-subtitle mb-2 text-body-secondary')
             ->setContent($subTitle);
     }
 
     public static function content(string $content): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+        return ComponentFactory::make(ComponentEnum::PARAGRAPH)
             ->setAttribute('class', 'card-text')
             ->setContent($content);
     }

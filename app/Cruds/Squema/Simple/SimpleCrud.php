@@ -12,10 +12,10 @@ use App\Cruds\Squema\Simple\Inputs\ContactByFactory;
 use App\Cruds\Squema\Simple\Inputs\LastNameFactory;
 use App\Cruds\Squema\Simple\Inputs\NameFactory;
 use App\Cruds\Themes\Inputs;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
@@ -79,12 +79,12 @@ class SimpleCrud implements Crud
         $inputs = $output->inputs;
         $meta = $output->meta;
 
-        $form = ComponentBuilder::make(ComponentEnum::FORM)
+        $form = ComponentFactory::make(ComponentEnum::FORM)
             ->setContents($inputs->toArray())
             ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER]).'#'.self::IDENTIFIER)
             ->setAttribute('enctype', 'multipart/form-data')
             ->setContent(
-                ComponentBuilder::make(ComponentEnum::BUTTON)
+                ComponentFactory::make(ComponentEnum::BUTTON)
                     ->setContent('Send')
                     ->setTheme('action', 'default')
                     ->setTheme('color', 'light')

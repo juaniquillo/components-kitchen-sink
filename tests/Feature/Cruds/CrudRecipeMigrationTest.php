@@ -8,6 +8,7 @@ use App\Cruds\Squema\Simple\Inputs\CitiesFactory;
 use App\Cruds\Squema\Simple\Inputs\ContactByFactory;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\CrudAssistant\Contracts\InputInterface;
+use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 use Juaniquillo\InputComponentAction\Groups\InputLabelErrorGroup;
 use Juaniquillo\InputComponentAction\Recipes\RadioComponentRecipe;
 use Juaniquillo\InputComponentAction\Recipes\SelectOptionComponentRecipe;
@@ -108,7 +109,14 @@ it('keeps the flux select.option type on year options', function () {
     expect($recipes[0]->getInputValue())->toBe('');
 
     foreach ($recipes as $recipe) {
-        expect($recipe->getComponentBag()?->getInputType())->toBe('select.option');
+        $type = $recipe->getComponentBag()?->getInputType();
+
+        // The recipe preserves the custom Flux type instead of replacing
+        // it with the base OPTION case; v0.2.0+ resolves the
+        // 'select.option' string to its FluxComponentEnum case, which
+        // renders the same value.
+        expect($type)->toBeInstanceOf(FluxComponentEnum::class)
+            ->and($type instanceof BackedEnum ? $type->value : $type)->toBe('select.option');
     }
 });
 

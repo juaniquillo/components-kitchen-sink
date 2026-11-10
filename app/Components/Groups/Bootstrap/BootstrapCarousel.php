@@ -6,10 +6,10 @@ namespace App\Components\Groups\Bootstrap;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 class BootstrapCarousel implements Component
 {
@@ -95,21 +95,21 @@ class BootstrapCarousel implements Component
 
         $contents = [];
 
-        $contents[] = ComponentBuilder::make(ComponentEnum::DIV)
+        $contents[] = ComponentFactory::make(ComponentEnum::DIV)
             ->setContent($label)
             ->setAttributes(['class' => 'd-block w-100']);
 
         if ($title !== null) {
-            $caption = ComponentBuilder::make(ComponentEnum::DIV)
+            $caption = ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttributes(['class' => 'carousel-caption d-none d-md-block'])
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::H5)
+                    ComponentFactory::make(ComponentEnum::H5)
                         ->setContent($title),
                 ]);
 
             if ($description !== null) {
                 $caption->setContent(
-                    ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+                    ComponentFactory::make(ComponentEnum::PARAGRAPH)
                         ->setContent($description)
                 );
             }
@@ -117,7 +117,7 @@ class BootstrapCarousel implements Component
             $contents[] = $caption;
         }
 
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setAttributes(['class' => $classes])
             ->setContents($contents);
     }
@@ -139,18 +139,18 @@ class BootstrapCarousel implements Component
                 $attributes['aria-current'] = 'true';
             }
 
-            $buttons[] = ComponentBuilder::make(ComponentEnum::BUTTON)
+            $buttons[] = ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setAttributes($attributes);
         }
 
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setAttributes(['class' => 'carousel-indicators'])
             ->setContents($buttons);
     }
 
     public static function placeholder(string $alt = ''): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::IMG)
+        return ComponentFactory::make(ComponentEnum::IMG)
             ->setAttributes([
                 'alt' => $alt,
                 'src' => 'https://placehold.co/400x200/000000/FFF',
@@ -163,19 +163,19 @@ class BootstrapCarousel implements Component
         $carouselContents = [];
 
         if ($subtitle) {
-            $carouselContents[] = ComponentBuilder::make(ComponentEnum::H5)
+            $carouselContents[] = ComponentFactory::make(ComponentEnum::H5)
                 ->setContent($subtitle)
                 ->setTheme('margin', 'bottom-xs');
         }
 
-        $inner = ComponentBuilder::make(ComponentEnum::DIV)
+        $inner = ComponentFactory::make(ComponentEnum::DIV)
             ->setAttributes(['class' => 'carousel-inner'])
             ->setContents($contents);
 
         $carouselContents[] = $inner;
 
         if ($withControls) {
-            $carouselContents[] = ComponentBuilder::make(ComponentEnum::BUTTON)
+            $carouselContents[] = ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setAttributes([
                     'class' => 'carousel-control-prev',
                     'type' => 'button',
@@ -183,14 +183,14 @@ class BootstrapCarousel implements Component
                     'data-bs-slide' => 'prev',
                 ])
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::SPAN)
+                    ComponentFactory::make(ComponentEnum::SPAN)
                         ->setAttributes(['class' => 'carousel-control-prev-icon', 'aria-hidden' => 'true']),
-                    ComponentBuilder::make(ComponentEnum::SPAN)
+                    ComponentFactory::make(ComponentEnum::SPAN)
                         ->setAttributes(['class' => 'visually-hidden'])
                         ->setContent('Previous'),
                 ]);
 
-            $carouselContents[] = ComponentBuilder::make(ComponentEnum::BUTTON)
+            $carouselContents[] = ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setAttributes([
                     'class' => 'carousel-control-next',
                     'type' => 'button',
@@ -198,15 +198,15 @@ class BootstrapCarousel implements Component
                     'data-bs-slide' => 'next',
                 ])
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::SPAN)
+                    ComponentFactory::make(ComponentEnum::SPAN)
                         ->setAttributes(['class' => 'carousel-control-next-icon', 'aria-hidden' => 'true']),
-                    ComponentBuilder::make(ComponentEnum::SPAN)
+                    ComponentFactory::make(ComponentEnum::SPAN)
                         ->setAttributes(['class' => 'visually-hidden'])
                         ->setContent('Next'),
                 ]);
         }
 
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setAttributes([
                 'id' => $carouselId,
                 'class' => 'carousel slide',

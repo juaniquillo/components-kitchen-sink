@@ -7,7 +7,7 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgPath;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
@@ -32,7 +32,7 @@ class SvgPaths implements Component
 
     public static function paths(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 120)
             ->setSize(200, 120)
@@ -54,7 +54,7 @@ class SvgPaths implements Component
 
     public static function drawn(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 120)
             ->setSize(200, 120)
@@ -77,7 +77,7 @@ class SvgPaths implements Component
 
     public static function commands(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 120)
             ->setSize(200, 120)

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\MjmlBackendComponents\Builders\MjmlComponentBuilder;
 use Juaniquillo\MjmlBackendComponents\Enums\MjmlComponentEnum;
+use Juaniquillo\MjmlBackendComponents\Factories\MjmlComponentFactory;
 
 test('single quotes pass through toHtml() escaping flag', function () {
-    $component = MjmlComponentBuilder::make(MjmlComponentEnum::IMAGE)
+    $component = MjmlComponentFactory::make(MjmlComponentEnum::IMAGE)
         ->setAttribute('src', "{{ asset('images/hero.jpg') }}");
 
     $html = $component->toHtml();
@@ -16,7 +16,7 @@ test('single quotes pass through toHtml() escaping flag', function () {
 });
 
 test('double quotes and & still escape', function () {
-    $component = MjmlComponentBuilder::make(MjmlComponentEnum::IMAGE)
+    $component = MjmlComponentFactory::make(MjmlComponentEnum::IMAGE)
         ->setAttribute('src', 'https://example.com/?a=1&b="x"');
 
     $html = $component->toHtml();
@@ -31,14 +31,14 @@ test('double quotes and & still escape', function () {
 
 test('enum output sanity checks MJmlComponentEnum string-backed conversion', function () {
     // SECTION → <mj-section>
-    $section = MjmlComponentBuilder::make(MjmlComponentEnum::SECTION);
+    $section = MjmlComponentFactory::make(MjmlComponentEnum::SECTION);
     expect($section->toHtml())->toContain('<mj-section');
 
     // MJML root → <mjml>
-    $root = MjmlComponentBuilder::document([]);
+    $root = MjmlComponentFactory::document([]);
     expect($root->toHtml())->toContain('<mjml');
 
     // NEW: MJML_CLASS → <mj-class>
-    $class = MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS);
+    $class = MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS);
     expect($class->toHtml())->toContain('<mj-class');
 });

@@ -13,7 +13,7 @@ it('generates a builder chain for the root component', function () {
     $tree = BuilderNode::tree('n1', 'div');
 
     expect($this->generator->expression($tree, 'n1'))
-        ->toBe('ComponentBuilder::make(ComponentEnum::DIV)');
+        ->toBe('ComponentFactory::make(ComponentEnum::DIV)');
 });
 
 it('writes a theme as a setThemes call', function () {
@@ -56,7 +56,7 @@ it('keeps the theme files out of the snippet', function () {
     // The files travel in the export, so the component is all a snippet is.
     expect($generator->snippet($tree))
         ->toContain("'action' => 'primary',")
-        ->toContain('LocalThemeComponentBuilder as ComponentBuilder')
+        ->toContain('LocalThemeComponentFactory as ComponentFactory')
         ->not->toContain('resources/views/_themes')
         ->not->toContain("'primary' => 'bg-indigo-600 text-white',");
 });
@@ -71,12 +71,12 @@ it('writes a theme as a file the local manager reads', function () {
         ->toEndWith("];\n");
 });
 
-it('uses the local builder even when there is no theme', function () {
+it('uses the local factory even when there is no theme', function () {
     $tree = BuilderNode::tree('n1', 'div');
 
     $snippet = (new PhpCodeGenerator)->snippet($tree);
 
-    expect($snippet)->toContain('LocalThemeComponentBuilder as ComponentBuilder')
+    expect($snippet)->toContain('LocalThemeComponentFactory as ComponentFactory')
         ->not->toContain('setThemes')
         ->not->toContain('Theme files');
 });
@@ -126,7 +126,7 @@ it('mixes text and components in one setContents', function () {
     $expression = $this->generator->expression($tree, 'n1');
 
     expect($expression)->toContain("'First text',")
-        ->toContain('ComponentBuilder::make(ComponentEnum::LINK)')
+        ->toContain('ComponentFactory::make(ComponentEnum::LINK)')
         ->toContain("' This is a link',")
         ->toContain("'Second Text',")
         ->toContain("'href' => 'https://google.com',");
@@ -143,7 +143,7 @@ it('nests children inside setContents', function () {
     $expression = $this->generator->expression($tree, 'n1');
 
     expect($expression)->toContain('->setContents([')
-        ->toContain('ComponentBuilder::make(ComponentEnum::H1)')
+        ->toContain('ComponentFactory::make(ComponentEnum::H1)')
         ->toContain("'Title',");
 });
 
@@ -154,7 +154,7 @@ it('indents nested children one level deeper', function () {
 
     $lines = explode("\n", $this->generator->expression($tree, 'n1'));
 
-    expect($lines)->toContain('    ComponentBuilder::make(ComponentEnum::H1),');
+    expect($lines)->toContain('    ComponentFactory::make(ComponentEnum::H1),');
 });
 
 it('emits the attributes the user chose', function () {
@@ -199,7 +199,7 @@ it('produces a pasteable snippet with the imports', function () {
 
     $snippet = $this->generator->snippet($tree);
 
-    expect($snippet)->toContain('use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder as ComponentBuilder;')
+    expect($snippet)->toContain('use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory as ComponentFactory;')
         ->toContain('use Juaniquillo\BackendComponents\Enums\ComponentEnum;')
-        ->toContain('$component = ComponentBuilder::make(ComponentEnum::DIV);');
+        ->toContain('$component = ComponentFactory::make(ComponentEnum::DIV);');
 });

@@ -7,7 +7,7 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
 class SvgMedia implements Component
@@ -28,12 +28,12 @@ class SvgMedia implements Component
 
     public static function image(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::IMAGE)
+                SvgComponentFactory::make(SvgComponentEnum::IMAGE)
                     ->setAttribute('href', '/images/mail/yellow-lightning-bolt.png')
                     ->setAttribute('preserveAspectRatio', 'xMidYMid meet')
                     ->setAttributes(['x' => '70', 'y' => '10'])

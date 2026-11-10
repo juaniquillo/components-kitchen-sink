@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Components\Individual\DivComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 it('composes a card component with header and body', function () {
-    $card = ComponentBuilder::make(ComponentEnum::DIV)
+    $card = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('class', 'card')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('class', 'card-header')
                 ->setContent('Card Title'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('class', 'card-body')
                 ->setContent('Card content goes here'),
         ]);
@@ -28,24 +28,24 @@ it('composes a card component with header and body', function () {
 });
 
 it('composes a form with labels and inputs', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('action', '/submit')
         ->setAttribute('method', 'POST')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::LABEL)
+            ComponentFactory::make(ComponentEnum::LABEL)
                 ->setAttribute('for', 'name')
                 ->setContent('Name'),
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('name', 'name')
                 ->setAttribute('type', 'text')
                 ->setAttribute('id', 'name'),
-            ComponentBuilder::make(ComponentEnum::LABEL)
+            ComponentFactory::make(ComponentEnum::LABEL)
                 ->setAttribute('for', 'email')
                 ->setContent('Email'),
-            ComponentBuilder::make(ComponentEnum::EMAIL_INPUT)
+            ComponentFactory::make(ComponentEnum::EMAIL_INPUT)
                 ->setAttribute('name', 'email')
                 ->setAttribute('id', 'email'),
-            ComponentBuilder::make(ComponentEnum::BUTTON)
+            ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setAttribute('type', 'submit')
                 ->setContent('Submit'),
         ]);
@@ -66,16 +66,16 @@ it('composes a form with labels and inputs', function () {
 });
 
 it('composes nested divs for layout', function () {
-    $layout = ComponentBuilder::make(ComponentEnum::DIV)
+    $layout = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('class', 'container')
         ->setContent(
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('class', 'row')
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::DIV)
+                    ComponentFactory::make(ComponentEnum::DIV)
                         ->setAttribute('class', 'col-md-6')
                         ->setContent('Left column'),
-                    ComponentBuilder::make(ComponentEnum::DIV)
+                    ComponentFactory::make(ComponentEnum::DIV)
                         ->setAttribute('class', 'col-md-6')
                         ->setContent('Right column'),
                 ])
@@ -91,27 +91,27 @@ it('composes nested divs for layout', function () {
 });
 
 it('composes a navigation menu', function () {
-    $nav = ComponentBuilder::make(ComponentEnum::DIV)
+    $nav = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('class', 'navbar')
         ->setContent(
-            ComponentBuilder::make(ComponentEnum::UL)
+            ComponentFactory::make(ComponentEnum::UL)
                 ->setAttribute('class', 'nav-list')
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::LI)
+                    ComponentFactory::make(ComponentEnum::LI)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::LINK)
+                            ComponentFactory::make(ComponentEnum::LINK)
                                 ->setAttribute('href', '/')
                                 ->setContent('Home')
                         ),
-                    ComponentBuilder::make(ComponentEnum::LI)
+                    ComponentFactory::make(ComponentEnum::LI)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::LINK)
+                            ComponentFactory::make(ComponentEnum::LINK)
                                 ->setAttribute('href', '/about')
                                 ->setContent('About')
                         ),
-                    ComponentBuilder::make(ComponentEnum::LI)
+                    ComponentFactory::make(ComponentEnum::LI)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::LINK)
+                            ComponentFactory::make(ComponentEnum::LINK)
                                 ->setAttribute('href', '/contact')
                                 ->setContent('Contact')
                         ),
@@ -131,31 +131,31 @@ it('composes a navigation menu', function () {
 });
 
 it('composes a table with header and body', function () {
-    $table = ComponentBuilder::make(ComponentEnum::TABLE)
+    $table = ComponentFactory::make(ComponentEnum::TABLE)
         ->setAttribute('class', 'data-table')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::THEAD)
+            ComponentFactory::make(ComponentEnum::THEAD)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContents([
-                            ComponentBuilder::make(ComponentEnum::TH)->setContent('ID'),
-                            ComponentBuilder::make(ComponentEnum::TH)->setContent('Name'),
-                            ComponentBuilder::make(ComponentEnum::TH)->setContent('Email'),
+                            ComponentFactory::make(ComponentEnum::TH)->setContent('ID'),
+                            ComponentFactory::make(ComponentEnum::TH)->setContent('Name'),
+                            ComponentFactory::make(ComponentEnum::TH)->setContent('Email'),
                         ])
                 ),
-            ComponentBuilder::make(ComponentEnum::TBODY)
+            ComponentFactory::make(ComponentEnum::TBODY)
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContents([
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('1'),
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('John Doe'),
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('john@example.com'),
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('1'),
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('John Doe'),
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('john@example.com'),
                         ]),
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContents([
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('2'),
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('Jane Smith'),
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('jane@example.com'),
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('2'),
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('Jane Smith'),
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('jane@example.com'),
                         ]),
                 ]),
         ]);
@@ -177,13 +177,13 @@ it('composes a table with header and body', function () {
 });
 
 it('composes deeply nested components', function () {
-    $deep = ComponentBuilder::make(ComponentEnum::DIV)
+    $deep = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent(
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::DIV)
+                    ComponentFactory::make(ComponentEnum::DIV)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::SPAN)
+                            ComponentFactory::make(ComponentEnum::SPAN)
                                 ->setContent('Deep content')
                         )
                 )
@@ -197,11 +197,11 @@ it('composes deeply nested components', function () {
 });
 
 it('composes component with mixed content types', function () {
-    $mixed = ComponentBuilder::make(ComponentEnum::DIV)
+    $mixed = ComponentFactory::make(ComponentEnum::DIV)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::H1)->setContent('Title'),
-            ComponentBuilder::make(ComponentEnum::PARAGRAPH)->setContent('Some text'),
-            ComponentBuilder::make(ComponentEnum::BUTTON)->setContent('Click me'),
+            ComponentFactory::make(ComponentEnum::H1)->setContent('Title'),
+            ComponentFactory::make(ComponentEnum::PARAGRAPH)->setContent('Some text'),
+            ComponentFactory::make(ComponentEnum::BUTTON)->setContent('Click me'),
         ]);
 
     $html = (string) $this->blade('{{ $mixed }}', ['mixed' => $mixed]);
@@ -215,22 +215,22 @@ it('composes component with mixed content types', function () {
 });
 
 it('composes a dialog with modal content', function () {
-    $dialog = ComponentBuilder::make(ComponentEnum::DIALOG)
+    $dialog = ComponentFactory::make(ComponentEnum::DIALOG)
         ->setAttribute('id', 'myModal')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('class', 'modal-header')
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::H2)
+                    ComponentFactory::make(ComponentEnum::H2)
                         ->setContent('Modal Title')
                 ),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('class', 'modal-body')
                 ->setContent('Modal content here'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('class', 'modal-footer')
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::BUTTON)
+                    ComponentFactory::make(ComponentEnum::BUTTON)
                         ->setContent('Close')
                 ),
         ]);
@@ -265,20 +265,20 @@ it('composes using DivComponent helper', function () {
 });
 
 it('composes fieldset with legend and inputs', function () {
-    $fieldset = ComponentBuilder::make(ComponentEnum::FIELDSET)
+    $fieldset = ComponentFactory::make(ComponentEnum::FIELDSET)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::LEGEND)
+            ComponentFactory::make(ComponentEnum::LEGEND)
                 ->setContent('Personal Information'),
-            ComponentBuilder::make(ComponentEnum::LABEL)
+            ComponentFactory::make(ComponentEnum::LABEL)
                 ->setAttribute('for', 'firstname')
                 ->setContent('First Name'),
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('name', 'firstname')
                 ->setAttribute('id', 'firstname'),
-            ComponentBuilder::make(ComponentEnum::LABEL)
+            ComponentFactory::make(ComponentEnum::LABEL)
                 ->setAttribute('for', 'lastname')
                 ->setContent('Last Name'),
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('name', 'lastname')
                 ->setAttribute('id', 'lastname'),
         ]);

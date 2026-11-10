@@ -42,18 +42,18 @@ Nest with `setContents()`. Element attributes (`viewBox`, `d`, `fill`, `r`, …)
 Fluent factories when preferred over `new`:
 
 ```php
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
-use Juaniquillo\SvgBackendComponents\Builders\SvgLocalThemeComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
+use Juaniquillo\SvgBackendComponents\Factories\SvgLocalThemeComponentFactory;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
 // Root helpers instead of raw strings:
-$icon = SvgComponentBuilder::make(SvgComponentEnum::SVG)
+$icon = SvgComponentFactory::make(SvgComponentEnum::SVG)
     ->setXmlns()
     ->setViewBox(0, 0, 24, 24)
     ->setSize(24); // square; setSize(200, 100) for rectangles
 
 // Aliases for common presentation attributes:
-$rect = SvgComponentBuilder::make(SvgComponentEnum::RECT)
+$rect = SvgComponentFactory::make(SvgComponentEnum::RECT)
     ->setFill('#3b82f6')
     ->setStroke('#111827')
     ->setStrokeWidth(2)
@@ -73,7 +73,7 @@ $path = SvgShape::path(
 
 // Resolves themes from the app's resources/views/_themes/tailwind/ instead of package defaults.
 // Group names are app-defined; this app paints SVG through its `fill` group.
-$themed = SvgLocalThemeComponentBuilder::make(SvgComponentEnum::PATH)
+$themed = SvgLocalThemeComponentFactory::make(SvgComponentEnum::PATH)
     ->setTheme('fill', 'muted');
 ```
 
@@ -82,7 +82,7 @@ $themed = SvgLocalThemeComponentBuilder::make(SvgComponentEnum::PATH)
 Apply Tailwind variants with `setTheme()` / `setThemes()`. Theme files live in the app's `resources/views/_themes/tailwind/` (one Blade file per group returning a variant array). See [theming in the engine docs](https://github.com/juaniquillo/backend-component-docs/blob/main/05-theming.md) for the file format:
 
 ```php
-$path = SvgComponentBuilder::make(SvgComponentEnum::PATH)
+$path = SvgComponentFactory::make(SvgComponentEnum::PATH)
     ->setTheme('fill', 'muted');
 ```
 
@@ -102,6 +102,6 @@ SvgRenderer::make($component)->saveTo('path/to/icon.svg');
 
 - Always use `SvgComponentEnum` cases, never raw element name strings.
 - Attributes are scalar (`setAttribute()` / `setAttributes()`); nested elements go through `setContent()` / `setContents()`.
-- Prefer `SvgShape` presets for rect/circle/ellipse/line/polyline/polygon/path over `SvgComponentBuilder::make()` + raw geometry.
+- Prefer `SvgShape` presets for rect/circle/ellipse/line/polyline/polygon/path over `SvgComponentFactory::make()` + raw geometry.
 - Prefer `SvgPath` command methods over hand-written `d` strings; use `raw()` only for anything the builder lacks.
 - Prefer presentation aliases (`setFill()`, `setStroke()`, `setStrokeWidth()`, `setOpacity()`) over raw `setAttribute()` for those names.

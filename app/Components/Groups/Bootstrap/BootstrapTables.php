@@ -6,10 +6,10 @@ namespace App\Components\Groups\Bootstrap;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Utils\CellBag;
 
 class BootstrapTables implements Component
@@ -39,7 +39,7 @@ class BootstrapTables implements Component
     /** @param array<int|string, BackendComponent> $contents */
     public static function container(array $contents): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::DIV)
+        return ComponentFactory::make(ComponentEnum::DIV)
             ->setContents($contents);
     }
 
@@ -117,14 +117,14 @@ class BootstrapTables implements Component
 
     public static function withActions(): CompoundComponent
     {
-        $editButton = ComponentBuilder::make(ComponentEnum::BUTTON)
+        $editButton = ComponentFactory::make(ComponentEnum::BUTTON)
             ->setContent('Edit')
             ->setAttributes([
                 'class' => 'btn btn-sm btn-outline-primary',
                 'type' => 'button',
             ]);
 
-        $deleteButton = ComponentBuilder::make(ComponentEnum::BUTTON)
+        $deleteButton = ComponentFactory::make(ComponentEnum::BUTTON)
             ->setContent('Delete')
             ->setAttributes([
                 'class' => 'btn btn-sm btn-outline-danger',
@@ -138,14 +138,14 @@ class BootstrapTables implements Component
                 [
                     'Alice',
                     'alice@example.com',
-                    ComponentBuilder::make(ComponentEnum::DIV)
+                    ComponentFactory::make(ComponentEnum::DIV)
                         ->setAttribute('class', 'd-flex gap-1')
                         ->setContents([$editButton, $deleteButton]),
                 ],
                 [
                     'Bob',
                     'bob@example.com',
-                    ComponentBuilder::make(ComponentEnum::DIV)
+                    ComponentFactory::make(ComponentEnum::DIV)
                         ->setAttribute('class', 'd-flex gap-1')
                         ->setContents([$editButton, $deleteButton]),
                 ],
@@ -181,7 +181,7 @@ class BootstrapTables implements Component
         if ($caption !== null) {
             $captionContent = self::resolveContent($caption);
             $captionAttrs = self::resolveAttributes($caption);
-            $tableContents[] = ComponentBuilder::make(ComponentEnum::CAPTION)
+            $tableContents[] = ComponentFactory::make(ComponentEnum::CAPTION)
                 ->setContent($captionContent)
                 ->setAttributes($captionAttrs);
         }
@@ -190,14 +190,14 @@ class BootstrapTables implements Component
         foreach ($head as $value) {
             $content = is_array($value) ? ($value['content'] ?? '') : $value;
             $attrs = is_array($value) ? ($value['attributes'] ?? []) : [];
-            $thCells[] = ComponentBuilder::make(ComponentEnum::TH)
+            $thCells[] = ComponentFactory::make(ComponentEnum::TH)
                 ->setContent($content)
                 ->setAttributes($attrs);
         }
 
-        $tableContents[] = ComponentBuilder::make(ComponentEnum::THEAD)
+        $tableContents[] = ComponentFactory::make(ComponentEnum::THEAD)
             ->setContents([
-                ComponentBuilder::make(ComponentEnum::TR)
+                ComponentFactory::make(ComponentEnum::TR)
                     ->setContents($thCells),
             ]);
 
@@ -207,18 +207,18 @@ class BootstrapTables implements Component
             foreach ($row as $value) {
                 $content = self::resolveContent($value);
                 $attrs = self::resolveAttributes($value);
-                $tdCells[] = ComponentBuilder::make(ComponentEnum::TD)
+                $tdCells[] = ComponentFactory::make(ComponentEnum::TD)
                     ->setContent($content)
                     ->setAttributes($attrs);
             }
-            $rows[] = ComponentBuilder::make(ComponentEnum::TR)
+            $rows[] = ComponentFactory::make(ComponentEnum::TR)
                 ->setContents($tdCells);
         }
 
-        $tableContents[] = ComponentBuilder::make(ComponentEnum::TBODY)
+        $tableContents[] = ComponentFactory::make(ComponentEnum::TBODY)
             ->setContents($rows);
 
-        return ComponentBuilder::make(ComponentEnum::TABLE)
+        return ComponentFactory::make(ComponentEnum::TABLE)
             ->setAttribute('class', $class)
             ->setContents($tableContents);
     }

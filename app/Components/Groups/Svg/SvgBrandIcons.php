@@ -7,8 +7,8 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
-use Juaniquillo\SvgBackendComponents\Builders\SvgLocalThemeComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
+use Juaniquillo\SvgBackendComponents\Factories\SvgLocalThemeComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
@@ -53,7 +53,7 @@ class SvgBrandIcons implements Component
      */
     public static function monoIcon(string $label, string $d): BackendComponent
     {
-        return SvgLocalThemeComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgLocalThemeComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 24, 24)
             ->setSize(40)
@@ -66,7 +66,7 @@ class SvgBrandIcons implements Component
 
     public static function coloredIcon(string $label, string $d, string $fill): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 24, 24)
             ->setSize(40)
@@ -78,24 +78,24 @@ class SvgBrandIcons implements Component
 
     public static function instagram(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 24, 24)
             ->setSize(40)
             ->setAttributes(['role' => 'img', 'aria-label' => 'Instagram'])
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                SvgComponentFactory::make(SvgComponentEnum::DEFS)
                     ->setContents([
-                        SvgComponentBuilder::make(SvgComponentEnum::LINEAR_GRADIENT)
+                        SvgComponentFactory::make(SvgComponentEnum::LINEAR_GRADIENT)
                             ->setAttributes(['id' => 'instagram-gradient', 'x1' => '0', 'y1' => '1', 'x2' => '1', 'y2' => '0'])
                             ->setContents([
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '0%', 'stop-color' => '#feda75']),
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '35%', 'stop-color' => '#fa7e1e']),
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '65%', 'stop-color' => '#d62976']),
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '100%', 'stop-color' => '#962fbf']),
                             ]),
                     ]),

@@ -6,9 +6,9 @@ namespace App\Components\Groups;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Utils\ModalUtil;
 
 class MainPackage implements Component
@@ -40,16 +40,16 @@ class MainPackage implements Component
     public static function basic(): BackendComponent
     {
         return ModalUtil::make(
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setContents([
-                    ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+                    ComponentFactory::make(ComponentEnum::PARAGRAPH)
                         ->setContent('This is the modal content area.'),
-                    ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+                    ComponentFactory::make(ComponentEnum::PARAGRAPH)
                         ->setContent('You can put any content here, including forms, images, etc.'),
                 ])
                 ->setTheme('padding', 'md')
                 ->setTheme('border', 'solid'),
-            ComponentBuilder::make(ComponentEnum::BUTTON)
+            ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setTheme('color', 'light')
                 ->setContent('Simple Modal')
                 ->setAttribute('type', 'button')
@@ -70,10 +70,10 @@ class MainPackage implements Component
     public static function withHeaderAndFooter(): BackendComponent
     {
         return ModalUtil::make(
-            content: ComponentBuilder::make(ComponentEnum::DIV)
+            content: ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent('This is the modal content area.')
                 ->setTheme('padding', 'sm'),
-            button: ComponentBuilder::make(ComponentEnum::BUTTON)
+            button: ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setTheme('color', 'light')
                 ->setContent('With Header and Footer')
                 ->setAttribute('type', 'button')
@@ -81,16 +81,16 @@ class MainPackage implements Component
                 ->setTheme('action', 'info')
                 ->setTheme('padding', 'button-compact')
                 ->setTheme('border-radius', 'sm'),
-            title: ComponentBuilder::make(ComponentEnum::DIV)
+            title: ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent('Modal Header')
                 ->setTheme('background', 'info')
                 ->setTheme('padding', 'xs'),
-            footer: ComponentBuilder::make(ComponentEnum::DIV)
+            footer: ComponentFactory::make(ComponentEnum::DIV)
                 ->setTheme('background', 'secondary')
                 ->setTheme('padding', 'xs')
                 ->setTheme('text', 'right')
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::BUTTON)
+                    ComponentFactory::make(ComponentEnum::BUTTON)
                         ->setTheme('color', 'light')
                         ->setContent('Close')
                         ->setAttribute('type', 'button')
@@ -112,9 +112,9 @@ class MainPackage implements Component
 
     public static function dialog(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::COLLECTION)
+        return ComponentFactory::make(ComponentEnum::COLLECTION)
             ->setContent(
-                ComponentBuilder::make(ComponentEnum::BUTTON)
+                ComponentFactory::make(ComponentEnum::BUTTON)
                     ->setContent('Dialog HTML Tag')
                     ->setTheme('action', 'default')
                     ->setTheme('padding', 'button-compact')
@@ -128,14 +128,14 @@ class MainPackage implements Component
 
             )
             ->setContent(
-                ComponentBuilder::make(ComponentEnum::DIALOG)
+                ComponentFactory::make(ComponentEnum::DIALOG)
                     ->setAttribute('id', 'my-dialog-1')
                     ->setTheme('modal', [
                         'default',
                         'lg',
                     ])
                     ->setContent(
-                        ComponentBuilder::make(ComponentEnum::DIV)
+                        ComponentFactory::make(ComponentEnum::DIV)
                             ->setTheme('padding', [
                                 'top-sm',
                                 'bottom-sm',
@@ -143,10 +143,10 @@ class MainPackage implements Component
                                 'left-md',
                             ])
                             ->setContents([
-                                ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+                                ComponentFactory::make(ComponentEnum::PARAGRAPH)
                                     ->setTheme('margin', 'bottom-sm')
                                     ->setContent('This is a dialog HTML tag. You can put any content here, including forms, images, etc.'),
-                                ComponentBuilder::make(ComponentEnum::BUTTON)
+                                ComponentFactory::make(ComponentEnum::BUTTON)
                                     ->setContent('Close')
                                     ->setTheme('action', 'default')
                                     ->setTheme('padding', 'button-compact')

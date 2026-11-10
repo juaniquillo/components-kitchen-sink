@@ -6,12 +6,12 @@ namespace App\Components\Builders;
 
 use Illuminate\Contracts\Support\Htmlable;
 use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
-use Juaniquillo\BackendComponents\Contracts\StaticBuilder;
+use Juaniquillo\BackendComponents\Contracts\StaticFactory;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\BackendComponents\Themes\LocalThemeManager;
 
-final class FormGroupWebComponentBuilder implements StaticBuilder
+final class FormGroupWebComponentBuilder implements StaticFactory
 {
     public static function make(string|ComponentEnum $name): Htmlable|CompoundComponent
     {

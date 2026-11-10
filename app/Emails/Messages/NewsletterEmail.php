@@ -7,8 +7,8 @@ namespace App\Emails\Messages;
 use App\Emails\Contracts\EmailInterface;
 use App\Mail\SendNewsletterEmail;
 use Illuminate\Contracts\Mail\Mailable;
-use Juaniquillo\MjmlBackendComponents\Builders\MjmlComponentBuilder;
 use Juaniquillo\MjmlBackendComponents\Enums\MjmlComponentEnum;
+use Juaniquillo\MjmlBackendComponents\Factories\MjmlComponentFactory;
 use Juaniquillo\MjmlBackendComponents\MjmlBackendComponent;
 
 class NewsletterEmail implements EmailInterface
@@ -31,15 +31,15 @@ class NewsletterEmail implements EmailInterface
 
     public static function build(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::document([
-            MjmlComponentBuilder::head([
-                MjmlComponentBuilder::make(MjmlComponentEnum::TITLE)
+        return MjmlComponentFactory::document([
+            MjmlComponentFactory::head([
+                MjmlComponentFactory::make(MjmlComponentEnum::TITLE)
                     ->setContent('The Workbench — Issue 42'),
-                MjmlComponentBuilder::preview('Issue 42: three small changes that survive a busy week.'),
-                MjmlComponentBuilder::font('Inter', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'),
+                MjmlComponentFactory::preview('Issue 42: three small changes that survive a busy week.'),
+                MjmlComponentFactory::font('Inter', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'),
                 self::globalAttributes(),
             ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::BODY)
+            MjmlComponentFactory::make(MjmlComponentEnum::BODY)
                 ->setAttributes([
                     'background-color' => '#eef2f7',
                     'width' => '600px',
@@ -73,16 +73,16 @@ class NewsletterEmail implements EmailInterface
 
     private static function column(array $contents, array $attributes = []): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::make(MjmlComponentEnum::COLUMN)
+        return MjmlComponentFactory::make(MjmlComponentEnum::COLUMN)
             ->setAttributes($attributes)
             ->setContents($contents);
     }
 
     private static function masthead(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::make(MjmlComponentEnum::IMAGE)
+                MjmlComponentFactory::make(MjmlComponentEnum::IMAGE)
                     ->setAttributes([
                         'src' => "{{ asset('images/mail/yellow-lightning-bolt.png') }}",
                         'alt' => 'The Workbench',
@@ -91,7 +91,7 @@ class NewsletterEmail implements EmailInterface
                         'align' => 'center',
                         'padding' => '0 24px 4px',
                     ]),
-                MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER),
+                MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER),
             ]),
         ], [
             'background-color' => '#ffffff',
@@ -101,22 +101,22 @@ class NewsletterEmail implements EmailInterface
 
     private static function hero(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::text('Hi <strong>{{ $name }}</strong>,', [
+                MjmlComponentFactory::text('Hi <strong>{{ $name }}</strong>,', [
                     'align' => 'center',
                     'font-size' => '17px',
                 ]),
-                MjmlComponentBuilder::text('Desk ergonomics that actually stick', [
+                MjmlComponentFactory::text('Desk ergonomics that actually stick', [
                     'mj-class' => 'h1',
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::text('Most ergonomics advice fails because it asks you to remember something. The three changes below work because they are physical defaults — once set, they hold without any effort from you.', [
+                MjmlComponentFactory::text('Most ergonomics advice fails because it asks you to remember something. The three changes below work because they are physical defaults — once set, they hold without any effort from you.', [
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::make(MjmlComponentEnum::SPACER)
+                MjmlComponentFactory::make(MjmlComponentEnum::SPACER)
                     ->setAttribute('height', '8px'),
-                MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+                MjmlComponentFactory::make(MjmlComponentEnum::BUTTON)
                     ->setAttributes([
                         'href' => 'https://example.com/newsletter/issue-42',
                         'align' => 'center',
@@ -131,9 +131,9 @@ class NewsletterEmail implements EmailInterface
 
     private static function story(string $heading, string $body, string $imageAlt): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::make(MjmlComponentEnum::IMAGE)
+                MjmlComponentFactory::make(MjmlComponentEnum::IMAGE)
                     ->setAttributes([
                         'src' => "{{ asset('images/mail/newsletter.jpg') }}",
                         'alt' => $imageAlt,
@@ -146,11 +146,11 @@ class NewsletterEmail implements EmailInterface
                 'vertical-align' => 'top',
             ]),
             self::column([
-                MjmlComponentBuilder::text($heading, [
+                MjmlComponentFactory::text($heading, [
                     'mj-class' => 'h2',
                     'padding' => '8px 24px 0',
                 ]),
-                MjmlComponentBuilder::text($body, [
+                MjmlComponentFactory::text($body, [
                     'padding' => '0 24px 8px',
                 ]),
             ], [
@@ -165,18 +165,18 @@ class NewsletterEmail implements EmailInterface
 
     private static function ctaBand(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::text('Get the checklist', [
+                MjmlComponentFactory::text('Get the checklist', [
                     'mj-class' => 'h2',
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::text('All three setups on one printable page — tape it to the side of your monitor.', [
+                MjmlComponentFactory::text('All three setups on one printable page — tape it to the side of your monitor.', [
                     'align' => 'center',
                 ]),
-                MjmlComponentBuilder::make(MjmlComponentEnum::SPACER)
+                MjmlComponentFactory::make(MjmlComponentEnum::SPACER)
                     ->setAttribute('height', '8px'),
-                MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+                MjmlComponentFactory::make(MjmlComponentEnum::BUTTON)
                     ->setAttributes([
                         'href' => 'https://example.com/newsletter/checklist',
                         'align' => 'center',
@@ -191,10 +191,10 @@ class NewsletterEmail implements EmailInterface
 
     private static function footer(): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::section([
+        return MjmlComponentFactory::section([
             self::column([
-                MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER),
-                MjmlComponentBuilder::text('You are receiving this because you subscribed at example.com. <a href="https://example.com/unsubscribe" style="color:#64748b;">Unsubscribe</a>', [
+                MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER),
+                MjmlComponentFactory::text('You are receiving this because you subscribed at example.com. <a href="https://example.com/unsubscribe" style="color:#64748b;">Unsubscribe</a>', [
                     'mj-class' => 'meta',
                     'align' => 'center',
                 ]),
@@ -207,19 +207,19 @@ class NewsletterEmail implements EmailInterface
 
     private static function globalAttributes(string $buttonColor = '#4f46e5'): MjmlBackendComponent
     {
-        return MjmlComponentBuilder::attributes([
-            MjmlComponentBuilder::make(MjmlComponentEnum::ALL)
+        return MjmlComponentFactory::attributes([
+            MjmlComponentFactory::make(MjmlComponentEnum::ALL)
                 ->setAttributes([
                     'font-family' => 'Inter, Arial, sans-serif',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::TEXT)
+            MjmlComponentFactory::make(MjmlComponentEnum::TEXT)
                 ->setAttributes([
                     'color' => '#334155',
                     'font-size' => '15px',
                     'line-height' => '24px',
                     'padding' => '8px 24px',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::BUTTON)
+            MjmlComponentFactory::make(MjmlComponentEnum::BUTTON)
                 ->setAttributes([
                     'background-color' => $buttonColor,
                     'color' => '#ffffff',
@@ -228,13 +228,13 @@ class NewsletterEmail implements EmailInterface
                     'border-radius' => '8px',
                     'inner-padding' => '12px 28px',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::DIVIDER)
+            MjmlComponentFactory::make(MjmlComponentEnum::DIVIDER)
                 ->setAttributes([
                     'border-color' => '#e2e8f0',
                     'border-width' => '1px',
                     'padding' => '16px 24px',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+            MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS)
                 ->setAttributes([
                     'name' => 'h1',
                     'font-size' => '26px',
@@ -242,7 +242,7 @@ class NewsletterEmail implements EmailInterface
                     'font-weight' => '700',
                     'color' => '#0f172a',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+            MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS)
                 ->setAttributes([
                     'name' => 'h2',
                     'font-size' => '19px',
@@ -250,7 +250,7 @@ class NewsletterEmail implements EmailInterface
                     'font-weight' => '700',
                     'color' => '#0f172a',
                 ]),
-            MjmlComponentBuilder::make(MjmlComponentEnum::MJML_CLASS)
+            MjmlComponentFactory::make(MjmlComponentEnum::MJML_CLASS)
                 ->setAttributes([
                     'name' => 'meta',
                     'font-size' => '12px',

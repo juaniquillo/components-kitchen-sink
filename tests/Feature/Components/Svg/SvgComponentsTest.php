@@ -9,7 +9,7 @@ use App\Components\Groups\Svg\SvgPaint;
 use App\Components\Groups\Svg\SvgPaths;
 use App\Components\Groups\Svg\SvgReuse;
 use App\Components\Groups\Svg\SvgThemedIcons;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 use Juaniquillo\SvgBackendComponents\SvgRenderer;
@@ -170,7 +170,7 @@ it('exports a standalone document, adding xmlns when the root lacks it', functio
     $path = storage_path('framework/testing/svg/showcase.svg');
     @unlink($path);
 
-    $bare = SvgComponentBuilder::make(SvgComponentEnum::SVG)
+    $bare = SvgComponentFactory::make(SvgComponentEnum::SVG)
         ->setViewBox(0, 0, 10, 10)
         ->setSize(10)
         ->setContent(SvgShape::circle(5, 5, 4));

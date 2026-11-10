@@ -6,12 +6,12 @@ namespace App\Components\Groups\Flux;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\LocalThemeComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 use Juaniquillo\BackendComponents\Utils\CellBag;
-use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
-use Juaniquillo\FluxBackendComponents\Builders\FluxLocalThemeComponentBuilder;
+use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
+use Juaniquillo\FluxBackendComponents\Factories\FluxLocalThemeComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 use Juaniquillo\FluxBackendComponents\Utils\FluxUITableUtil;
 
@@ -56,14 +56,14 @@ class FluxUITables implements Component
     /** @param array<int|string, BackendComponent> $contents */
     public static function container(array $contents): BackendComponent
     {
-        return LocalThemeComponentBuilder::make(ComponentEnum::DIV)
+        return LocalThemeComponentFactory::make(ComponentEnum::DIV)
             ->setContents($contents)
             ->setTheme('table', 'container');
     }
 
     public static function badge(string $content, string $color = 'lime'): BackendComponent
     {
-        return FluxComponentBuilder::make(FluxComponentEnum::BADGE)
+        return FluxComponentFactory::make(FluxComponentEnum::BADGE)
             ->setContent($content)
             ->setAttribute('color', $color)
             ->setAttribute('size', 'sm');
@@ -115,13 +115,13 @@ class FluxUITables implements Component
 
     public static function withActions(): BackendComponent
     {
-        $editButton = FluxLocalThemeComponentBuilder::make(FluxComponentEnum::BUTTON)
+        $editButton = FluxLocalThemeComponentFactory::make(FluxComponentEnum::BUTTON)
             ->setAttribute('variant', 'ghost')
             ->setAttribute('size', 'sm')
             ->setAttribute('type', 'button')
             ->setContent('Edit');
 
-        $deleteButton = FluxLocalThemeComponentBuilder::make(FluxComponentEnum::BUTTON)
+        $deleteButton = FluxLocalThemeComponentFactory::make(FluxComponentEnum::BUTTON)
             ->setAttribute('variant', 'danger')
             ->setAttribute('size', 'sm')
             ->setAttribute('type', 'button')
@@ -134,7 +134,7 @@ class FluxUITables implements Component
                     'Alice',
                     'alice@example.com',
                     new CellBag(
-                        content: LocalThemeComponentBuilder::make(ComponentEnum::COLLECTION)
+                        content: LocalThemeComponentFactory::make(ComponentEnum::COLLECTION)
                             ->setContents([$editButton, $deleteButton]),
                     ),
                 ],
@@ -142,7 +142,7 @@ class FluxUITables implements Component
                     'Bob',
                     'bob@example.com',
                     new CellBag(
-                        content: LocalThemeComponentBuilder::make(ComponentEnum::COLLECTION)
+                        content: LocalThemeComponentFactory::make(ComponentEnum::COLLECTION)
                             ->setContents([$editButton, $deleteButton])
                     ),
                 ],

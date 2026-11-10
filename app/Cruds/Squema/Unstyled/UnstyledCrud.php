@@ -8,9 +8,9 @@ use App\Cruds\Concerns\IsCrud;
 use App\Cruds\Contracts\Crud;
 use App\Cruds\Squema\Unstyled\Inputs\EmailFactory;
 use App\Cruds\Squema\Unstyled\Inputs\NameFactory;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
 use Juaniquillo\InputComponentAction\Bags\DefaultThemeBag;
@@ -53,12 +53,12 @@ class UnstyledCrud implements Crud
         /** @var InputComponentOutput $output */
         $inputs = $output->inputs;
 
-        $form = ComponentBuilder::make(ComponentEnum::FORM)
+        $form = ComponentFactory::make(ComponentEnum::FORM)
             ->setContents($inputs->toArray())
             ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER]).'#'.self::IDENTIFIER)
             ->setAttribute('enctype', 'multipart/form-data')
             ->setContent(
-                ComponentBuilder::make(ComponentEnum::BUTTON)
+                ComponentFactory::make(ComponentEnum::BUTTON)
                     ->setContent('Send')
             );
 

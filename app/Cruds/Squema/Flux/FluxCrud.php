@@ -10,13 +10,13 @@ use App\Cruds\Squema\Flux\Inputs\FluxEmailFactory;
 use App\Cruds\Squema\Flux\Inputs\FluxNameFactory;
 use App\Cruds\Squema\Flux\Inputs\FluxYearFactory;
 use BackedEnum;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
-use Juaniquillo\FluxBackendComponents\Builders\FluxComponentBuilder;
+use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxBackendComponent;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 use Juaniquillo\InputComponentAction\Bags\DefaultComponentBag;
@@ -75,7 +75,7 @@ class FluxCrud implements Crud
         $inputs = $output->inputs;
         $meta = $output->meta;
 
-        return ComponentBuilder::make(ComponentEnum::FORM)
+        return ComponentFactory::make(ComponentEnum::FORM)
             ->setContents($inputs->toArray())
             ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER]).'#'.self::IDENTIFIER)
             ->setAttribute('enctype', 'multipart/form-data')
@@ -86,12 +86,12 @@ class FluxCrud implements Crud
                 ],
             ])
             ->setContent(
-                ComponentBuilder::make(ComponentEnum::DIV)
+                ComponentFactory::make(ComponentEnum::DIV)
                     ->setContent(
-                        ComponentBuilder::make(ComponentEnum::DIV)
+                        ComponentFactory::make(ComponentEnum::DIV)
                             ->setTheme('margin', 'top-sm')
                             ->setContent(
-                                FluxComponentBuilder::make('button')
+                                FluxComponentFactory::make('button')
                                     ->setContent('Send')
                                     ->setAttribute('type', 'submit')
                                     ->setAttribute('variant', 'primary')

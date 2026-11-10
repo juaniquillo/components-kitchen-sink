@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 it('renders a button component', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click me');
 
     $html = (string) $this->blade('{{ $button }}', ['button' => $button]);
@@ -17,7 +17,7 @@ it('renders a button component', function () {
 });
 
 it('renders a div component with content', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Hello World');
 
     $html = (string) $this->blade('{{ $div }}', ['div' => $div]);
@@ -28,7 +28,7 @@ it('renders a div component with content', function () {
 });
 
 it('renders a paragraph component', function () {
-    $paragraph = ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+    $paragraph = ComponentFactory::make(ComponentEnum::PARAGRAPH)
         ->setContent('This is a paragraph');
 
     $html = (string) $this->blade('{{ $paragraph }}', ['paragraph' => $paragraph]);
@@ -39,7 +39,7 @@ it('renders a paragraph component', function () {
 });
 
 it('renders a heading component', function () {
-    $h1 = ComponentBuilder::make(ComponentEnum::H1)
+    $h1 = ComponentFactory::make(ComponentEnum::H1)
         ->setContent('Main Title');
 
     $html = (string) $this->blade('{{ $h1 }}', ['h1' => $h1]);
@@ -50,7 +50,7 @@ it('renders a heading component', function () {
 });
 
 it('renders a span component', function () {
-    $span = ComponentBuilder::make(ComponentEnum::SPAN)
+    $span = ComponentFactory::make(ComponentEnum::SPAN)
         ->setContent('Inline text');
 
     $html = (string) $this->blade('{{ $span }}', ['span' => $span]);
@@ -61,7 +61,7 @@ it('renders a span component', function () {
 });
 
 it('renders a link component', function () {
-    $link = ComponentBuilder::make(ComponentEnum::LINK)
+    $link = ComponentFactory::make(ComponentEnum::LINK)
         ->setContent('Click here')
         ->setAttribute('href', 'https://example.com');
 
@@ -74,7 +74,7 @@ it('renders a link component', function () {
 });
 
 it('renders an image component', function () {
-    $img = ComponentBuilder::make(ComponentEnum::IMG)
+    $img = ComponentFactory::make(ComponentEnum::IMG)
         ->setAttribute('src', 'image.jpg')
         ->setAttribute('alt', 'Test image');
 
@@ -87,7 +87,7 @@ it('renders an image component', function () {
 });
 
 it('renders a bold component', function () {
-    $bold = ComponentBuilder::make(ComponentEnum::BOLD)
+    $bold = ComponentFactory::make(ComponentEnum::BOLD)
         ->setContent('Bold text');
 
     $html = (string) $this->blade('{{ $bold }}', ['bold' => $bold]);
@@ -98,7 +98,7 @@ it('renders a bold component', function () {
 });
 
 it('renders an italic component', function () {
-    $italic = ComponentBuilder::make(ComponentEnum::ITALIC)
+    $italic = ComponentFactory::make(ComponentEnum::ITALIC)
         ->setContent('Italic text');
 
     $html = (string) $this->blade('{{ $italic }}', ['italic' => $italic]);
@@ -109,7 +109,7 @@ it('renders an italic component', function () {
 });
 
 it('renders a small component', function () {
-    $small = ComponentBuilder::make(ComponentEnum::SMALL)
+    $small = ComponentFactory::make(ComponentEnum::SMALL)
         ->setContent('Small text');
 
     $html = (string) $this->blade('{{ $small }}', ['small' => $small]);
@@ -120,7 +120,7 @@ it('renders a small component', function () {
 });
 
 it('renders a text input component', function () {
-    $input = ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+    $input = ComponentFactory::make(ComponentEnum::TEXT_INPUT)
         ->setAttribute('name', 'username')
         ->setAttribute('type', 'text');
 
@@ -133,7 +133,7 @@ it('renders a text input component', function () {
 });
 
 it('renders a textarea component', function () {
-    $textarea = ComponentBuilder::make(ComponentEnum::TEXTAREA)
+    $textarea = ComponentFactory::make(ComponentEnum::TEXTAREA)
         ->setAttribute('name', 'message')
         ->setContent('Default text');
 
@@ -146,7 +146,7 @@ it('renders a textarea component', function () {
 });
 
 it('renders a select component', function () {
-    $select = ComponentBuilder::make(ComponentEnum::SELECT)
+    $select = ComponentFactory::make(ComponentEnum::SELECT)
         ->setAttribute('name', 'choice');
 
     $html = (string) $this->blade('{{ $select }}', ['select' => $select]);
@@ -157,7 +157,7 @@ it('renders a select component', function () {
 });
 
 it('renders a checkbox input', function () {
-    $checkbox = ComponentBuilder::make(ComponentEnum::CHECKBOX_INPUT)
+    $checkbox = ComponentFactory::make(ComponentEnum::CHECKBOX_INPUT)
         ->setAttribute('name', 'agree')
         ->setAttribute('value', '1');
 
@@ -170,7 +170,7 @@ it('renders a checkbox input', function () {
 });
 
 it('renders a radio input', function () {
-    $radio = ComponentBuilder::make(ComponentEnum::RADIO_INPUT)
+    $radio = ComponentFactory::make(ComponentEnum::RADIO_INPUT)
         ->setAttribute('name', 'option')
         ->setAttribute('value', 'yes');
 
@@ -183,7 +183,7 @@ it('renders a radio input', function () {
 });
 
 it('renders a form component', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('action', '/submit')
         ->setAttribute('method', 'POST');
 
@@ -196,10 +196,10 @@ it('renders a form component', function () {
 });
 
 it('renders an unordered list', function () {
-    $ul = ComponentBuilder::make(ComponentEnum::UL)
+    $ul = ComponentFactory::make(ComponentEnum::UL)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::LI)->setContent('Item 1'),
-            ComponentBuilder::make(ComponentEnum::LI)->setContent('Item 2'),
+            ComponentFactory::make(ComponentEnum::LI)->setContent('Item 1'),
+            ComponentFactory::make(ComponentEnum::LI)->setContent('Item 2'),
         ]);
 
     $html = (string) $this->blade('{{ $ul }}', ['ul' => $ul]);
@@ -212,10 +212,10 @@ it('renders an unordered list', function () {
 });
 
 it('renders an ordered list', function () {
-    $ol = ComponentBuilder::make(ComponentEnum::OL)
+    $ol = ComponentFactory::make(ComponentEnum::OL)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::LI)->setContent('First'),
-            ComponentBuilder::make(ComponentEnum::LI)->setContent('Second'),
+            ComponentFactory::make(ComponentEnum::LI)->setContent('First'),
+            ComponentFactory::make(ComponentEnum::LI)->setContent('Second'),
         ]);
 
     $html = (string) $this->blade('{{ $ol }}', ['ol' => $ol]);
@@ -228,20 +228,20 @@ it('renders an ordered list', function () {
 });
 
 it('renders a table component', function () {
-    $table = ComponentBuilder::make(ComponentEnum::TABLE)
+    $table = ComponentFactory::make(ComponentEnum::TABLE)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::THEAD)
+            ComponentFactory::make(ComponentEnum::THEAD)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::TH)->setContent('Name')
+                            ComponentFactory::make(ComponentEnum::TH)->setContent('Name')
                         )
                 ),
-            ComponentBuilder::make(ComponentEnum::TBODY)
+            ComponentFactory::make(ComponentEnum::TBODY)
                 ->setContent(
-                    ComponentBuilder::make(ComponentEnum::TR)
+                    ComponentFactory::make(ComponentEnum::TR)
                         ->setContent(
-                            ComponentBuilder::make(ComponentEnum::TD)->setContent('John')
+                            ComponentFactory::make(ComponentEnum::TD)->setContent('John')
                         )
                 ),
         ]);
@@ -258,7 +258,7 @@ it('renders a table component', function () {
 });
 
 it('renders a dialog component', function () {
-    $dialog = ComponentBuilder::make(ComponentEnum::DIALOG)
+    $dialog = ComponentFactory::make(ComponentEnum::DIALOG)
         ->setContent('Dialog content');
 
     $html = (string) $this->blade('{{ $dialog }}', ['dialog' => $dialog]);
@@ -269,10 +269,10 @@ it('renders a dialog component', function () {
 });
 
 it('renders a details component', function () {
-    $details = ComponentBuilder::make(ComponentEnum::DETAILS)
+    $details = ComponentFactory::make(ComponentEnum::DETAILS)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::SUMMARY)->setContent('Summary'),
-            ComponentBuilder::make(ComponentEnum::DIV)->setContent('Details content'),
+            ComponentFactory::make(ComponentEnum::SUMMARY)->setContent('Summary'),
+            ComponentFactory::make(ComponentEnum::DIV)->setContent('Details content'),
         ]);
 
     $html = (string) $this->blade('{{ $details }}', ['details' => $details]);
@@ -285,10 +285,10 @@ it('renders a details component', function () {
 });
 
 it('renders a fieldset component', function () {
-    $fieldset = ComponentBuilder::make(ComponentEnum::FIELDSET)
+    $fieldset = ComponentFactory::make(ComponentEnum::FIELDSET)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::LEGEND)->setContent('Personal Info'),
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)->setAttribute('name', 'name'),
+            ComponentFactory::make(ComponentEnum::LEGEND)->setContent('Personal Info'),
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)->setAttribute('name', 'name'),
         ]);
 
     $html = (string) $this->blade('{{ $fieldset }}', ['fieldset' => $fieldset]);
@@ -301,7 +301,7 @@ it('renders a fieldset component', function () {
 });
 
 it('renders a label component', function () {
-    $label = ComponentBuilder::make(ComponentEnum::LABEL)
+    $label = ComponentFactory::make(ComponentEnum::LABEL)
         ->setAttribute('for', 'email')
         ->setContent('Email Address');
 

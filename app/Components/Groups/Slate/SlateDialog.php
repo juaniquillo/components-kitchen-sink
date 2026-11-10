@@ -7,7 +7,7 @@ namespace App\Components\Groups\Slate;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SlateBackendComponents\Builders\SlateComponentBuilder;
+use Juaniquillo\SlateBackendComponents\Factories\SlateComponentFactory;
 use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 use Juaniquillo\SlateBackendComponents\Utils\SlateOverlayUtil;
 
@@ -33,7 +33,7 @@ class SlateDialog implements Component
         return SlateOverlayUtil::make(
             root: SlateComponentEnum::DIALOG,
             content: 'Yo, I\'m here',
-            trigger: SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+            trigger: SlateComponentFactory::make(SlateComponentEnum::BUTTON)
                 ->setContent('Open'),
             title: 'Cure Dialog',
         )->getComponent();
@@ -44,15 +44,15 @@ class SlateDialog implements Component
         return SlateOverlayUtil::make(
             root: SlateComponentEnum::DIALOG,
             content: [],
-            trigger: SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+            trigger: SlateComponentFactory::make(SlateComponentEnum::BUTTON)
                 ->setAttribute('variant', 'outline')
                 ->setContent('Open'),
             title: 'Are you sure?',
             description: 'This action cannot be undone.',
             footer: [
-                SlateComponentBuilder::make(SlateComponentEnum::DIALOG_CLOSE)
+                SlateComponentFactory::make(SlateComponentEnum::DIALOG_CLOSE)
                     ->setContent(
-                        SlateComponentBuilder::make(SlateComponentEnum::BUTTON)
+                        SlateComponentFactory::make(SlateComponentEnum::BUTTON)
                             ->setContent('Cancel')
                     ),
             ],

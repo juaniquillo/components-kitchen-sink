@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 it('creates a div with livewire wrapper', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setLivewire()
         ->setLivewireKey('unique-key');
 
@@ -19,7 +19,7 @@ it('creates a div with livewire wrapper', function () {
 });
 
 it('creates a div with livewire params', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setLivewire()
         ->setLivewireKey('user-component')
         ->setLivewireParams(['userId' => 1, 'team' => 'engineering']);
@@ -34,7 +34,7 @@ it('creates a div with livewire params', function () {
 });
 
 it('creates a button with livewire click handler', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click me')
         ->setAttribute('wire:click', 'handleClick');
 
@@ -45,12 +45,12 @@ it('creates a button with livewire click handler', function () {
 });
 
 it('creates a form with livewire submit', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('wire:submit', 'save')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('wire:model', 'name'),
-            ComponentBuilder::make(ComponentEnum::BUTTON)
+            ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setAttribute('type', 'submit')
                 ->setContent('Save'),
         ]);
@@ -63,7 +63,7 @@ it('creates a form with livewire submit', function () {
 });
 
 it('creates a div with livewire loading state', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Loading...')
         ->setAttribute('wire:loading', '')
         ->setAttribute('wire:target', 'submit');
@@ -76,7 +76,7 @@ it('creates a div with livewire loading state', function () {
 });
 
 it('creates a button with livewire poll', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Refresh')
         ->setAttribute('wire:poll', '5s');
 
@@ -87,7 +87,7 @@ it('creates a button with livewire poll', function () {
 });
 
 it('creates a div with livewire navigate', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Go to dashboard')
         ->setAttribute('wire:navigate', '/dashboard');
 
@@ -98,7 +98,7 @@ it('creates a div with livewire navigate', function () {
 });
 
 it('creates a button with livewire confirm', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Delete')
         ->setAttribute('wire:confirm', 'Are you sure?')
         ->setAttribute('wire:click', 'delete');
@@ -111,11 +111,11 @@ it('creates a button with livewire confirm', function () {
 });
 
 it('creates a div with livewire model live', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('wire:model.live', 'search'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('wire:loading', '')
                 ->setContent('Searching...'),
         ]);
@@ -128,7 +128,7 @@ it('creates a div with livewire model live', function () {
 });
 
 it('creates a button with livewire click and key', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Submit')
         ->setAttribute('wire:click', 'submit')
         ->setAttribute('wire:key', 'submit-button');
@@ -141,7 +141,7 @@ it('creates a button with livewire click and key', function () {
 });
 
 it('creates a div with livewire ignore', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Static content')
         ->setAttribute('wire:ignore', '');
 
@@ -152,13 +152,13 @@ it('creates a div with livewire ignore', function () {
 });
 
 it('creates a form with livewire validate', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('wire:submit.prevent', 'save')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('wire:model', 'email')
                 ->setAttribute('type', 'email'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('wire:loading', '')
                 ->setContent('Saving...'),
         ]);
@@ -173,7 +173,7 @@ it('creates a form with livewire validate', function () {
 });
 
 it('creates a button with livewire off', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Disabled when offline')
         ->setAttribute('wire:offline', 'disabled');
 
@@ -184,7 +184,7 @@ it('creates a button with livewire off', function () {
 });
 
 it('creates a div with livewire snapshot', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Snapshot content')
         ->setAttribute('wire:snapshot', '{}');
 
@@ -195,7 +195,7 @@ it('creates a div with livewire snapshot', function () {
 });
 
 it('creates a button with livewire loading delay', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Delayed loading')
         ->setAttribute('wire:click', 'process')
         ->setAttribute('wire:loading.delay', '');
@@ -208,7 +208,7 @@ it('creates a button with livewire loading delay', function () {
 });
 
 it('creates a div with livewire partial', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Partial content')
         ->setAttribute('wire:partial', 'components.card');
 
@@ -219,7 +219,7 @@ it('creates a div with livewire partial', function () {
 });
 
 it('creates a button with livewire loading class', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Submit')
         ->setAttribute('wire:click', 'submit')
         ->setAttribute('wire:loading.class', 'opacity-50');
@@ -232,7 +232,7 @@ it('creates a button with livewire loading class', function () {
 });
 
 it('creates a div with livewire scroll', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Scrollable content')
         ->setAttribute('wire:scroll', 'loadMore');
 
@@ -243,7 +243,7 @@ it('creates a div with livewire scroll', function () {
 });
 
 it('creates a button with livewire click prevent', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Prevent default')
         ->setAttribute('wire:click.prevent', 'handleClick');
 
@@ -254,7 +254,7 @@ it('creates a button with livewire click prevent', function () {
 });
 
 it('creates a div with livewire init', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Initialized content')
         ->setAttribute('wire:init', 'loadData');
 
@@ -265,7 +265,7 @@ it('creates a div with livewire init', function () {
 });
 
 it('creates a button with livewire click self', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click self')
         ->setAttribute('wire:click.self', 'handleClick');
 

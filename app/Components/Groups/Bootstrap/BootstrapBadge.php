@@ -6,9 +6,9 @@ namespace App\Components\Groups\Bootstrap;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 class BootstrapBadge implements Component
 {
@@ -36,7 +36,7 @@ class BootstrapBadge implements Component
 
     public static function primary(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Primary')
             ->setAttributes([
                 'class' => 'badge bg-primary text-white',
@@ -45,7 +45,7 @@ class BootstrapBadge implements Component
 
     public static function secondary(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Secondary')
             ->setAttributes([
                 'class' => 'badge bg-secondary text-white',
@@ -54,7 +54,7 @@ class BootstrapBadge implements Component
 
     public static function success(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Success')
             ->setAttributes([
                 'class' => 'badge bg-success text-white',
@@ -63,7 +63,7 @@ class BootstrapBadge implements Component
 
     public static function danger(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Danger')
             ->setAttributes([
                 'class' => 'badge bg-danger text-white',
@@ -72,7 +72,7 @@ class BootstrapBadge implements Component
 
     public static function warning(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Warning')
             ->setAttributes([
                 'class' => 'badge bg-warning text-dark',
@@ -81,7 +81,7 @@ class BootstrapBadge implements Component
 
     public static function info(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Info')
             ->setAttributes([
                 'class' => 'badge bg-info text-white',
@@ -90,7 +90,7 @@ class BootstrapBadge implements Component
 
     public static function light(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Light')
             ->setAttributes([
                 'class' => 'badge bg-light text-dark',
@@ -99,7 +99,7 @@ class BootstrapBadge implements Component
 
     public static function dark(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Dark')
             ->setAttributes([
                 'class' => 'badge bg-dark text-white',
@@ -108,7 +108,7 @@ class BootstrapBadge implements Component
 
     public static function link(): BackendComponent
     {
-        return ComponentBuilder::make(ComponentEnum::SPAN)
+        return ComponentFactory::make(ComponentEnum::SPAN)
             ->setContent('Link')
             ->setAttributes([
                 'class' => 'badge text-reset',

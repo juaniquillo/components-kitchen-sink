@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 it('renders a button with data attributes', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click me')
         ->setAttribute('data-action', 'submit')
         ->setAttribute('data-target', 'form1');
@@ -19,7 +19,7 @@ it('renders a button with data attributes', function () {
 });
 
 it('renders a div with aria attributes', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Accessible content')
         ->setAttribute('role', 'alert')
         ->setAttribute('aria-live', 'polite');
@@ -32,7 +32,7 @@ it('renders a div with aria attributes', function () {
 });
 
 it('renders a button with alpine.js click handler', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Toggle')
         ->setAttribute('@click', 'open = !open');
 
@@ -43,7 +43,7 @@ it('renders a button with alpine.js click handler', function () {
 });
 
 it('renders a div with alpine.js conditional display', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Conditional content')
         ->setAttribute('x-show', 'isOpen')
         ->setAttribute('x-transition', '');
@@ -56,12 +56,12 @@ it('renders a div with alpine.js conditional display', function () {
 });
 
 it('renders a form with wire:submit', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setAttribute('wire:submit', 'save')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('wire:model', 'name'),
-            ComponentBuilder::make(ComponentEnum::BUTTON)
+            ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setAttribute('type', 'submit')
                 ->setContent('Save'),
         ]);
@@ -74,7 +74,7 @@ it('renders a form with wire:submit', function () {
 });
 
 it('renders a button with x-on:click', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Alert')
         ->setAttribute('x-on:click', "alert('clicked')");
 
@@ -85,13 +85,13 @@ it('renders a button with x-on:click', function () {
 });
 
 it('renders a div with x-data', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('x-data', '{ open: false }')
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::BUTTON)
+            ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setContent('Toggle')
                 ->setAttribute('@click', 'open = !open'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setContent('Dropdown content')
                 ->setAttribute('x-show', 'open'),
         ]);
@@ -106,7 +106,7 @@ it('renders a div with x-data', function () {
 });
 
 it('renders a button with multiple alpine attributes', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Multi Alpine')
         ->setAttribute('x-data', '{ loading: false }')
         ->setAttribute('@click', 'loading = true')
@@ -121,7 +121,7 @@ it('renders a button with multiple alpine attributes', function () {
 });
 
 it('renders a div with wire:loading', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Loading...')
         ->setAttribute('wire:loading', '')
         ->setAttribute('wire:target', 'submit');
@@ -134,7 +134,7 @@ it('renders a div with wire:loading', function () {
 });
 
 it('renders a button with wire:click', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Click me')
         ->setAttribute('wire:click', 'increment');
 
@@ -145,7 +145,7 @@ it('renders a button with wire:click', function () {
 });
 
 it('renders a div with x-init', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('x-data', '{ count: 0 }')
         ->setAttribute('x-init', 'count = 1')
         ->setContent('Count: ');
@@ -158,7 +158,7 @@ it('renders a div with x-init', function () {
 });
 
 it('renders a button with x-bind:class', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Styled')
         ->setAttribute('x-bind:class', "active ? 'bg-blue-500' : 'bg-gray-500'");
 
@@ -169,7 +169,7 @@ it('renders a button with x-bind:class', function () {
 });
 
 it('renders a div with x-on:keydown', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('x-data', '{}')
         ->setAttribute('x-on:keydown.escape', 'open = false')
         ->setContent('Press Escape to close');
@@ -181,11 +181,11 @@ it('renders a div with x-on:keydown', function () {
 });
 
 it('renders a form with wire:model.live', function () {
-    $form = ComponentBuilder::make(ComponentEnum::FORM)
+    $form = ComponentFactory::make(ComponentEnum::FORM)
         ->setContents([
-            ComponentBuilder::make(ComponentEnum::TEXT_INPUT)
+            ComponentFactory::make(ComponentEnum::TEXT_INPUT)
                 ->setAttribute('wire:model.live', 'search'),
-            ComponentBuilder::make(ComponentEnum::DIV)
+            ComponentFactory::make(ComponentEnum::DIV)
                 ->setAttribute('wire:loading', '')
                 ->setContent('Searching...'),
         ]);
@@ -198,7 +198,7 @@ it('renders a form with wire:model.live', function () {
 });
 
 it('renders a button with x-cloak', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Hidden until ready')
         ->setAttribute('x-cloak', '');
 
@@ -209,7 +209,7 @@ it('renders a button with x-cloak', function () {
 });
 
 it('renders a div with x-transition:enter', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setContent('Transitioning content')
         ->setAttribute('x-show', 'open')
         ->setAttribute('x-transition:enter', 'transition ease-out duration-300')
@@ -225,7 +225,7 @@ it('renders a div with x-transition:enter', function () {
 });
 
 it('renders a button with wire:poll', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Refresh')
         ->setAttribute('wire:poll', '5s');
 
@@ -236,7 +236,7 @@ it('renders a button with wire:poll', function () {
 });
 
 it('renders a div with x-effect', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('x-data', '{ count: 0 }')
         ->setAttribute('x-effect', 'console.log(count)')
         ->setContent('Count: ');
@@ -248,7 +248,7 @@ it('renders a div with x-effect', function () {
 });
 
 it('renders a button with wire:confirm', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Delete')
         ->setAttribute('wire:confirm', 'Are you sure?')
         ->setAttribute('wire:click', 'delete');
@@ -261,7 +261,7 @@ it('renders a button with wire:confirm', function () {
 });
 
 it('renders a div with x-intersect', function () {
-    $div = ComponentBuilder::make(ComponentEnum::DIV)
+    $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setAttribute('x-data', '{ visible: false }')
         ->setAttribute('x-intersect:enter', 'visible = true')
         ->setContent('Infinite scroll item');
@@ -273,7 +273,7 @@ it('renders a div with x-intersect', function () {
 });
 
 it('renders a button with wire:navigate', function () {
-    $button = ComponentBuilder::make(ComponentEnum::BUTTON)
+    $button = ComponentFactory::make(ComponentEnum::BUTTON)
         ->setContent('Go to page')
         ->setAttribute('wire:navigate', '/dashboard');
 

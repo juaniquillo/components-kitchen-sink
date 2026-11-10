@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Menu\Concerns;
 
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
 trait Nav
 {
@@ -27,14 +27,14 @@ trait Nav
      */
     public static function getNavList(array $contents): CompoundComponent
     {
-        return ComponentBuilder::make(ComponentEnum::UL)
+        return ComponentFactory::make(ComponentEnum::UL)
             ->setContents($contents)
             ->setThemes(self::getNavListTheme());
     }
 
     public static function getNavListItem(array $link): CompoundComponent
     {
-        return ComponentBuilder::make(name: ComponentEnum::LI)
+        return ComponentFactory::make(name: ComponentEnum::LI)
             ->setContent(
                 content: self::getLink($link)
             )
@@ -46,7 +46,7 @@ trait Nav
         $name = $link['name'] ?? 'name not provided';
         $route = $link['route'] ?? 'route not provided';
 
-        return ComponentBuilder::make(name: ComponentEnum::LINK)
+        return ComponentFactory::make(name: ComponentEnum::LINK)
             ->setContent(content: $name)
             ->setAttributes(attributes: [
                 'href' => $route,

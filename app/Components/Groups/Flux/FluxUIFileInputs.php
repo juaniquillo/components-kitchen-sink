@@ -7,7 +7,7 @@ namespace App\Components\Groups\Flux;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\FluxBackendComponents\Builders\FluxLocalThemeComponentBuilder;
+use Juaniquillo\FluxBackendComponents\Factories\FluxLocalThemeComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
 class FluxUIFileInputs implements Component
@@ -39,7 +39,7 @@ class FluxUIFileInputs implements Component
 
     public static function textInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_INPUT)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXT_INPUT)
             ->setAttributes([
                 'type' => 'text',
                 'placeholder' => 'Enter your name',
@@ -48,7 +48,7 @@ class FluxUIFileInputs implements Component
 
     public static function emailInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_INPUT)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXT_INPUT)
             ->setAttributes([
                 'type' => 'email',
                 'placeholder' => 'you@example.com',
@@ -57,7 +57,7 @@ class FluxUIFileInputs implements Component
 
     public static function passwordInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_INPUT)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXT_INPUT)
             ->setAttributes([
                 'type' => 'password',
                 'placeholder' => 'Enter password',
@@ -66,7 +66,7 @@ class FluxUIFileInputs implements Component
 
     public static function numberInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_INPUT)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXT_INPUT)
             ->setAttributes([
                 'type' => 'number',
                 'placeholder' => '0',
@@ -75,13 +75,13 @@ class FluxUIFileInputs implements Component
 
     public static function fileInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_FILE)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXT_FILE)
             ->setAttribute('name', 'avatar');
     }
 
     public static function fileInputMultiple(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXT_FILE)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXT_FILE)
             ->setAttributes([
                 'name' => 'documents',
                 'multiple' => 1,
@@ -90,18 +90,18 @@ class FluxUIFileInputs implements Component
 
     public static function selectInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::SELECT)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::SELECT)
             ->setContents([
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::OPTION)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::OPTION)
                     ->setAttribute('value', '')
                     ->setContent('Select a role'),
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::OPTION)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::OPTION)
                     ->setAttribute('value', 'admin')
                     ->setContent('Admin'),
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::OPTION)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::OPTION)
                     ->setAttribute('value', 'editor')
                     ->setContent('Editor'),
-                FluxLocalThemeComponentBuilder::make(FluxComponentEnum::OPTION)
+                FluxLocalThemeComponentFactory::make(FluxComponentEnum::OPTION)
                     ->setAttribute('value', 'viewer')
                     ->setContent('Viewer'),
             ]);
@@ -109,7 +109,7 @@ class FluxUIFileInputs implements Component
 
     public static function checkboxInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::CHECKBOX)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::CHECKBOX)
             ->setAttributes([
                 'label' => 'Accept terms and conditions',
             ]);
@@ -117,7 +117,7 @@ class FluxUIFileInputs implements Component
 
     public static function radioInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::RADIO)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::RADIO)
             ->setAttributes([
                 'label' => 'Option A',
                 'value' => 'a',
@@ -126,7 +126,7 @@ class FluxUIFileInputs implements Component
 
     public static function textareaInput(): BackendComponent
     {
-        return FluxLocalThemeComponentBuilder::make(FluxComponentEnum::TEXTAREA)
+        return FluxLocalThemeComponentFactory::make(FluxComponentEnum::TEXTAREA)
             ->setAttributes([
                 'placeholder' => 'Write your message here...',
                 'rows' => 4,

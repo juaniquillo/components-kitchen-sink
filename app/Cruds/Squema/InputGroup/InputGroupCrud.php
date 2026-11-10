@@ -12,10 +12,10 @@ use App\Cruds\Squema\InputGroup\Inputs\FavoriteAnimalFactory;
 use App\Cruds\Squema\InputGroup\Inputs\LastNameFactory;
 use App\Cruds\Squema\InputGroup\Inputs\NameFactory;
 use BackedEnum;
-use Juaniquillo\BackendComponents\Builders\ComponentBuilder;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Contracts\ThemeManager;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
+use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 use Juaniquillo\CrudAssistant\CrudAssistant;
@@ -74,7 +74,7 @@ class InputGroupCrud implements Crud
         /** @var InputComponentOutput $output */
         $inputs = $output->inputs;
 
-        $form = ComponentBuilder::make(ComponentEnum::FORM)
+        $form = ComponentFactory::make(ComponentEnum::FORM)
             ->setContents($inputs->toArray())
             ->setAttribute('action', route('cruds.store', ['identifier' => self::IDENTIFIER]).'#'.self::IDENTIFIER)
             ->setAttribute('enctype', 'multipart/form-data')
@@ -83,7 +83,7 @@ class InputGroupCrud implements Crud
                 'grid' => 'gap-md',
             ])
             ->setContent(
-                ComponentBuilder::make(ComponentEnum::BUTTON)
+                ComponentFactory::make(ComponentEnum::BUTTON)
                     ->setContent('Send')
                     ->setAttribute('id', 'form_group_wc_button')
                     ->setTheme('action', 'default')

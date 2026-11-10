@@ -45,11 +45,11 @@ Components are organized into groups registered in `App\Components\RouteCollecti
 
 #### Third-Party Slate Components
 
-The Slate group is built with `juaniquillo/slate-backend-components`, which adapts the `BackendComponent` contract to render Slate's anonymous Blade components. Components are composed with the `SlateComponentEnum` (over 200 cases) and `SlateComponentBuilder`, using helpers like `SlateOverlayUtil` (dialogs), `SlateTabsUtil` (tabs), and `SlateUITableUtil` (tables). Each `SlateBackendComponent` resolves through `backend-component::_utilities.resolve-third-party-component`, which delegates to `<x-dynamic-component>`. The Slate group also registers its own stylesheet (`resources/css/slate.css`) as a per-group asset.
+The Slate group is built with `juaniquillo/slate-backend-components`, which adapts the `BackendComponent` contract to render Slate's anonymous Blade components. Components are composed with the `SlateComponentEnum` (over 200 cases) and `SlateComponentFactory`, using helpers like `SlateOverlayUtil` (dialogs), `SlateTabsUtil` (tabs), and `SlateUITableUtil` (tables). Each `SlateBackendComponent` resolves through `backend-component::_utilities.resolve-third-party-component`, which delegates to `<x-dynamic-component>`. The Slate group also registers its own stylesheet (`resources/css/slate.css`) as a per-group asset.
 
 #### Third-Party SVG Components
 
-The SVG group is built with `juaniquillo/svg-backend-components`, which adapts the `BackendComponent` contract to SVG elements. Components are composed with the `SvgComponentEnum` (`SVG`, `G`, `PATH`, `CIRCLE`, …) and `SvgComponentBuilder`, with roots built fluently via `make(SvgComponentEnum::SVG)->setXmlns()->setViewBox()->setSize()->setContents()`. Geometry uses `SvgShape` presets (`rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, `path`), path data uses the `SvgPath` builder (`start()->lineTo()->close()`, `curveTo()`, `quadraticTo()`, `arcTo()`, with `raw()` as the escape hatch), and paint uses the aliases `setFill()` / `setStroke()` / `setStrokeWidth()` / `setOpacity()`. Each `SvgBackendComponent` renders through the `svg::` view context, or standalone via `SvgRenderer::make($component)->toSvg()` (which can add the XML prolog and backfills `xmlns` when saving). The Themed Icons box uses `SvgLocalThemeComponentBuilder` so the paint comes from the app's own `fill` theme group (`fill-indigo-600 dark:fill-indigo-300`, …) instead of hardcoded fills. The caption in Reuse and Text does the same through the `muted` / `accent` variants of that group, so no Tailwind classes are written in PHP for SVG paint. Brand marks are single 24x24 paths from Simple Icons fed through `SvgShape::path()`; the mono marks (GitHub, X) use `fill="currentColor"` plus the app's `color` theme group so they flip with light and dark mode, while Facebook keeps its brand colour and Instagram fills its path with a `linearGradient` defined in `defs`.
+The SVG group is built with `juaniquillo/svg-backend-components`, which adapts the `BackendComponent` contract to SVG elements. Components are composed with the `SvgComponentEnum` (`SVG`, `G`, `PATH`, `CIRCLE`, …) and `SvgComponentFactory`, with roots built fluently via `make(SvgComponentEnum::SVG)->setXmlns()->setViewBox()->setSize()->setContents()`. Geometry uses `SvgShape` presets (`rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, `path`), path data uses the `SvgPath` builder (`start()->lineTo()->close()`, `curveTo()`, `quadraticTo()`, `arcTo()`, with `raw()` as the escape hatch), and paint uses the aliases `setFill()` / `setStroke()` / `setStrokeWidth()` / `setOpacity()`. Each `SvgBackendComponent` renders through the `svg::` view context, or standalone via `SvgRenderer::make($component)->toSvg()` (which can add the XML prolog and backfills `xmlns` when saving). The Themed Icons box uses `SvgLocalThemeComponentFactory` so the paint comes from the app's own `fill` theme group (`fill-indigo-600 dark:fill-indigo-300`, …) instead of hardcoded fills. The caption in Reuse and Text does the same through the `muted` / `accent` variants of that group, so no Tailwind classes are written in PHP for SVG paint. Brand marks are single 24x24 paths from Simple Icons fed through `SvgShape::path()`; the mono marks (GitHub, X) use `fill="currentColor"` plus the app's `color` theme group so they flip with light and dark mode, while Facebook keeps its brand colour and Instagram fills its path with a `linearGradient` defined in `defs`.
 
 ### Emails
 
@@ -171,10 +171,10 @@ The chrome is never part of the tree, so the code generator never sees it. A nod
 Text is a **content entry** rather than a field on the node, so a paragraph can hold text and a link and more text in any order:
 
 ```php
-ComponentBuilder::make(ComponentEnum::PARAGRAPH)
+ComponentFactory::make(ComponentEnum::PARAGRAPH)
     ->setContents([
         'First text',
-        ComponentBuilder::make(ComponentEnum::LINK)
+        ComponentFactory::make(ComponentEnum::LINK)
             ->setContents([
                 ' This is a link',
             ])
@@ -300,7 +300,7 @@ Each CRUD follows a consistent pattern:
 1. **Factories** define input fields (name, email, etc.)
 2. **`CrudAssistant::make()`** creates an `InputCollection`
 3. **`InputComponentAction`** processes values and errors
-4. **`ComponentBuilder`** constructs the final HTML component
+4. **`ComponentFactory`** constructs the final HTML component
 5. **Form submits to `/cruds`** with `identifier` input
 
 ## Installation
@@ -370,14 +370,14 @@ vendor/bin/pest --filter="undoes a change"
 This project experiments with the `juaniquillo/laravel-backend-component` package. Key integration points:
 
 - **`BackendComponent` interface** - Implemented by `FluxBackendComponent` (from `juaniquillo/flux-backend-components`), `SlateBackendComponent` (from `juaniquillo/slate-backend-components`), and `SvgBackendComponent` (from `juaniquillo/svg-backend-components`)
-- **`ComponentBuilder`** - Fluent builder for creating component trees
+- **`ComponentFactory`** - Fluent factory for creating component trees
 - **`ComponentEnum`** - Enumeration of all available component types
 - **Theme system** - Default theme manager with configurable themes, plus app-level Tailwind theme files
 - **Content system** - HasContent concern for managing component content
 - **`Component` contract** - Each group implements `App\Components\Contracts\Component` with `list()` and `options()` returning a `ContainerOptions` DTO (flex/column/gap layout settings)
 - **`RouteCollectionGroup`** - Central registry mapping each route group to its components and static assets
 - **`ComponentCollection`** - Collection that aggregates group components for rendering
-- **`MjmlComponentBuilder`** - Fluent builder for MJML trees; shorthands exist for `document`, `head`, `preview`, `font`, `attributes`, `style`, `section`, and `text`, every other `MjmlComponentEnum` case goes through generic `make()`
+- **`MjmlComponentFactory`** - Fluent factory for MJML trees; shorthands exist for `document`, `head`, `preview`, `font`, `attributes`, `style`, `section`, and `text`, every other `MjmlComponentEnum` case goes through generic `make()`
 - **`toHtml()` vs `renderHtml()`** - `toHtml()` returns raw MJML markup; `renderHtml()` compiles it to production HTML via the bound `CompilesMjml` driver (node process by default)
 
 ### Custom Component Development
@@ -391,9 +391,9 @@ To create new backend components:
 
 Existing adapters serve as reference implementations:
 
-- `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) - Flux-styled backend components using `FluxComponentEnum` and `FluxComponentBuilder`
+- `FluxBackendComponent` (from `juaniquillo/flux-backend-components`) - Flux-styled backend components using `FluxComponentEnum` and `FluxComponentFactory`
 - `SlateBackendComponent` (from `juaniquillo/slate-backend-components`) - Resolves `SlateComponentEnum` cases to `slate::*` views through `x-dynamic-component`
-- `SvgBackendComponent` (from `juaniquillo/svg-backend-components`) - SVG elements from `SvgComponentEnum` composed with `SvgComponentBuilder`, rendered through the `svg::` view context
+- `SvgBackendComponent` (from `juaniquillo/svg-backend-components`) - SVG elements from `SvgComponentEnum` composed with `SvgComponentFactory`, rendered through the `svg::` view context
 
 ## License
 

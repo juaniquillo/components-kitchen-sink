@@ -7,7 +7,7 @@ namespace App\Components\Groups\Svg;
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
 use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\SvgBackendComponents\Builders\SvgComponentBuilder;
+use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 
@@ -32,27 +32,27 @@ class SvgPaint implements Component
 
     public static function gradients(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                SvgComponentFactory::make(SvgComponentEnum::DEFS)
                     ->setContents([
-                        SvgComponentBuilder::make(SvgComponentEnum::LINEAR_GRADIENT)
+                        SvgComponentFactory::make(SvgComponentEnum::LINEAR_GRADIENT)
                             ->setAttributes(['id' => 'fade', 'x1' => '0', 'y1' => '0', 'x2' => '1', 'y2' => '0'])
                             ->setContents([
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '0%', 'stop-color' => '#3b82f6']),
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '100%', 'stop-color' => '#a855f7']),
                             ]),
-                        SvgComponentBuilder::make(SvgComponentEnum::RADIAL_GRADIENT)
+                        SvgComponentFactory::make(SvgComponentEnum::RADIAL_GRADIENT)
                             ->setAttributes(['id' => 'glow'])
                             ->setContents([
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '0%', 'stop-color' => '#fde047']),
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '100%', 'stop-color' => '#f97316']),
                             ]),
                     ]),
@@ -65,19 +65,19 @@ class SvgPaint implements Component
 
     public static function clipAndPattern(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                SvgComponentFactory::make(SvgComponentEnum::DEFS)
                     ->setContents([
-                        SvgComponentBuilder::make(SvgComponentEnum::CLIP_PATH)
+                        SvgComponentFactory::make(SvgComponentEnum::CLIP_PATH)
                             ->setAttributes(['id' => 'round'])
                             ->setContents([
                                 SvgShape::circle(50, 50, 40),
                             ]),
-                        SvgComponentBuilder::make(SvgComponentEnum::PATTERN)
+                        SvgComponentFactory::make(SvgComponentEnum::PATTERN)
                             ->setAttribute('id', 'dots')
                             ->setAttribute('patternUnits', 'userSpaceOnUse')
                             ->setSize(12)
@@ -96,7 +96,7 @@ class SvgPaint implements Component
 
     public static function opacity(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
@@ -112,22 +112,22 @@ class SvgPaint implements Component
 
     public static function mask(): BackendComponent
     {
-        return SvgComponentBuilder::make(SvgComponentEnum::SVG)
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
             ->setXmlns()
             ->setViewBox(0, 0, 200, 100)
             ->setSize(200, 100)
             ->setContents([
-                SvgComponentBuilder::make(SvgComponentEnum::DEFS)
+                SvgComponentFactory::make(SvgComponentEnum::DEFS)
                     ->setContents([
-                        SvgComponentBuilder::make(SvgComponentEnum::RADIAL_GRADIENT)
+                        SvgComponentFactory::make(SvgComponentEnum::RADIAL_GRADIENT)
                             ->setAttribute('id', 'mask-fade')
                             ->setContents([
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '30%', 'stop-color' => '#ffffff']),
-                                SvgComponentBuilder::make(SvgComponentEnum::STOP)
+                                SvgComponentFactory::make(SvgComponentEnum::STOP)
                                     ->setAttributes(['offset' => '100%', 'stop-color' => '#000000']),
                             ]),
-                        SvgComponentBuilder::make(SvgComponentEnum::MASK)
+                        SvgComponentFactory::make(SvgComponentEnum::MASK)
                             ->setAttribute('id', 'fade')
                             ->setContents([
                                 SvgShape::rect(10, 10, 180, 80)
