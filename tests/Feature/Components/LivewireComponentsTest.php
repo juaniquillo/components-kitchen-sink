@@ -2,35 +2,45 @@
 
 declare(strict_types=1);
 
+use Juaniquillo\BackendComponents\Deserializers\ComponentDeserializer;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 
-it('creates a div with livewire wrapper', function () {
+it('keeps livewire state runtime-only', function () {
+    // Since v0.12 toArray() no longer serializes Livewire state: the
+    // wrapper is runtime-only, so the array carries no livewire keys.
     $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setLivewire()
         ->setLivewireKey('unique-key');
 
+    expect($div->isLivewire())->toBeTrue()
+        ->and($div->getLivewireKey())->toBe('unique-key');
+
     $array = $div->toArray();
 
     expect($array)->toBeArray()
-        ->toHaveKey('isLivewire')
-        ->and($array['isLivewire'])->toBeTrue()
-        ->and($array['livewireKey'])->toBe('unique-key');
+        ->not->toHaveKey('isLivewire')
+        ->not->toHaveKey('livewireKey')
+        ->not->toHaveKey('livewireParams')
+        ->and($array)->toHaveKey('name');
 });
 
-it('creates a div with livewire params', function () {
+it('restores a livewire component without livewire state', function () {
     $div = ComponentFactory::make(ComponentEnum::DIV)
         ->setLivewire()
         ->setLivewireKey('user-component')
         ->setLivewireParams(['userId' => 1, 'team' => 'engineering']);
 
-    $array = $div->toArray();
+    expect($div->getLivewireParams())->toBe(['userId' => 1, 'team' => 'engineering']);
 
-    expect($array)->toBeArray()
-        ->toHaveKey('isLivewire')
-        ->and($array['isLivewire'])->toBeTrue()
-        ->and($array['livewireKey'])->toBe('user-component')
-        ->and($array['livewireParams'])->toBe(['userId' => 1, 'team' => 'engineering']);
+    $restored = ComponentDeserializer::fromArray($div->toArray());
+
+    expect($restored->isLivewire())->toBeFalse();
+
+    $restored->setLivewire()->setLivewireKey('user-component');
+
+    expect($restored->isLivewire())->toBeTrue()
+        ->and($restored->getLivewireKey())->toBe('user-component');
 });
 
 it('creates a button with livewire click handler', function () {

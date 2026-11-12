@@ -6,10 +6,10 @@ namespace App\Components\Groups\Flux;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 use Juaniquillo\BackendComponents\Utils\CellBag;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
 use Juaniquillo\FluxBackendComponents\Factories\FluxLocalThemeComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;

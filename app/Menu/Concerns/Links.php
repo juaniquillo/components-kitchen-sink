@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Menu\Concerns;
 
-use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BaseBackendComponent\Contracts\CompoundComponent;
 
 trait Links
 {

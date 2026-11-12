@@ -37,7 +37,7 @@ $icon = (new SvgBackendComponent(SvgComponentEnum::SVG))
 
 Nest with `setContents()`. Element attributes (`viewBox`, `d`, `fill`, `r`, …) travel as attributes via `setAttribute()` / `setAttributes()`. Extra view settings travel via `setSetting()` / `setSettings()`. Prefer the helpers in Builders below over raw strings: `setXmlns()` / `setViewBox()` / `setSize()`, presentation aliases (`setFill()`, `setStroke()`, `setStrokeWidth()`, `setOpacity()`), `SvgShape` presets for geometry, and `SvgPath` for `d` data.
 
-## Builders
+## Factories
 
 Fluent factories when preferred over `new`:
 
@@ -64,7 +64,7 @@ use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 
 $rect = SvgShape::rect(10, 10, 80, 50)->setFill('#3b82f6');
 
-// Path data builder for the `d` attribute (prefer the command methods; raw() for anything else):
+// Path data helper for the `d` attribute (prefer the command methods; raw() for anything else):
 use Juaniquillo\SvgBackendComponents\Shapes\SvgPath;
 
 $path = SvgShape::path(
@@ -103,5 +103,5 @@ SvgRenderer::make($component)->saveTo('path/to/icon.svg');
 - Always use `SvgComponentEnum` cases, never raw element name strings.
 - Attributes are scalar (`setAttribute()` / `setAttributes()`); nested elements go through `setContent()` / `setContents()`.
 - Prefer `SvgShape` presets for rect/circle/ellipse/line/polyline/polygon/path over `SvgComponentFactory::make()` + raw geometry.
-- Prefer `SvgPath` command methods over hand-written `d` strings; use `raw()` only for anything the builder lacks.
+- Prefer `SvgPath` command methods over hand-written `d` strings; use `raw()` only for anything `SvgPath` lacks.
 - Prefer presentation aliases (`setFill()`, `setStroke()`, `setStrokeWidth()`, `setOpacity()`) over raw `setAttribute()` for those names.

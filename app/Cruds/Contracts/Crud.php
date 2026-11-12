@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Cruds\Contracts;
 
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\CrudAssistant\Contracts\InputCollectionInterface;
 
 interface Crud

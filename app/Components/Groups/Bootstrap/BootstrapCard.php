@@ -6,9 +6,9 @@ namespace App\Components\Groups\Bootstrap;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BaseBackendComponent\Contracts\CompoundComponent;
 
 class BootstrapCard implements Component
 {

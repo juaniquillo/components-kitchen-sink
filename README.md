@@ -378,13 +378,13 @@ This project experiments with the `juaniquillo/laravel-backend-component` packag
 - **`RouteCollectionGroup`** - Central registry mapping each route group to its components and static assets
 - **`ComponentCollection`** - Collection that aggregates group components for rendering
 - **`MjmlComponentFactory`** - Fluent factory for MJML trees; shorthands exist for `document`, `head`, `preview`, `font`, `attributes`, `style`, `section`, and `text`, every other `MjmlComponentEnum` case goes through generic `make()`
-- **`toHtml()` vs `renderHtml()`** - `toHtml()` returns raw MJML markup; `renderHtml()` compiles it to production HTML via the bound `CompilesMjml` driver (node process by default)
+- **`toHtml()` vs `renderHtml()`** - `toHtml()` returns raw MJML markup; `renderHtml()` compiles it to production HTML via the explicitly passed `CompilesMjml` driver (e.g. `new NodeProcessCompiler`)
 
 ### Custom Component Development
 
 To create new backend components:
 
-1. Implement `Juaniquillo\BackendComponents\Contracts\BackendComponent`
+1. Implement `Juaniquillo\BaseBackendComponent\Contracts\BackendComponent`
 2. Use concerns like `HasContent`, `IsThemeable`, `HasPath` as needed
 3. Implement `getContext()`, `getName()`, `getAttributeBag()`, `toArray()`, `toHtml()`
 4. Register the component in the appropriate CRUD or component group

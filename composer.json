@@ -14,7 +14,7 @@
         "electrik/slate": "^3.0",
         "juaniquillo/crud-assistant": "@dev",
         "juaniquillo/flux-backend-components": "@dev",
-        "juaniquillo/input-component-action": "^0.2",
+        "juaniquillo/input-component-action": "^0.3",
         "juaniquillo/laravel-backend-component": "@dev",
         "juaniquillo/mjml-backend-components": "@dev",
         "juaniquillo/slate-backend-components": "@dev",
@@ -88,7 +88,7 @@
             "@php artisan config:clear --ansi",
             "@test:lint",
             "@composer analyse",
-            "@php artisan test"
+            "@test:parallel"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -122,7 +122,8 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
-        }
+        },
+        "process-timeout": 1200
     },
     "minimum-stability": "stable",
     "prefer-stable": true

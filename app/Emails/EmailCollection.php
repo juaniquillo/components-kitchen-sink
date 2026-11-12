@@ -10,9 +10,9 @@ use App\Emails\Messages\NewsletterEmail;
 use App\Emails\Messages\NotificationEmail;
 use App\Emails\Messages\WelcomeEmail;
 use App\Emails\Presenters\EmailPresenter;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
 final class EmailCollection
 {

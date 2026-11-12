@@ -43,7 +43,7 @@ $card = (new FluxBackendComponent(FluxComponentEnum::CARD))
     ]);
 ```
 
-## Builders
+## Factories
 
 Fluent factories when preferred over `new`:
 

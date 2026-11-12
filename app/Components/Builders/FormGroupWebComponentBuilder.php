@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Components\Builders;
 
 use Illuminate\Contracts\Support\Htmlable;
-use Juaniquillo\BackendComponents\Contracts\CompoundComponent;
 use Juaniquillo\BackendComponents\Contracts\StaticFactory;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\BackendComponents\Themes\LocalThemeManager;
+use Juaniquillo\BaseBackendComponent\Contracts\CompoundComponent;
 
 final class FormGroupWebComponentBuilder implements StaticFactory
 {

@@ -6,8 +6,8 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\BackendComponents\Contracts\ContentComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\ContentComponent;
 use Juaniquillo\SlateBackendComponents\SlateBackendComponent;
 use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 use Juaniquillo\SlateBackendComponents\Utils\SlateUITableUtil;

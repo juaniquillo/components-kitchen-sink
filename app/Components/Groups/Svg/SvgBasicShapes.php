@@ -6,7 +6,7 @@ namespace App\Components\Groups\Svg;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;

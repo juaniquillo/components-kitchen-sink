@@ -6,10 +6,10 @@ namespace App\Components\Groups;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Utils\ModalUtil;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
 class MainPackage implements Component
 {

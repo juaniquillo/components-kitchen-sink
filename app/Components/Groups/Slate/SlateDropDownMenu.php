@@ -6,7 +6,7 @@ namespace App\Components\Groups\Slate;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\SlateBackendComponents\Factories\SlateComponentFactory;
 use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 

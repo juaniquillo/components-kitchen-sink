@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Juaniquillo\BackendComponents\Components\Individual\DivComponent;
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
 use Juaniquillo\BackendComponents\Deserializers\ComponentDeserializer;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
 it('serializes a simple button to array', function () {
     $button = ComponentFactory::make(ComponentEnum::BUTTON)

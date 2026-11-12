@@ -45,7 +45,7 @@ $custom = ComponentFactory::make('inline.button');
 | **Template** | `TEMPLATE` |
 | **Collection** | `COLLECTION` |
 | **Block** | `DIV`, `PARAGRAPH` |
-| **Inline** | `BUTTON`, `LINK`, `IMG`, `SPAN`, `BOLD`, `EM`, `ITALIC`, `STRONG`, `SMALL` |
+| **Inline** | `BUTTON`, `LINK`, `IMG`, `SPAN`, `BOLD`, `EM`, `ITALIC`, `STRONG`, `SMALL`, `IFRAME` |
 | **Headers** | `H1`, `H2`, `H3`, `H4`, `H5`, `H6` |
 | **Form** | `FORM`, `LABEL`, `LEGEND`, `FIELDSET`, `TEXT_INPUT`, `FILE_INPUT`, `EMAIL_INPUT`, `SEARCH_INPUT`, `PASSWORD_INPUT`, `CHECKBOX_INPUT`, `HIDDEN_INPUT`, `RADIO_INPUT`, `DATALIST`, `TEXTAREA`, `SELECT`, `OPTGROUP`, `OPTION` |
 | **Table** | `TABLE`, `THEAD`, `TBODY`, `TFOOT`, `TR`, `TH`, `TD`, `CAPTION`, `COLGROUP`, `COL` |

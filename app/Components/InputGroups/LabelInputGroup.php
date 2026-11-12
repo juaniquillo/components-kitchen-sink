@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Components\InputGroups;
 
-use Juaniquillo\BackendComponents\Contracts\BackendComponent;
-use Juaniquillo\BackendComponents\Contracts\ContentComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
+use Juaniquillo\BaseBackendComponent\Contracts\ContentComponent;
 use Juaniquillo\InputComponentAction\Concerns\HasLabel;
 use Juaniquillo\InputComponentAction\Concerns\HasWrapper;
 use Juaniquillo\InputComponentAction\Concerns\IsInputGroup;
