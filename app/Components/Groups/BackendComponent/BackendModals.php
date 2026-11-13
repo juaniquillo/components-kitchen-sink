@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Components\Groups;
+namespace App\Components\Groups\BackendComponent;
 
 use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
@@ -11,7 +11,7 @@ use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Utils\ModalUtil;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
-class MainPackage implements Component
+class BackendModals implements Component
 {
     const NAME = 'Alpine JS Modals';
 

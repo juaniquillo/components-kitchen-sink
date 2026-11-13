@@ -11,7 +11,7 @@ use Juaniquillo\SlateBackendComponents\Utils\SlateAccordionUtil;
 
 class SlateAccordion implements Component
 {
-    const NAME = 'Accordion';
+    const NAME = 'Slate Accordion';
 
     public static function list(): array
     {

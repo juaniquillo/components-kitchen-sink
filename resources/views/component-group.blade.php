@@ -14,17 +14,14 @@
 
         <div class="component-container mt-sm">
             @foreach ($componentGroup->list() as $components)
-                @php
-                    $options = $components->options();
-                    $disableFlex = $options->disableFlex;
-                    $flexColumn = $options->flexColumn;
-                    $flexGap = $options->flexGap;
-                    
-                @endphp
                 <div class="component-box-bg p-sm ">
                     <h2 class="component-box-h2">{{ $components::NAME }}</h2>
-                    
-                    <div class="mt-sm @if(!$disableFlex)flex {{ $flexGap }} flex-wrap justify-center items-center @endif @if($flexColumn) flex-columns @endif">
+
+                    @php
+                        /** @var \App\Components\ContainerOptions $options */
+                        $options = $components->options();
+                    @endphp
+                    <div class="{{ $options->getContainerCSS() }}">
 
                         @foreach ($components->list() as $component)
                             {{ $component }}

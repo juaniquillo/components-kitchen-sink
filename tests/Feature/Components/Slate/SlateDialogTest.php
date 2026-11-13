@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Components\Groups\Slate\SlateDialog;
 
 it('has the correct NAME constant', function () {
-    expect(SlateDialog::NAME)->toBe('Dialogs');
+    expect(SlateDialog::NAME)->toBe('Slate Dialogs');
 });
 
 it('returns 2 dialog variants', function () {

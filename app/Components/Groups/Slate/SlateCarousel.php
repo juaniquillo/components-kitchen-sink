@@ -14,7 +14,7 @@ use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateCarousel implements Component
 {
-    const NAME = 'Carousel';
+    const NAME = 'Slate Carousel';
 
     public static function list(): array
     {

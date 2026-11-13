@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Components\Groups\Slate\SlateButtons;
 
 it('has the correct NAME constant', function () {
-    expect(SlateButtons::NAME)->toBe('Buttons');
+    expect(SlateButtons::NAME)->toBe('Slate Buttons');
 });
 
 it('returns 9 button variants', function () {

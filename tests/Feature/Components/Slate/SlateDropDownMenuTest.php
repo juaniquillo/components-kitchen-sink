@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Components\Groups\Slate\SlateDropDownMenu;
 
 it('has the correct NAME constant', function () {
-    expect(SlateDropDownMenu::NAME)->toBe('Drop Down Menus');
+    expect(SlateDropDownMenu::NAME)->toBe('Slate Drop Down Menus');
 });
 
 it('returns 1 dropdown menu variant', function () {

@@ -12,7 +12,7 @@ use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateButtons implements Component
 {
-    const NAME = 'Buttons';
+    const NAME = 'Slate Buttons';
 
     public static function list(): array
     {

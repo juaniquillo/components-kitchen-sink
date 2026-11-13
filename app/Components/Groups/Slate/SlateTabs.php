@@ -13,7 +13,7 @@ use Juaniquillo\SlateBackendComponents\Utils\SlateTabsUtil;
 
 class SlateTabs implements Component
 {
-    const NAME = 'Tabs';
+    const NAME = 'Slate Tabs';
 
     public static function list(): array
     {

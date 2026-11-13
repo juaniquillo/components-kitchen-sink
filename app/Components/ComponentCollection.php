@@ -44,8 +44,8 @@ final class ComponentCollection
 //     public static function list() : array
 //     {
 //         return [
-//             MainPackage::NAME => [
-//                 'group' => MainPackage::make(),
+//             BackendModals::NAME => [
+//                 'group' => BackendModals::make(),
 //             ],
 //             LivewireFlux::NAME => [
 //                 'group' => LivewireFlux::make(),

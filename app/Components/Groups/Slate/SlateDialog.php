@@ -13,7 +13,7 @@ use Juaniquillo\SlateBackendComponents\Utils\SlateOverlayUtil;
 
 class SlateDialog implements Component
 {
-    const NAME = 'Dialogs';
+    const NAME = 'Slate Dialogs';
 
     public static function list(): array
     {

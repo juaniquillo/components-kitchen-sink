@@ -12,7 +12,7 @@ use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
 
 class SlateDropDownMenu implements Component
 {
-    const NAME = 'Drop Down Menus';
+    const NAME = 'Slate Drop Down Menus';
 
     public static function list(): array
     {

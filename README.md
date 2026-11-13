@@ -37,10 +37,10 @@ Components are organized into groups registered in `App\Components\RouteCollecti
 
 | Route Group | Component (variants) |
 |---|---|
-| **Backend Components** | Alpine JS Modals — Default modal (1), Basic modal (1), Modal with header and footer (1), Dialog HTML Tag (1) |
+| **Backend Components** | Alpine JS Modals (4), Backend Tables (2), Backend Details (3) |
 | **Flux UI** | Modals (3), Buttons (6), Skeletons (5), Cards (6), Tables (7), Inputs (10) |
 | **Bootstrap** | Button (5), Badge (9), Card (2), Carousel (3), Tables (7) |
-| **Slate** | Dialog (2), Tabs (1), Drop Down Menus (1), Buttons (9), Carousel (2), Tables (1) |
+| **Slate** | Slate Dialogs (2), Slate Tabs (1), Slate Drop Down Menus (1), Slate Buttons (9), Slate Carousel (2), Slate Tables (1) |
 | **SVG** | Basic Shapes (1), Paths and Polygons (3), Paint and Patterns (4), Reuse and Text (3), Media (1), Themed Icons (4), Brand Icons (4) |
 
 #### Third-Party Slate Components

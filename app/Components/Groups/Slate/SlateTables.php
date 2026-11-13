@@ -14,7 +14,7 @@ use Juaniquillo\SlateBackendComponents\Utils\SlateUITableUtil;
 
 class SlateTables implements Component
 {
-    const NAME = 'Tables';
+    const NAME = 'Slate Tables';
 
     public static function list(): array
     {

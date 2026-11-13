@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Components;
 
+use App\Components\Groups\BackendComponent\BackendDetails;
+use App\Components\Groups\BackendComponent\BackendModals;
+use App\Components\Groups\BackendComponent\BackendTables;
 use App\Components\Groups\Bootstrap\BootstrapBadge;
 use App\Components\Groups\Bootstrap\BootstrapButton;
 use App\Components\Groups\Bootstrap\BootstrapCard;
@@ -15,7 +18,6 @@ use App\Components\Groups\Flux\FluxUIFileInputs;
 use App\Components\Groups\Flux\FluxUIModals;
 use App\Components\Groups\Flux\FluxUISkeletons;
 use App\Components\Groups\Flux\FluxUITables;
-use App\Components\Groups\MainPackage;
 use App\Components\Groups\Slate\SlateAccordion;
 use App\Components\Groups\Slate\SlateButtons;
 use App\Components\Groups\Slate\SlateCarousel;
@@ -54,7 +56,9 @@ class RouteCollectionGroup
             'backend-component' => [
                 'name' => 'Backend Components',
                 'components' => ComponentCollection::make()->addComponents([
-                    new MainPackage,
+                    new BackendModals,
+                    new BackendTables,
+                    new BackendDetails,
                 ]),
                 'assets' => [],
             ],

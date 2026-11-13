@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Components\Groups\Slate\SlateCarousel;
 
 it('has the correct NAME constant', function () {
-    expect(SlateCarousel::NAME)->toBe('Carousel');
+    expect(SlateCarousel::NAME)->toBe('Slate Carousel');
 });
 
 it('returns 2 carousel variants', function () {

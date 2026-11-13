@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Components\Groups\Slate\SlateTabs;
 
 it('has the correct NAME constant', function () {
-    expect(SlateTabs::NAME)->toBe('Tabs');
+    expect(SlateTabs::NAME)->toBe('Slate Tabs');
 });
 
 it('returns 1 tab variant', function () {
