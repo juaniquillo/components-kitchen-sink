@@ -410,6 +410,55 @@ it('refuses a scaffold smaller than one row or column', function () {
     expect($tree['nodes']['n1']['children'])->toBe(['n2', 'n3']);
 });
 
+it('scaffolds a details with an empty summary', function () {
+    $tree = TreeMutator::scaffoldDetails(
+        $this->tree,
+        'n1',
+        '',
+        false,
+        fn (string $id): string => $id.'x',
+    );
+
+    expect($tree['nodes']['n1']['children'])->toBe(['n2', 'n3', 'n1x'])
+        ->and($tree['nodes']['n1x']['type'])->toBe('details.details')
+        ->and($tree['nodes']['n1x']['children'])->toBe(['n1xx'])
+        ->and($tree['nodes']['n1x']['attrs'])->toBe([])
+        ->and($tree['nodes']['n1xx']['type'])->toBe('details.summary')
+        ->and($tree['nodes']['n1xx']['children'])->toBe([]);
+});
+
+it('scaffolds a details with the summary and openness asked for', function () {
+    $tree = TreeMutator::scaffoldDetails(
+        $this->tree,
+        'n1',
+        'Shipping',
+        true,
+        fn (string $id): string => $id.'x',
+    );
+
+    expect($tree['nodes']['n1x']['type'])->toBe('details.details')
+        ->and($tree['nodes']['n1x']['attrs'])->toBe(['open' => 'open'])
+        ->and($tree['nodes']['n1x']['children'])->toBe(['n1xx'])
+        ->and($tree['nodes']['n1xx']['type'])->toBe('details.summary')
+        ->and($tree['nodes']['n1xx']['children'])->toBe(['n1xxx'])
+        ->and($tree['nodes']['n1xxx']['type'])->toBe(BuilderNode::TYPE_TEXT)
+        ->and($tree['nodes']['n1xxx']['text'])->toBe('Shipping');
+});
+
+it('refuses a details where the parent does not take one', function () {
+    // A paragraph holds phrasing content, and a details is flow content.
+    $scaffolded = TreeMutator::scaffoldDetails(
+        $this->tree,
+        'n3',
+        'Summary',
+        true,
+        fn (string $id): string => $id.'x',
+    );
+
+    expect($scaffolded['nodes']['n3']['children'])->toBe([])
+        ->and(count($scaffolded['nodes']))->toBe(count($this->tree['nodes']));
+});
+
 it('copies a row below itself without the texts of its cells', function () {
     $tree = tableTree();
 

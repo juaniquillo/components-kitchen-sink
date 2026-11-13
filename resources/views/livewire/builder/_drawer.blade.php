@@ -1,3 +1,4 @@
+@use('App\Builder\Scaffolds\ScaffoldFieldType')
 @use('App\Livewire\Builder\DrawerMode')
 @use('App\Livewire\Builder\NoticeSurface')
 
@@ -21,7 +22,7 @@
     <div class="mb-4 flex items-center justify-between">
         <h2 class="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
             {{ match ($drawer) {
-                DrawerMode::TABLE => 'Add table',
+                DrawerMode::SCAFFOLD => $this->scaffoldDefinition()?->drawerTitle ?? 'Add',
                 DrawerMode::THEMES => 'Themes',
                 default => 'Configure',
             } }}
@@ -30,46 +31,54 @@
         <x-bw-button x-ref="close" wire:click="closeConfig">Close</x-bw-button>
     </div>
 
-    @if ($drawer === DrawerMode::TABLE)
+    @if ($drawer === DrawerMode::SCAFFOLD && ($definition = $this->scaffoldDefinition()) !== null)
         <div class="space-y-5">
             <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                A skeleton with a head row and the body rows goes under the
-                node <span class="font-medium text-slate-600 dark:text-slate-300">{{ $drawerTarget }}</span>.
-                Every cell holds a dash until something is typed into it.
+                {{ $definition->blurb }} under the node
+                <span class="font-medium text-slate-600 dark:text-slate-300">{{ $drawerTarget }}</span>.
+                {{ $definition->hint }}
             </p>
 
-            <div class="grid grid-cols-2 gap-2">
-                <label>
-                    <span class="mb-1 block text-[11px] font-medium text-slate-500 dark:text-slate-400">Columns</span>
+            <div class="space-y-2">
+                @foreach ($definition->fields as $field)
+                    @if ($field->type === ScaffoldFieldType::NUMBER)
+                        <label>
+                            <span class="mb-1 block text-[11px] font-medium text-slate-500 dark:text-slate-400">{{ $field->label }}</span>
 
-                    <input
-                        type="number"
-                        min="1"
-                        max="99"
-                        wire:model.number="newTableColumns"
-                        class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
-                    />
-                </label>
+                            <input
+                                type="number"
+                                min="{{ $field->min }}"
+                                max="{{ $field->max }}"
+                                wire:model.number="scaffoldValues.{{ $field->name }}"
+                                class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
+                            />
+                        </label>
+                    @elseif ($field->type === ScaffoldFieldType::TEXT)
+                        <label>
+                            <span class="mb-1 block text-[11px] font-medium text-slate-500 dark:text-slate-400">{{ $field->label }}</span>
 
-                <label>
-                    <span class="mb-1 block text-[11px] font-medium text-slate-500 dark:text-slate-400">Rows</span>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="99"
-                        wire:model.number="newTableRows"
-                        class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
-                    />
-                </label>
+                            <input
+                                type="text"
+                                wire:model="scaffoldValues.{{ $field->name }}"
+                                placeholder="{{ $field->placeholder }}"
+                                class="w-full rounded border border-slate-200 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-900"
+                            />
+                        </label>
+                    @elseif ($field->type === ScaffoldFieldType::CHECKBOX)
+                        <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+                            <input type="checkbox" wire:model="scaffoldValues.{{ $field->name }}" />
+                            {{ $field->label }}
+                        </label>
+                    @endif
+                @endforeach
             </div>
 
-            @if ($tableMessage = $this->noticeOn(NoticeSurface::TABLE))
-                <p class="text-[11px] text-red-500" role="alert">{{ $tableMessage }}</p>
+            @if ($scaffoldMessage = $this->noticeOn($definition->notice))
+                <p class="text-[11px] text-red-500" role="alert">{{ $scaffoldMessage }}</p>
             @endif
 
             <div class="flex gap-2">
-                <x-bw-button variant="primary" size="md" wire:click="scaffoldTable">Add table</x-bw-button>
+                <x-bw-button variant="primary" size="md" wire:click="runScaffold">{{ $definition->submitLabel }}</x-bw-button>
 
                 <x-bw-button wire:click="closeConfig">Cancel</x-bw-button>
             </div>

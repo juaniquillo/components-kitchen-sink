@@ -96,9 +96,9 @@ A drag-and-drop builder for `backend-component` trees, at `/builder`. Compose a 
 | Panel | What it does |
 |---|---|
 | **Workspace header** | The workspace name, saved as it is typed, with **Copy link**, **New**, **Reset** and **Delete**. |
-| **Palette** | Every base component, grouped (Layout, Typography, Text, Media & Links, Lists, Table, Form). Click to add. The Table group also offers **Add table…**, which asks for rows and columns and scaffolds the head and body. |
-| **Canvas** | The real rendered output. Drag the handle to reorder a node or move it into another parent; click to select. |
-| **Drawer** | Slides in from the right: the node being configured, the table form, or the themes panel. |
+| **Palette** | Every base component, grouped (Layout, Typography, Text, Media & Links, Lists, Table, Form). Click to add. The Table group also offers **Add table…**, which asks for rows and columns and scaffolds the head and body. The Layout group offers **Add details…**, which asks for a summary and scaffolds it with the details. |
+| **Canvas** | The real rendered output. Drag the handle to reorder a node or move it into another parent; click to select. A closed `<details>` hides its content, so the canvas always shows it open. |
+| **Drawer** | Slides in from the right: the node being configured, the table form, the details form, or the themes panel. |
 | **Generated code** | The PHP for the current tree, with a copy button. |
 
 #### Workspaces
@@ -133,6 +133,7 @@ app/Builder/
 ├── Components/ComponentDescriptor.php + ContentMode.php
 ├── Contracts/BuilderNode.php
 ├── Registries/ComponentRegistry.php + ThemeRegistry.php
+├── Scaffolds/ScaffoldRegistry.php + ScaffoldDefinition.php + ScaffoldField.php + ScaffoldFieldType.php
 └── Support/AttributeGuard.php, ClassList.php, CompositionHistory.php,
              NodeChrome.php, TreeRenderer.php, TreeMutator.php,
              PhpCodeGenerator.php, ThemeArchive.php, CompositionSerializer.php,
@@ -144,6 +145,8 @@ app/Livewire/Builder/BuilderCanvas.php + DrawerMode.php + NoticeSurface.php
 The tree is a flat map of nodes keyed by id, each holding the ids of its children (`App\Builder\Contracts\BuilderNode`). A flat map keeps the type free of recursion, makes moving a node a matter of editing two lists, and stays small on disk.
 
 `TreeRenderer` turns the tree into real `MainBackendComponent` objects, so the canvas is the genuine article — the same code the generator emits, rendered by the same views. `PhpCodeGenerator` walks the same tree to produce the PHP.
+
+Some compounds are not assembled part by part: a table needs its rows and columns up front, and a details without a summary shows the browser's placeholder label. Those live as entries in `ScaffoldRegistry`, each with the form fields the drawer renders and the `TreeMutator` call that builds the compound. A new compound is a single registry entry — the canvas (`scaffoldMode` / `runScaffold`), the drawer panel, the palette buttons and the node menu all read from the registry and need no changes.
 
 #### The node chrome
 
@@ -162,7 +165,7 @@ The chrome has to live *inside* the node it belongs to — the handle must be a 
 
 A `<div>` inside a `<p>` or a `<ul>` is hoisted out by the browser's parser, which would quietly restructure the tree — a `<span>` is the one element that fits inside every phrasing context.
 
-A component that cannot hold a chrome of its own is **wrapped** in a `<span>` that can, so the toolbar still travels with it. The wrapper is builder-only and never reaches the generated code. Four components cannot be wrapped — a `<span>` is invalid inside a `<select>`, an `<optgroup>`, a `<colgroup>` or a `<table>` — so `form.option`, `form.optgroup`, `table.col` and `table.colgroup` keep the **Configure selected** route.
+A component that cannot hold a chrome of its own is **wrapped** in a `<span>` that can, so the toolbar still travels with it. A `details` is wrapped in a block of its own instead: the browser paints the `summary` first no matter where it sits, so a toolbar inside the element would read as belonging to the summary rather than the container. Clicks on the wrapper select the wrapped node, the way clicks on any other chrome select its node. The wrapper is builder-only and never reaches the generated code. Four components cannot be wrapped — a `<span>` is invalid inside a `<select>`, an `<optgroup>`, a `<colgroup>` or a `<table>` — so `form.option`, `form.optgroup`, `table.col` and `table.colgroup` keep the **Configure selected** route.
 
 The chrome is never part of the tree, so the code generator never sees it. A node keeps a row free above its content for the chrome to sit in, and an empty inline element is given a box so it can be seen and grabbed; both are stripped from the generated PHP.
 

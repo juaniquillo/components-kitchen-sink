@@ -9,23 +9,24 @@ use Livewire\Livewire;
 it('offers a table in the menu of the root', function () {
     Livewire::test(BuilderCanvas::class)
         ->assertSee('Add table…', false)
-        ->assertSee('tableMode(', false);
+        ->assertSee("scaffoldMode('table'", false);
 });
 
 it('offers the table form from the palette', function () {
     // The palette has no node of its own, so the form goes where every
     // other palette entry goes: the root, when nothing is selected.
     Livewire::test(BuilderCanvas::class)
-        ->assertSee('wire:click="tableMode"', false)
-        ->call('tableMode')
-        ->assertSet('drawer', DrawerMode::TABLE)
+        ->assertSee('wire:click="scaffoldMode', false)
+        ->call('scaffoldMode', 'table')
+        ->assertSet('drawer', DrawerMode::SCAFFOLD)
+        ->assertSet('scaffoldKey', 'table')
         ->assertSet('drawerTarget', 'n1');
 });
 
 it('puts a palette table in the selected container', function () {
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'div')
-        ->call('tableMode')
+        ->call('scaffoldMode', 'table')
         ->assertSet('drawerTarget', 'n2');
 });
 
@@ -33,17 +34,17 @@ it('puts a palette table in the nearest container of a selection', function () {
     // A paragraph cannot hold a table, so the root takes it instead.
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
-        ->call('tableMode')
+        ->call('scaffoldMode', 'table')
         ->assertSet('drawerTarget', 'n1');
 });
 
 it('opens the table form for a node that takes a table', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->assertSet('drawer', DrawerMode::TABLE)
+        ->call('scaffoldMode', 'table', 'n1')
+        ->assertSet('drawer', DrawerMode::SCAFFOLD)
+        ->assertSet('scaffoldKey', 'table')
         ->assertSet('drawerTarget', 'n1')
-        ->assertSet('newTableColumns', 3)
-        ->assertSet('newTableRows', 2)
+        ->assertSet('scaffoldValues', ['columns' => 3, 'rows' => 2])
         ->assertSee('data-open="true"', false);
 });
 
@@ -52,15 +53,15 @@ it('refuses the table form for a node that cannot hold a table', function () {
     // form does not take its place.
     Livewire::test(BuilderCanvas::class)
         ->call('add', 'paragraph')
-        ->call('tableMode', 'n2')
+        ->call('scaffoldMode', 'table', 'n2')
         ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n2');
 });
 
 it('scaffolds a whole table under the node the form was opened for', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->assertSet('drawer', null)
         ->assertSet('notice', null)
         ->assertSet('tree.nodes.n2.type', 'table.table')
@@ -71,16 +72,16 @@ it('scaffolds a whole table under the node the form was opened for', function ()
 
 it('offers the table operations in the menus of the parts', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->assertSee('Row below', false)
         ->assertSee('Delete column', false);
 });
 
 it('copies a row in the canvas below the one it was asked about', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('addRowBelow', 'n12')
         ->assertSet('tree.nodes.n5.children', ['n12', 'n26', 'n19'])
         ->assertSet('tree.nodes.n26.type', 'table.tr')
@@ -89,8 +90,8 @@ it('copies a row in the canvas below the one it was asked about', function () {
 
 it('adds a column from a row of the canvas', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('addColumn', 'n12')
         ->assertSet('tree.nodes.n4.children', ['n6', 'n8', 'n10', 'n26'])
         ->assertSet('tree.nodes.n12.children', ['n13', 'n15', 'n17', 'n28'])
@@ -99,8 +100,8 @@ it('adds a column from a row of the canvas', function () {
 
 it('removes a column from the canvas when a cell asks', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('deleteColumn', 'n15')
         ->assertSet('tree.nodes.n4.children', ['n6', 'n10'])
         ->assertSet('tree.nodes.n12.children', ['n13', 'n17'])
@@ -114,8 +115,8 @@ it('clears the selection of a cell the column operation took out', function () {
     // deletion. A selection left on a node that is not there makes the
     // button that configures it do nothing at all.
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('select', 'n22')
         ->call('deleteColumn', 'n15')
         ->assertSet('selectedId', 'n1');
@@ -123,8 +124,8 @@ it('clears the selection of a cell the column operation took out', function () {
 
 it('closes the drawer of a cell the column operation took out', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('openConfig', 'n22')
         ->call('deleteColumn', 'n15')
         ->assertSet('drawer', null);
@@ -132,8 +133,8 @@ it('closes the drawer of a cell the column operation took out', function () {
 
 it('leaves the selection alone when the column is refused', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('openConfig', 'n13')
         ->set('attributeName', 'colspan')
         ->set('attributeValue', '2')
@@ -145,8 +146,8 @@ it('leaves the selection alone when the column is refused', function () {
 
 it('refuses a column while a cell of the table spans rows or columns', function () {
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('openConfig', 'n13')
         ->set('attributeName', 'colspan')
         ->set('attributeValue', '2')
@@ -158,8 +159,8 @@ it('refuses a column while a cell of the table spans rows or columns', function 
 
 it('refuses a head the table already holds', function () {
     $component = Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->assertSet('notice', null);
 
     $before = count($component->instance()->tree['nodes']);
@@ -178,8 +179,8 @@ it('refuses a head the table already holds', function () {
 
 it('takes a foot the table does not hold yet', function () {
     $component = Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->call('runScaffold')
         ->call('add', 'table.tfoot', 'n2');
 
     $tree = $component->instance()->tree;

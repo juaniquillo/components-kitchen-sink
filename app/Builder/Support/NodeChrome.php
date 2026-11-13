@@ -6,6 +6,7 @@ namespace App\Builder\Support;
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
+use App\Builder\Scaffolds\ScaffoldRegistry;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 
@@ -33,57 +34,57 @@ final class NodeChrome
     /**
      * The tag the chrome uses inside a given component.
      *
-     * @var array<string, string>
+     * @var array<string, ChromeTag>
      */
     private const TAGS = [
         // Flow containers: anything goes.
-        'div' => 'div',
-        'collection' => 'div',
-        'template' => 'div',
-        'details.details' => 'div',
-        'layers.dialog' => 'div',
-        'form.form' => 'div',
-        'form.fieldset' => 'div',
-        'lists.li' => 'div',
+        'div' => ChromeTag::DIV,
+        'collection' => ChromeTag::DIV,
+        'template' => ChromeTag::DIV,
+        'details.details' => ChromeTag::DIV,
+        'layers.dialog' => ChromeTag::DIV,
+        'form.form' => ChromeTag::DIV,
+        'form.fieldset' => ChromeTag::DIV,
+        'lists.li' => ChromeTag::DIV,
 
         // Phrasing only: a span is the one element that always fits.
-        'paragraph' => 'span',
-        'headers.h1' => 'span',
-        'headers.h2' => 'span',
-        'headers.h3' => 'span',
-        'headers.h4' => 'span',
-        'headers.h5' => 'span',
-        'headers.h6' => 'span',
-        'inline.span' => 'span',
-        'inline.bold' => 'span',
-        'inline.strong' => 'span',
-        'inline.em' => 'span',
-        'inline.italic' => 'span',
-        'inline.small' => 'span',
-        'inline.link' => 'span',
-        'inline.button' => 'span',
-        'form.label' => 'span',
-        'form.legend' => 'span',
-        'details.summary' => 'span',
-        'table.th' => 'span',
-        'table.td' => 'span',
-        'table.caption' => 'span',
+        'paragraph' => ChromeTag::SPAN,
+        'headers.h1' => ChromeTag::SPAN,
+        'headers.h2' => ChromeTag::SPAN,
+        'headers.h3' => ChromeTag::SPAN,
+        'headers.h4' => ChromeTag::SPAN,
+        'headers.h5' => ChromeTag::SPAN,
+        'headers.h6' => ChromeTag::SPAN,
+        'inline.span' => ChromeTag::SPAN,
+        'inline.bold' => ChromeTag::SPAN,
+        'inline.strong' => ChromeTag::SPAN,
+        'inline.em' => ChromeTag::SPAN,
+        'inline.italic' => ChromeTag::SPAN,
+        'inline.small' => ChromeTag::SPAN,
+        'inline.link' => ChromeTag::SPAN,
+        'inline.button' => ChromeTag::SPAN,
+        'form.label' => ChromeTag::SPAN,
+        'form.legend' => ChromeTag::SPAN,
+        'details.summary' => ChromeTag::SPAN,
+        'table.th' => ChromeTag::SPAN,
+        'table.td' => ChromeTag::SPAN,
+        'table.caption' => ChromeTag::SPAN,
 
         // Lists only hold list items.
-        'lists.ul' => 'li',
-        'lists.ol' => 'li',
+        'lists.ul' => ChromeTag::LI,
+        'lists.ol' => ChromeTag::LI,
 
         // Rows only hold cells, so a row's chrome is a row of its own: the
         // renderer places it after the row it belongs to.
-        'table.tr' => 'tr',
+        'table.tr' => ChromeTag::TR,
 
         // Table sections only hold rows.
-        'table.thead' => 'tr',
-        'table.tbody' => 'tr',
-        'table.tfoot' => 'tr',
+        'table.thead' => ChromeTag::TR,
+        'table.tbody' => ChromeTag::TR,
+        'table.tfoot' => ChromeTag::TR,
 
         // A table only holds a caption, and it has to come first.
-        'table.table' => 'caption',
+        'table.table' => ChromeTag::CAPTION,
     ];
 
     /**
@@ -141,20 +142,23 @@ final class NodeChrome
      *
      * The chrome's controls are buttons, and a button cannot hold a button:
      * the browser takes the inner ones out of the chrome, and with them the
-     * chrome's Alpine scope goes. Such a node is wrapped instead, so the
-     * chrome rides along outside the button.
+     * chrome's Alpine scope goes. A summary paints first no matter where it
+     * sits in a details, so a chrome inside one would read as belonging to
+     * the summary instead of the container. Such nodes are wrapped instead,
+     * so the chrome rides along outside them.
      *
      * @var array<int, string>
      */
     private const CANNOT_HOLD = [
         'inline.button',
+        'details.details',
     ];
 
     /**
      * The tag the chrome uses for a component, or null when the component
      * cannot hold one of its own.
      */
-    public static function tag(string $type): ?string
+    public static function tag(string $type): ?ChromeTag
     {
         return self::TAGS[$type] ?? null;
     }
@@ -181,7 +185,7 @@ final class NodeChrome
     {
         $id = $node['id'];
 
-        $chrome = new MainBackendComponent(self::COMPONENTS[self::tag($node['type']) ?? 'span']);
+        $chrome = new MainBackendComponent(self::COMPONENTS[self::tag($node['type'])->value ?? 'span']);
 
         // The chrome is a bar in the flow of its node: the layout engine of
         // the browser keeps everything apart, where a floating toolbar landed
@@ -201,7 +205,7 @@ final class NodeChrome
 
         $tag = self::tag($node['type']);
 
-        if ($tag === 'tr') {
+        if ($tag === ChromeTag::TR) {
             // A row's chrome is a table row as well, so a row cannot be a
             // bar. Its display stays a table row and its styling moves to
             // the cell that carries the toolbar; the display the chrome
@@ -209,7 +213,7 @@ final class NodeChrome
             // stylesheet of the canvas uses.
             $attributes['class'] = 'bw-chrome';
             $attributes['style'] = '--bw-chrome-display: table-row;';
-        } elseif ($tag === 'caption') {
+        } elseif ($tag === ChromeTag::CAPTION) {
             // A table hosts its chrome in a caption, the one element a table
             // may carry besides its parts, and the one that renders above
             // them. The display of a caption has to stay a caption: any
@@ -265,8 +269,8 @@ final class NodeChrome
         // table section the toolbar travels in a cell. The cell spans the
         // columns of the table, so the toolbar sits at its right edge like
         // the bars of the other nodes do.
-        if (self::tag($node['type']) === 'tr') {
-            $cell = new MainBackendComponent(self::COMPONENTS['td']);
+        if (self::tag($node['type']) === ChromeTag::TR) {
+            $cell = new MainBackendComponent(self::COMPONENTS[ChromeTag::TD->value]);
 
             $cell->setAttributes([
                 // The browser clamps a colspan wider than the table.
@@ -276,7 +280,7 @@ final class NodeChrome
 
             $cell->setContents($contents);
             $chrome->setContents([$cell]);
-        } elseif ($tag === 'caption') {
+        } elseif ($tag === ChromeTag::CAPTION) {
             // The caption carries the bar of the toolbar in one element of
             // its own: the bar keeps the styling the other bars have, and
             // the caption keeps the display a caption has to have.
@@ -537,12 +541,12 @@ final class NodeChrome
     }
 
     /**
-     * The table operations the menu of a node offers.
+     * The scaffold operations the menu of a node offers.
      *
-     * A table is the one component that is not assembled part by part: the
-     * node that can hold one offers its scaffold, and the parts offer the
-     * row and column operations that finish the job. Every operation calls
-     * the canvas, where the tree is.
+     * Some components are not assembled part by part: the node that can
+     * hold one offers its scaffold, and the form asks what cannot be
+     * clicked together. Every operation calls the canvas, where the tree
+     * is.
      *
      * @param  Node  $node
      * @return array<int, array{label: string, wire: string}>
@@ -552,10 +556,10 @@ final class NodeChrome
         $actions = [];
         $id = $node['id'];
 
-        if (in_array('table.table', self::allowedChildren($node), true)) {
+        foreach (ScaffoldRegistry::forAllowedChildren(self::allowedChildren($node)) as $definition) {
             $actions[] = [
-                'label' => 'Add table…',
-                'wire' => "\$wire.tableMode('".$id."')",
+                'label' => $definition->menuLabel,
+                'wire' => "\$wire.scaffoldMode('".$definition->key."', '".$id."')",
             ];
         }
 

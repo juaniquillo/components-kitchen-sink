@@ -736,6 +736,57 @@ final class TreeMutator
     }
 
     /**
+     * Add a whole details under a node.
+     *
+     * A details on its own shows the browser's placeholder label, so the
+     * summary goes in with it: with the label when the form asked for one,
+     * empty when it did not, and open when the form asked for it.
+     *
+     * @param  Tree  $tree
+     * @param  callable(string): string  $idFactory
+     * @return Tree
+     */
+    public static function scaffoldDetails(array $tree, string $parentId, string $summary, bool $open, callable $idFactory): array
+    {
+        $detailsId = $idFactory($parentId);
+        $summaryId = $idFactory($detailsId);
+
+        $details = BuilderNode::make($detailsId, 'details.details');
+
+        if ($open) {
+            $details['attrs']['open'] = 'open';
+        }
+
+        $summaryNode = BuilderNode::make($summaryId, 'details.summary');
+
+        $nodes = [$summaryId => $summaryNode];
+
+        if (trim($summary) !== '') {
+            $textId = $idFactory($summaryId);
+
+            $nodes[$textId] = BuilderNode::make($textId, BuilderNode::TYPE_TEXT, $summary);
+            $summaryNode['children'] = [$textId];
+            $nodes[$summaryId] = $summaryNode;
+        }
+
+        $details['children'] = [$summaryId];
+
+        // The parent is the one place the compound can be refused, because
+        // a summary is always allowed by the details before it.
+        $tree = self::addChild($tree, $parentId, $details);
+
+        if (! isset($tree['nodes'][$detailsId])) {
+            return $tree;
+        }
+
+        foreach ($nodes as $id => $node) {
+            $tree['nodes'][$id] = $node;
+        }
+
+        return $tree;
+    }
+
+    /**
      * Find a node by id.
      *
      * @param  Tree  $tree

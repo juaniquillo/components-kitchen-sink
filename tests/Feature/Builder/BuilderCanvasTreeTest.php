@@ -301,7 +301,7 @@ it('gives the configuration back when a node is asked about', function () {
     // The drawer shows one thing at a time: the node a user opened on the
     // canvas takes the place of the form the table had.
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
+        ->call('scaffoldMode', 'table', 'n1')
         ->call('openConfig', 'n1')
         ->assertSet('drawer', DrawerMode::NODE)
         ->assertSet('drawerTarget', 'n1')
@@ -312,10 +312,9 @@ it('scaffolds the size the form asks for, and nothing smaller', function () {
     // The columns and the rows are clamped between 1 and 99: whatever the
     // browser sends, a table always comes out with at least one of each.
     Livewire::test(BuilderCanvas::class)
-        ->call('tableMode', 'n1')
-        ->set('newTableColumns', 0)
-        ->set('newTableRows', 0)
-        ->call('scaffoldTable')
+        ->call('scaffoldMode', 'table', 'n1')
+        ->set('scaffoldValues', ['columns' => 0, 'rows' => 0])
+        ->call('runScaffold')
         ->assertSet('tree.nodes.n4.children', ['n6'])
         ->assertSet('tree.nodes.n5.children', ['n8']);
 });

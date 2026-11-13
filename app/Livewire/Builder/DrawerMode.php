@@ -15,6 +15,6 @@ namespace App\Livewire\Builder;
 enum DrawerMode: string
 {
     case NODE = 'node';
-    case TABLE = 'table';
+    case SCAFFOLD = 'scaffold';
     case THEMES = 'themes';
 }

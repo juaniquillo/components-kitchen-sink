@@ -17,6 +17,7 @@ enum NoticeSurface: string
     case CANVAS = 'canvas';
     case NODE = 'node';
     case TABLE = 'table';
+    case DETAILS = 'details';
     case THEME = 'theme';
     case ATTRIBUTE = 'attribute';
 }

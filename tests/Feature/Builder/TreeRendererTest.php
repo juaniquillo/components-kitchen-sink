@@ -111,6 +111,7 @@ it('wraps a textarea, whose contents are text and not markup', function () {
     // first element of the wrapper, like the bar of any other node is.
     expect($html)->toContain('bw-wrap')
         ->toContain('bw-chrome')
+        ->toContain('wire:click.stop.prevent="select(\'n1\')"')
         ->toContain('<textarea')
         ->and(strpos($html, 'bw-chrome'))->toBeLessThan(strpos($html, '<textarea'));
 });
@@ -586,4 +587,60 @@ it('renders a clean copy with none of the builders additions', function () {
         ->not->toContain('data-node-id')
         ->not->toContain('position: relative')
         ->not->toContain('padding-top');
+});
+
+it('keeps a details open in the canvas, with its chrome', function () {
+    // A closed details hides everything inside it, including the chrome,
+    // and the browser paints its own "Details" label instead, so the
+    // canvas always shows the open state.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'details.details');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'details.summary');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->toContain('<details')
+        ->toContain('open="open"')
+        ->toContain('<summary')
+        ->toContain('bw-chrome');
+});
+
+it('leaves a details closed in the clean render', function () {
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'details.details');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'details.summary');
+
+    $html = (new TreeRenderer)->render($tree, null, clean: true);
+
+    expect($html)->toContain('<details')
+        ->toContain('<summary')
+        ->not->toContain('open="open"')
+        ->not->toContain('bw-chrome');
+});
+
+it('wraps a details, whose summary paints first no matter where it sits', function () {
+    // The browser paints the summary first even ahead of a chrome inside
+    // the details, so the toolbar rides in a block wrapper above the
+    // element instead: container chrome first, then the summary row.
+    $tree = BuilderNode::tree('n1', 'div');
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'details.details');
+    $tree['nodes']['n2']['children'] = ['n3'];
+    $tree['nodes']['n3'] = BuilderNode::make('n3', 'details.summary');
+    $tree['nodes']['n3']['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, 'Shipping');
+
+    $html = (new TreeRenderer)->render($tree);
+
+    expect($html)->toContain('bw-wrap')
+        ->toContain('display: block;')
+        ->toContain('wire:sort:item="n2"')
+        ->toContain('wire:click.stop.prevent="select(\'n2\')"')
+        ->toContain('<details')
+        ->toContain('<summary')
+        ->and(strpos($html, 'chrome-n2'))->toBeLessThan(strpos($html, '<details'));
 });

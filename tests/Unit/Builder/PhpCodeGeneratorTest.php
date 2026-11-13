@@ -203,3 +203,18 @@ it('produces a pasteable snippet with the imports', function () {
         ->toContain('use Juaniquillo\BackendComponents\Enums\ComponentEnum;')
         ->toContain('$component = ComponentFactory::make(ComponentEnum::DIV);');
 });
+
+it('emits a details with its summary and open state', function () {
+    $tree = BuilderNode::tree('n1', 'details.details');
+    $tree['nodes']['n1']['attrs'] = ['open' => 'open'];
+    $tree['nodes']['n1']['children'] = ['n2'];
+    $tree['nodes']['n2'] = BuilderNode::make('n2', 'details.summary');
+    $tree['nodes']['n2']['children'] = ['t1'];
+    $tree['nodes']['t1'] = BuilderNode::make('t1', BuilderNode::TYPE_TEXT, 'Shipping');
+
+    expect($this->generator->expression($tree, 'n1'))
+        ->toContain('ComponentFactory::make(ComponentEnum::DETAILS)')
+        ->toContain("'open' => 'open',")
+        ->toContain('ComponentFactory::make(ComponentEnum::SUMMARY)')
+        ->toContain("'Shipping',");
+});

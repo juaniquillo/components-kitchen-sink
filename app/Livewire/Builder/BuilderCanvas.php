@@ -8,6 +8,8 @@ use App\Builder\Components\ComponentDescriptor;
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
 use App\Builder\Registries\ThemeRegistry;
+use App\Builder\Scaffolds\ScaffoldDefinition;
+use App\Builder\Scaffolds\ScaffoldRegistry;
 use App\Builder\Support\AttributeGuard;
 use App\Builder\Support\ClassList;
 use App\Builder\Support\CompositionHistory;
@@ -107,14 +109,16 @@ class BuilderCanvas extends Component
     public ?array $notice = null;
 
     /**
-     * The number of columns the table form is set to.
+     * The values the scaffold form is set to, keyed by field name.
+     *
+     * @var array<string, mixed>
      */
-    public int $newTableColumns = 3;
+    public array $scaffoldValues = [];
 
     /**
-     * The number of body rows the table form is set to.
+     * The scaffold the drawer form is asking for, if it is showing.
      */
-    public int $newTableRows = 2;
+    public ?string $scaffoldKey = null;
 
     /**
      * The name of the workspace, as it is being typed.
@@ -606,7 +610,7 @@ class BuilderCanvas extends Component
      */
     private function clearConfiguring(): void
     {
-        if ($this->drawer === DrawerMode::NODE || $this->drawer === DrawerMode::TABLE) {
+        if ($this->drawer === DrawerMode::NODE || $this->drawer === DrawerMode::SCAFFOLD) {
             $this->drawer = null;
             $this->drawerTarget = null;
         }
@@ -629,7 +633,7 @@ class BuilderCanvas extends Component
     private function openDrawer(DrawerMode $mode, ?string $target = null): void
     {
         $this->drawer = $mode;
-        $this->drawerTarget = $mode === DrawerMode::NODE || $mode === DrawerMode::TABLE ? $target : null;
+        $this->drawerTarget = $mode === DrawerMode::NODE || $mode === DrawerMode::SCAFFOLD ? $target : null;
 
         // The panel is a place of its own, so the keyboard focus goes with
         // the panel instead of staying behind on the canvas.
@@ -645,11 +649,23 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * The node the table form is putting a table under, if it is showing.
+     * The scaffold the drawer form is asking for, if it is showing.
      */
-    private function tableParentId(): ?string
+    public function scaffoldDefinition(): ?ScaffoldDefinition
     {
-        return $this->drawer === DrawerMode::TABLE ? $this->drawerTarget : null;
+        if ($this->drawer !== DrawerMode::SCAFFOLD || $this->scaffoldKey === null) {
+            return null;
+        }
+
+        return ScaffoldRegistry::get($this->scaffoldKey);
+    }
+
+    /**
+     * The node the scaffold form is putting a scaffold under, if it is showing.
+     */
+    private function scaffoldParentId(): ?string
+    {
+        return $this->drawer === DrawerMode::SCAFFOLD ? $this->drawerTarget : null;
     }
 
     /**
@@ -790,6 +806,14 @@ class BuilderCanvas extends Component
             // the one to ask about it.
             if (! in_array($node['id'], $this->tree['nodes'][$parentId]['children'] ?? [], true)) {
                 return;
+            }
+
+            // A details without a summary shows the browser's own
+            // "Details" label instead of real content, so one is added
+            // with it, empty and ready for the text entry.
+            if ($type === 'details.details') {
+                $summary = BuilderNode::make($this->nextId(), 'details.summary');
+                $this->tree = TreeMutator::addChild($this->tree, $node['id'], $summary);
             }
 
             $this->selectedId = $node['id'];
@@ -937,15 +961,21 @@ class BuilderCanvas extends Component
     }
 
     /**
-     * Open the drawer with the table form, for the node a table goes under.
+     * Open the drawer with a scaffold form, for the node a scaffold goes under.
      *
      * The palette offers the same form without a node of its own, so the
-     * table goes where any other palette entry goes: into the container the
-     * selection is in.
+     * scaffold goes where any other palette entry goes: into the container
+     * the selection is in.
      */
-    public function tableMode(?string $nodeId = null): void
+    public function scaffoldMode(string $key, ?string $nodeId = null): void
     {
-        $nodeId ??= $this->targetParent('table.table');
+        $definition = ScaffoldRegistry::get($key);
+
+        if ($definition === null) {
+            return;
+        }
+
+        $nodeId ??= $this->targetParent($definition->rootType);
 
         $node = TreeMutator::find($this->tree, $nodeId);
 
@@ -955,27 +985,28 @@ class BuilderCanvas extends Component
 
         $descriptor = ComponentRegistry::get($node['type']);
 
-        if ($descriptor === null || ! $descriptor->allowsChild('table.table')) {
+        if ($descriptor === null || ! $descriptor->allowsChild($definition->rootType)) {
             return;
         }
 
         $this->closeConfig();
 
         $this->selectedId = $nodeId;
-        $this->clearNotice(NoticeSurface::TABLE);
-        $this->newTableColumns = 3;
-        $this->newTableRows = 2;
-        $this->openDrawer(DrawerMode::TABLE, $nodeId);
+        $this->clearNotice($definition->notice);
+        $this->scaffoldKey = $key;
+        $this->scaffoldValues = $definition->defaults();
+        $this->openDrawer(DrawerMode::SCAFFOLD, $nodeId);
     }
 
     /**
-     * Add the table skeleton the form is asking for.
+     * Add the scaffold the form is asking for.
      */
-    public function scaffoldTable(): void
+    public function runScaffold(): void
     {
-        $parentId = $this->tableParentId();
+        $definition = $this->scaffoldDefinition();
+        $parentId = $this->scaffoldParentId();
 
-        if ($parentId === null) {
+        if ($definition === null || $parentId === null) {
             return;
         }
 
@@ -985,30 +1016,23 @@ class BuilderCanvas extends Component
             return;
         }
 
-        $columns = max(1, min(99, $this->newTableColumns));
-        $rows = max(1, min(99, $this->newTableRows));
+        $values = $definition->normalize($this->scaffoldValues);
 
         $count = count($this->tree['nodes']);
 
-        $this->transact(function () use ($parentId, $columns, $rows): void {
-            $this->tree = TreeMutator::scaffoldTable(
-                $this->tree,
-                $parentId,
-                $columns,
-                $rows,
-                fn (string $id): string => $this->nextId(),
-            );
+        $this->transact(function () use ($definition, $parentId, $values): void {
+            $this->tree = ($definition->build)($this->tree, $parentId, $values, fn (string $id): string => $this->nextId());
         });
 
-        // The skeleton is only added when the node takes a table, and a
-        // quiet refusal has the reason the form stayed open for.
+        // The scaffold is only added when the node takes it, and a quiet
+        // refusal has the reason the form stayed open for.
         if (count($this->tree['nodes']) === $count) {
-            $this->notify(NoticeSurface::TABLE, 'This node does not take a table.');
+            $this->notify($definition->notice, $definition->refusalMessage);
 
             return;
         }
 
-        $this->clearNotice(NoticeSurface::TABLE);
+        $this->clearNotice($definition->notice);
 
         $this->closeConfig();
     }

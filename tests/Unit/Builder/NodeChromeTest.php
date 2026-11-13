@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Registries\ComponentRegistry;
+use App\Builder\Support\ChromeTag;
 use App\Builder\Support\NodeChrome;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 
@@ -40,22 +41,22 @@ function contentLabels(MainBackendComponent $component): array
 }
 
 it('gives a flow container a div for its chrome', function () {
-    expect(NodeChrome::tag('div'))->toBe('div')
-        ->and(NodeChrome::tag('form.form'))->toBe('div')
-        ->and(NodeChrome::tag('lists.li'))->toBe('div');
+    expect(NodeChrome::tag('div'))->toBe(ChromeTag::DIV)
+        ->and(NodeChrome::tag('form.form'))->toBe(ChromeTag::DIV)
+        ->and(NodeChrome::tag('lists.li'))->toBe(ChromeTag::DIV);
 });
 
 it('gives a phrasing container a span for its chrome', function () {
-    expect(NodeChrome::tag('paragraph'))->toBe('span')
-        ->and(NodeChrome::tag('headers.h1'))->toBe('span')
-        ->and(NodeChrome::tag('table.td'))->toBe('span');
+    expect(NodeChrome::tag('paragraph'))->toBe(ChromeTag::SPAN)
+        ->and(NodeChrome::tag('headers.h1'))->toBe(ChromeTag::SPAN)
+        ->and(NodeChrome::tag('table.td'))->toBe(ChromeTag::SPAN);
 });
 
 it('gives the elements that only accept one kind of child a matching tag', function () {
-    expect(NodeChrome::tag('lists.ul'))->toBe('li')
-        ->and(NodeChrome::tag('table.tr'))->toBe('tr')
-        ->and(NodeChrome::tag('table.tbody'))->toBe('tr')
-        ->and(NodeChrome::tag('table.table'))->toBe('caption');
+    expect(NodeChrome::tag('lists.ul'))->toBe(ChromeTag::LI)
+        ->and(NodeChrome::tag('table.tr'))->toBe(ChromeTag::TR)
+        ->and(NodeChrome::tag('table.tbody'))->toBe(ChromeTag::TR)
+        ->and(NodeChrome::tag('table.table'))->toBe(ChromeTag::CAPTION);
 });
 
 it('gives no chrome to the components that cannot hold one', function () {
@@ -259,7 +260,7 @@ it('offers a table in the menu of a node that takes one', function () {
         }
     }
 
-    expect(implode(' ', $clicks))->toContain('tableMode(')
+    expect(implode(' ', $clicks))->toContain("scaffoldMode('table'")
         ->and(implode(' ', $clicks))->toContain("'n1'");
 });
 
@@ -277,6 +278,40 @@ it('offers no table in the menu of a node that does not take one', function () {
     expect($first === null || (method_exists($first, 'getContent') && $first->getContent()) !== 'Add table…')->toBeTrue();
 });
 
+it('offers details in the menu of a node that takes one', function () {
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'div'));
+
+    $menu = $chrome->getContents()[4] ?? null;
+
+    $parts = $menu ? $menu->getContents() : [];
+    $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
+
+    $clicks = [];
+
+    foreach ($items as $item) {
+        if (method_exists($item, 'getAttributes')) {
+            $clicks[] = $item->getAttributes()['x-on:click'] ?? '';
+        }
+    }
+
+    expect(implode(' ', $clicks))->toContain("scaffoldMode('details'")
+        ->and(implode(' ', $clicks))->toContain("'n1'");
+});
+
+it('offers no details in the menu of a node that does not take one', function () {
+    // A paragraph is phrasing content, and a details is not in it.
+    $chrome = NodeChrome::build(BuilderNode::make('n1', 'paragraph'));
+
+    $menu = $chrome->getContents()[4] ?? null;
+
+    $parts = $menu ? $menu->getContents() : [];
+    $items = $parts !== [] && method_exists($parts[0], 'getContents') ? $parts[0]->getContents() : [];
+
+    $first = $items[0] ?? null;
+
+    expect($first === null || (method_exists($first, 'getContent') && $first->getContent()) !== 'Add details…')->toBeTrue();
+});
+
 it('carries the toolbar of a table section in a cell', function () {
     // A row only holds cells, and if the chrome went straight into the row,
     // the parser would take the toolbar out of it and leave it without its
@@ -286,7 +321,7 @@ it('carries the toolbar of a table section in a cell', function () {
     $contents = $chrome->getContents();
 
     expect(count($contents))->toBe(1)
-        ->and(NodeChrome::tag('table.thead'))->toBe('tr')
+        ->and(NodeChrome::tag('table.thead'))->toBe(ChromeTag::TR)
         ->and($contents[0])->toBeInstanceOf(MainBackendComponent::class)
         ->and(count($contents[0]->getContents()))->toBe(6);
 });
@@ -312,7 +347,7 @@ it('rows the toolbar of a row under the row', function () {
 
     $cell = $chrome->getContents()[0];
 
-    expect(NodeChrome::tag('table.tr'))->toBe('tr')
+    expect(NodeChrome::tag('table.tr'))->toBe(ChromeTag::TR)
         ->and($chrome->getAttributes()['class'] ?? '')->toBe('bw-chrome')
         ->and($chrome->getAttributes()['style'] ?? '')->toContain('--bw-chrome-display: table-row;')
         ->and($cell->getAttributes())->toHaveKey('colspan', '999');
@@ -326,7 +361,7 @@ it('keeps the caption of a table a caption', function () {
     // one element of its own, the way a row's does in its cell.
     $chrome = NodeChrome::build(BuilderNode::make('n1', 'table.table'));
 
-    expect(NodeChrome::tag('table.table'))->toBe('caption')
+    expect(NodeChrome::tag('table.table'))->toBe(ChromeTag::CAPTION)
         ->and($chrome->getAttributes()['class'] ?? '')->toBe('bw-chrome')
         ->and($chrome->getAttributes()['style'] ?? '')->toContain('--bw-chrome-display: table-caption;')
         ->and(count($chrome->getContents()))->toBe(1);

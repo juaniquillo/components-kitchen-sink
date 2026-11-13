@@ -126,7 +126,10 @@ final class TreeRenderer
             );
 
         if ($chrome !== null && ! $hostsOwnChrome) {
-            return $this->buildWrapped($tree, $node, $chrome, $selectedId, $clean);
+            // The wrapper matches the display level of the node it wraps:
+            // an inline element keeps an inline wrapper, a block one keeps
+            // a block wrapper, so the canvas lays out like the clean render.
+            return $this->buildWrapped($tree, $node, $chrome, $selectedId, $clean, block: ! ComponentRegistry::isInline($node['type']));
         }
 
         if ($chrome !== null && $flowsAcross && ! $overlay) {
@@ -186,6 +189,11 @@ final class TreeRenderer
             'wire:key' => $node['id'],
             'class' => 'bw-wrap',
             'style' => $block ? 'display: block;' : 'display: inline-block;',
+            // A click on the chrome belongs to the node, and the chrome of
+            // a wrapped node hangs on the wrapper: without this, the click
+            // would bubble past the wrapper to the parent container and
+            // select the parent instead.
+            'wire:click.stop.prevent' => "select('".$node['id']."')",
         ];
 
         // The chrome of the wrapped node hangs on the wrapper, so the
@@ -208,6 +216,7 @@ final class TreeRenderer
             // container above it, and the whole node would be dragged.
             ...$this->sortAttributes($node),
             ...$this->themedAttributes($node),
+            ...$this->forcedAttributes($node, $clean),
             'data-node-id' => $node['id'],
             // The same prevention the nodes that hold a chrome of their
             // own carry: a click in the canvas selects, and does not
@@ -237,6 +246,26 @@ final class TreeRenderer
         $wrapper->setContents([$chrome, $inner]);
 
         return $wrapper;
+    }
+
+    /**
+     * The attributes the builder forces onto a node in the canvas.
+     *
+     * A closed details hides everything inside it, including the chrome,
+     * and the browser paints its own "Details" label instead. The canvas
+     * is for editing, so it always shows the open state; the clean render
+     * keeps whatever the user set.
+     *
+     * @param  Node  $node
+     * @return array<string, string>
+     */
+    private function forcedAttributes(array $node, bool $clean): array
+    {
+        if ($clean || $node['type'] !== 'details.details') {
+            return [];
+        }
+
+        return ['open' => 'open'];
     }
 
     /**
@@ -329,7 +358,7 @@ final class TreeRenderer
             $attributes['wire:sort:handle'] = '';
         }
 
-        $attributes = array_merge($attributes, $this->themedAttributes($node));
+        $attributes = array_merge($attributes, $this->themedAttributes($node), $this->forcedAttributes($node, $clean));
 
         $style = $this->style($node, $positioned);
 
