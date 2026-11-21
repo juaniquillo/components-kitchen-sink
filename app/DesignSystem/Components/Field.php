@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\DesignSystem\Components;
 
+use App\DesignSystem\Concerns\IsDesignComponent;
 use App\DesignSystem\Contracts\DesignComponent;
-use App\DesignSystem\Design;
-use App\DesignSystem\DesignRegistry;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
-use RuntimeException;
 
 final class Field implements DesignComponent
 {
+    use IsDesignComponent;
+
     private string|BackendComponent|null $label = null;
 
     private string|BackendComponent|null $input = null;
@@ -27,13 +26,6 @@ final class Field implements DesignComponent
 
     /** @var array<string, int|string> */
     private array $attributes = [];
-
-    private function __construct(private readonly Design $design) {}
-
-    public static function make(?Design $design = null): static
-    {
-        return new self($design ?? DesignRegistry::current());
-    }
 
     public function label(string|BackendComponent $label): static
     {
@@ -70,14 +62,7 @@ final class Field implements DesignComponent
         return $this;
     }
 
-    public function attributes(array $attributes): static
-    {
-        $this->attributes = [...$this->attributes, ...$attributes];
-
-        return $this;
-    }
-
-    public function component(): MainBackendComponent
+    protected function build(): MainBackendComponent
     {
         $label = $this->label;
         $input = $this->input;
@@ -127,15 +112,11 @@ final class Field implements DesignComponent
                 : $this->buildError($error, $id);
         }
 
-        $component = ComponentFactory::make(ComponentEnum::DIV)
+        $component = $this->makeComponent(ComponentEnum::DIV)
             ->setThemeManager($this->design->themeManager)
             ->setContents($contents)
             ->setTheme('field', 'container')
             ->setAttributes($this->attributes);
-
-        if (! $component instanceof MainBackendComponent) {
-            throw new RuntimeException('Design components build MainBackendComponent instances.');
-        }
 
         return $component;
     }
@@ -203,7 +184,7 @@ final class Field implements DesignComponent
 
     private function buildError(string $text, ?string $id): BackendComponent
     {
-        $error = ComponentFactory::make(ComponentEnum::DIV)
+        $error = $this->makeComponent(ComponentEnum::DIV)
             ->setThemeManager($this->design->themeManager)
             ->setContent($text)
             ->setTheme('field', 'error');
@@ -213,10 +194,5 @@ final class Field implements DesignComponent
         }
 
         return $error;
-    }
-
-    public function toHtml(): string
-    {
-        return $this->component()->toHtml();
     }
 }

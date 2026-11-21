@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\DesignSystem\Components;
 
+use App\DesignSystem\Concerns\IsDesignComponent;
 use App\DesignSystem\Contracts\DesignComponent;
-use App\DesignSystem\Design;
-use App\DesignSystem\DesignRegistry;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
-use RuntimeException;
 
 final class Card implements DesignComponent
 {
+    use IsDesignComponent;
+
     private string|BackendComponent|null $title = null;
 
     private string|BackendComponent|null $body = null;
@@ -25,13 +24,6 @@ final class Card implements DesignComponent
 
     /** @var array<string, int|string> */
     private array $attributes = [];
-
-    private function __construct(private readonly Design $design) {}
-
-    public static function make(?Design $design = null): static
-    {
-        return new self($design ?? DesignRegistry::current());
-    }
 
     public function title(string|BackendComponent $title): static
     {
@@ -65,14 +57,7 @@ final class Card implements DesignComponent
         return $this;
     }
 
-    public function attributes(array $attributes): static
-    {
-        $this->attributes = [...$this->attributes, ...$attributes];
-
-        return $this;
-    }
-
-    public function component(): MainBackendComponent
+    protected function build(): MainBackendComponent
     {
         $contents = [];
 
@@ -93,16 +78,12 @@ final class Card implements DesignComponent
             $contents[] = $this->section($this->footer, 'foot');
         }
 
-        $component = ComponentFactory::make(ComponentEnum::DIV)
+        $component = $this->makeComponent(ComponentEnum::DIV)
             ->setThemeManager($this->design->themeManager)
             ->setContents($contents)
             ->setTheme('card', 'container')
             ->setTheme('radius', 'md')
             ->setAttributes($this->attributes);
-
-        if (! $component instanceof MainBackendComponent) {
-            throw new RuntimeException('Design components build MainBackendComponent instances.');
-        }
 
         return $component;
     }
@@ -118,7 +99,7 @@ final class Card implements DesignComponent
             default => ComponentEnum::H3,
         };
 
-        return ComponentFactory::make($enum)
+        return $this->makeComponent($enum)
             ->setThemeManager($this->design->themeManager)
             ->setContent($text)
             ->setTheme('card', 'title')
@@ -131,14 +112,9 @@ final class Card implements DesignComponent
             return $content;
         }
 
-        return ComponentFactory::make(ComponentEnum::DIV)
+        return $this->makeComponent(ComponentEnum::DIV)
             ->setThemeManager($this->design->themeManager)
             ->setContent($content)
             ->setTheme('card', $variant);
-    }
-
-    public function toHtml(): string
-    {
-        return $this->component()->toHtml();
     }
 }

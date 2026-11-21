@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\DesignSystem\Components;
 
+use App\DesignSystem\Concerns\IsDesignComponent;
 use App\DesignSystem\Contracts\DesignComponent;
-use App\DesignSystem\Design;
-use App\DesignSystem\DesignRegistry;
 use App\DesignSystem\Theme\Look;
 use App\DesignSystem\Theme\State;
 use App\DesignSystem\ThemeVariants;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
-use RuntimeException;
 
 final class Select implements DesignComponent
 {
+    use IsDesignComponent;
+
     private string $name = '';
 
     /** @var array<string, string> */
@@ -30,13 +29,6 @@ final class Select implements DesignComponent
 
     /** @var array<string, int|string> */
     private array $attributes = [];
-
-    private function __construct(private readonly Design $design) {}
-
-    public static function make(?Design $design = null): static
-    {
-        return new self($design ?? DesignRegistry::current());
-    }
 
     public function name(string $name): static
     {
@@ -78,20 +70,13 @@ final class Select implements DesignComponent
         return $this;
     }
 
-    public function attributes(array $attributes): static
-    {
-        $this->attributes = [...$this->attributes, ...$attributes];
-
-        return $this;
-    }
-
-    public function component(): MainBackendComponent
+    protected function build(): MainBackendComponent
     {
         $variants = ThemeVariants::make()
             ->look(Look::Default)
             ->state($this->disabled ? State::Disabled : null);
 
-        $select = ComponentFactory::make(ComponentEnum::SELECT)
+        $select = $this->makeComponent(ComponentEnum::SELECT)
             ->setThemeManager($this->design->themeManager)
             ->setTheme('select', $variants->all())
             ->setTheme('radius', 'sm');
@@ -101,7 +86,7 @@ final class Select implements DesignComponent
         }
 
         foreach ($this->options as $value => $label) {
-            $option = ComponentFactory::make(ComponentEnum::OPTION)
+            $option = $this->makeComponent(ComponentEnum::OPTION)
                 ->setThemeManager($this->design->themeManager)
                 ->setAttribute('value', (string) $value)
                 ->setContent($label);
@@ -123,15 +108,6 @@ final class Select implements DesignComponent
 
         $component = $select->setAttributes($this->attributes);
 
-        if (! $component instanceof MainBackendComponent) {
-            throw new RuntimeException('Design components build MainBackendComponent instances.');
-        }
-
         return $component;
-    }
-
-    public function toHtml(): string
-    {
-        return $this->component()->toHtml();
     }
 }

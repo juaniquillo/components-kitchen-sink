@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\DesignSystem\Components;
 
+use App\DesignSystem\Concerns\IsDesignComponent;
 use App\DesignSystem\Contracts\DesignComponent;
-use App\DesignSystem\Design;
-use App\DesignSystem\DesignRegistry;
 use App\DesignSystem\Theme\Look;
 use App\DesignSystem\Theme\State;
 use App\DesignSystem\ThemeVariants;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
-use RuntimeException;
 
 final class Input implements DesignComponent
 {
+    use IsDesignComponent;
+
     private string $type = 'text';
 
     private string $name = '';
@@ -31,13 +30,6 @@ final class Input implements DesignComponent
 
     /** @var array<string, int|string> */
     private array $attributes = [];
-
-    private function __construct(private readonly Design $design) {}
-
-    public static function make(?Design $design = null): static
-    {
-        return new self($design ?? DesignRegistry::current());
-    }
 
     public function type(string $type): static
     {
@@ -81,14 +73,7 @@ final class Input implements DesignComponent
         return $this;
     }
 
-    public function attributes(array $attributes): static
-    {
-        $this->attributes = [...$this->attributes, ...$attributes];
-
-        return $this;
-    }
-
-    public function component(): MainBackendComponent
+    protected function build(): MainBackendComponent
     {
         // One input element, and the type as an attribute. The package has
         // dedicated enums for a few types, but they all render the same
@@ -102,7 +87,7 @@ final class Input implements DesignComponent
             ->look(Look::Default)
             ->state($this->disabled ? State::Disabled : null);
 
-        $input = ComponentFactory::make(ComponentEnum::TEXT_INPUT)
+        $input = $this->makeComponent(ComponentEnum::TEXT_INPUT)
             ->setThemeManager($this->design->themeManager)
             ->setTheme('input', $variants->all())
             ->setTheme('radius', 'sm')
@@ -130,15 +115,6 @@ final class Input implements DesignComponent
 
         $component = $input->setAttributes($this->attributes);
 
-        if (! $component instanceof MainBackendComponent) {
-            throw new RuntimeException('Design components build MainBackendComponent instances.');
-        }
-
         return $component;
-    }
-
-    public function toHtml(): string
-    {
-        return $this->component()->toHtml();
     }
 }

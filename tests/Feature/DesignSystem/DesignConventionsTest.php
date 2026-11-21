@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\DesignSystem\DarkMode;
+use App\DesignSystem\Design;
 use App\DesignSystem\DesignRegistry;
 use App\DesignSystem\Theme\AlertVariant;
 use App\DesignSystem\Theme\BadgeVariant;
@@ -9,6 +11,7 @@ use App\DesignSystem\Theme\ButtonVariant;
 use App\DesignSystem\Theme\Look;
 use App\DesignSystem\Theme\Size;
 use App\DesignSystem\Theme\State;
+use Tests\Support\AcmeThemeManager;
 
 function themeFiles(string $key): array
 {
@@ -171,6 +174,32 @@ it('defines the same keys in every design', function () {
     }
 });
 
-it('builds the registry once per process', function () {
-    expect(DesignRegistry::all())->toBe(DesignRegistry::all());
+it('builds each design from the config', function () {
+    config()->set('design-system.designs.acme', [
+        'label' => 'Acme',
+        'manager' => AcmeThemeManager::class,
+        'dark' => 'adaptive',
+    ]);
+
+    $design = DesignRegistry::get('acme');
+
+    expect($design)->toBeInstanceOf(Design::class)
+        ->and($design->label)->toBe('Acme')
+        ->and($design->darkMode)->toBe(DarkMode::Adaptive)
+        ->and($design->themeManager)->toBeInstanceOf(AcmeThemeManager::class);
+});
+
+it('refuses a design without a theme source', function () {
+    config()->set('design-system.designs.broken', ['label' => 'Broken']);
+
+    expect(fn () => DesignRegistry::get('broken'))->toThrow(InvalidArgumentException::class);
+});
+
+it('refuses a manager that is not a theme manager', function () {
+    config()->set('design-system.designs.broken', [
+        'label' => 'Broken',
+        'manager' => stdClass::class,
+    ]);
+
+    expect(fn () => DesignRegistry::get('broken'))->toThrow(InvalidArgumentException::class);
 });

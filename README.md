@@ -61,6 +61,55 @@ Two scale groups keep spacing and type tunable per design: `space` (`xs`/`sm`/`m
 
 Keys are enums (`App\DesignSystem\Theme\*`): `ButtonVariant`, `BadgeVariant`, `AlertVariant`, plus the shared `Size`, `State` and `Look`. Components therefore take enums instead of strings, and `ThemeVariants` is the one place that knows how a key is spelled. The classes themselves stay in the `.blade.php` theme files, so Tailwind finds them with the Laravel default scan and no extra `@source` is needed; a test fails any enum value that looks like a class.
 
+#### Adding a component
+
+A component is a class plus theme files; nothing central needs editing.
+
+1. Create `app/DesignSystem/Components/Accordion.php`. Use the trait for the shared plumbing and write only the slots and the build:
+
+```php
+final class Accordion implements DesignComponent
+{
+    use IsDesignComponent;
+
+    /** @var array<int, array{title: string|BackendComponent, body: string|BackendComponent}> */
+    private array $items = [];
+
+    private ?string $name = null;
+
+    public function name(?string $name): static { /* … */ }
+
+    public function items(array $items): static { /* … */ }
+
+    protected function build(): MainBackendComponent
+    {
+        $details = [];
+
+        foreach ($this->items as $item) {
+            $details[] = $this->makeComponent(ComponentEnum::DETAILS)
+                ->setThemeManager($this->design->themeManager)
+                ->setAttribute('name', $this->name ?? '')
+                ->setContents([/* SUMMARY, body */]);
+        }
+
+        return $this->makeComponent(ComponentEnum::DIV)
+            ->setThemeManager($this->design->themeManager)
+            ->setContents($details);
+    }
+}
+```
+
+2. Add `accordion.blade.php` to each design folder under `resources/views/_themes/designs/`, with the same keys in all of them (a gate fails a design that disagrees).
+3. Add an enum under `App\DesignSystem\Theme` only if the component has variants, and list it in the conventions test's expectations map.
+4. Add a test mirroring an existing one, and a box in `DesignSystemCollection` plus its title in `DesignSystemCollectionTest`.
+
+#### Adding a design
+
+- **In an app**: a folder under `resources/views/_themes/designs/<key>` and one entry in `config/design-system.php` (`label`, `path`, `dark`). The path is relative to `resources/`.
+- **In a package**: a `ThemeManager` class whose constructor sets its own path, named in the config's `manager` key. The design's folder then travels with the package and no app path is involved.
+
+A folder has to provide every theme group the components use. Layering (a design that only overrides what it changes) is the planned follow-up, and the reason the theme manager, not the `Design`, owns the path.
+
 #### Third-Party Slate Components
 
 The Slate group is built with `juaniquillo/slate-backend-components`, which adapts the `BackendComponent` contract to render Slate's anonymous Blade components. Components are composed with the `SlateComponentEnum` (over 200 cases) and `SlateComponentFactory`, using helpers like `SlateOverlayUtil` (dialogs), `SlateTabsUtil` (tabs), and `SlateUITableUtil` (tables). Each `SlateBackendComponent` resolves through `backend-component::_utilities.resolve-third-party-component`, which delegates to `<x-dynamic-component>`. The Slate group also registers its own stylesheet (`resources/css/slate.css`) as a per-group asset.

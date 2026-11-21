@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\DesignSystem\Components;
 
+use App\DesignSystem\Concerns\IsDesignComponent;
 use App\DesignSystem\Contracts\DesignComponent;
-use App\DesignSystem\Design;
-use App\DesignSystem\DesignRegistry;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
-use RuntimeException;
 
 final class Checkbox implements DesignComponent
 {
+    use IsDesignComponent;
+
     private string $name = '';
 
     private ?string $value = null;
@@ -28,13 +27,6 @@ final class Checkbox implements DesignComponent
 
     /** @var array<string, int|string> */
     private array $attributes = [];
-
-    private function __construct(private readonly Design $design) {}
-
-    public static function make(?Design $design = null): static
-    {
-        return new self($design ?? DesignRegistry::current());
-    }
 
     public function name(string $name): static
     {
@@ -78,18 +70,11 @@ final class Checkbox implements DesignComponent
         return $this;
     }
 
-    public function attributes(array $attributes): static
-    {
-        $this->attributes = [...$this->attributes, ...$attributes];
-
-        return $this;
-    }
-
-    public function component(): MainBackendComponent
+    protected function build(): MainBackendComponent
     {
         // The label wraps the control, so the association needs no id and
         // the click target includes the text.
-        $box = ComponentFactory::make(ComponentEnum::CHECKBOX_INPUT)
+        $box = $this->makeComponent(ComponentEnum::CHECKBOX_INPUT)
             ->setThemeManager($this->design->themeManager)
             ->setTheme('checkbox', 'box');
 
@@ -113,13 +98,13 @@ final class Checkbox implements DesignComponent
             $box->setAttribute('required', 'required');
         }
 
-        $label = ComponentFactory::make(ComponentEnum::LABEL)
+        $label = $this->makeComponent(ComponentEnum::LABEL)
             ->setThemeManager($this->design->themeManager)
             ->setTheme('checkbox', 'container')
             ->setTheme('space', 'sm')
             ->setContents([
                 $box,
-                ComponentFactory::make(ComponentEnum::SPAN)
+                $this->makeComponent(ComponentEnum::SPAN)
                     ->setThemeManager($this->design->themeManager)
                     ->setTheme('checkbox', 'label')
                     ->setTheme('text', 'sm')
@@ -128,15 +113,6 @@ final class Checkbox implements DesignComponent
 
         $component = $label->setAttributes($this->attributes);
 
-        if (! $component instanceof MainBackendComponent) {
-            throw new RuntimeException('Design components build MainBackendComponent instances.');
-        }
-
         return $component;
-    }
-
-    public function toHtml(): string
-    {
-        return $this->component()->toHtml();
     }
 }

@@ -24,7 +24,7 @@ it('registers the designs', function () {
         ->and(DesignRegistry::get('base-dark')->darkMode)->toBe(DarkMode::Always)
         ->and(DesignRegistry::get('base-dual')->darkMode)->toBe(DarkMode::Adaptive)
         ->and(DesignRegistry::get('missing'))->toBeNull()
-        ->and(DesignRegistry::default()->key)->toBe('base');
+        ->and(DesignRegistry::current()->key)->toBe('base');
 });
 
 it('serves the design system page', function () {
