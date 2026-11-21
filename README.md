@@ -37,11 +37,29 @@ Components are organized into groups registered in `App\Components\RouteCollecti
 
 | Route Group | Component (variants) |
 |---|---|
-| **Backend Components** | Alpine JS Modals (4), Backend Tables (2), Backend Details (3) |
+| **Backend Components** | Alpine JS Modals (4), Backend Tables (2), Backend Details (4) |
 | **Flux UI** | Modals (3), Buttons (6), Skeletons (5), Cards (6), Tables (7), Inputs (10) |
 | **Bootstrap** | Button (5), Badge (9), Card (2), Carousel (3), Tables (7) |
 | **Slate** | Slate Dialogs (2), Slate Tabs (1), Slate Drop Down Menus (1), Slate Buttons (9), Slate Carousel (2), Slate Tables (1) |
 | **SVG** | Basic Shapes (1), Paths and Polygons (3), Paint and Patterns (4), Reuse and Text (3), Media (1), Themed Icons (4), Brand Icons (4) |
+
+#### Design System
+
+A small design system is showcased at `/design-system`, separate from the component kitchen sink. A `Design` pairs a key and label with a `ThemeManager`; the registry (`App\DesignSystem\DesignRegistry`) lists the available looks, and every component (`Button`, `Badge`, `Card`, `Input`, `Field`, `Alert` in `App\DesignSystem\Components`) renders through the active design's manager. The `?design=` query string switches looks (unknown keys 404), so each design gets a linkable page.
+
+Components declare fixed, typed slots (`string|BackendComponent`) and terminate in `component()`, a plain backend component with the full package API. Interaction attributes go through `attributes()`, applied after structure and themes so they merge instead of replacing. Adding a design is a theme folder under `resources/views/_themes/designs/` plus one registry entry; the `base` look is austere and light-only on purpose, `base-dark` is the same look for dark surfaces, and both are a stable footing for polished layers later. A design declares its dark mode (`none`, `adaptive`, `always`); single-mode designs must not contain `dark:` branches, and adaptive designs must pair every color with its dark counterpart — both enforced by tests.
+
+Accessibility is part of the contract: `Field` derives an id from the input, points the label's `for` at it, gives the error `id="{id}-error"`, and sets `aria-describedby` plus `aria-invalid` on the control. `required` lives on the input (`Input::required()`, forwarded by `Field::required()`), and the visible asterisk is pure CSS (`label:has(+ input:required)::after`), so the label component never learns about it. A test walks the gallery and fails on duplicate ids or a `for` that resolves to nothing.
+
+The gallery itself lives in `App\DesignSystem\DesignSystemCollection::boxes($design)`; the route only picks the design and renders it. Labels are shown inside the field components rather than in a box of their own.
+
+Consumers rarely pass a design: `config/design-system.php` sets the default (`DESIGN_SYSTEM_DESIGN`, `base` out of the box), and `DesignRegistry::current()` resolves it, throwing on an unknown key rather than rendering the wrong look. An explicit `Design` argument still wins per call, which is how the gallery switches designs and how a multi-brand app would scope a section.
+
+Theme groups follow two rules: a **look** variant is a complete appearance, while a **state** variant (`disabled`) carries only the affordance and is appended by the component — so a theme never needs a `primary-disabled` for every combination, and tests fail a state variant that carries colors. Sizes live in their own group (`button-size`) so a look can never collide with a size name.
+
+Two scale groups keep spacing and type tunable per design: `space` (`xs`/`sm`/`md`/`lg` gaps, used by the form, the choice rows and card spacing) and `text` (`xs`→`lg`, used by card titles and choice labels). The component set covers `Button`, `Badge`, `Card`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Field`, `Alert` and `Form`; `Form` builds plain HTML by default and emits `@csrf` plus the hidden `_method` field only when asked (`csrf()`, `methodInput()`).
+
+Keys are enums (`App\DesignSystem\Theme\*`): `ButtonVariant`, `BadgeVariant`, `AlertVariant`, plus the shared `Size`, `State` and `Look`. Components therefore take enums instead of strings, and `ThemeVariants` is the one place that knows how a key is spelled. The classes themselves stay in the `.blade.php` theme files, so Tailwind finds them with the Laravel default scan and no extra `@source` is needed; a test fails any enum value that looks like a class.
 
 #### Third-Party Slate Components
 

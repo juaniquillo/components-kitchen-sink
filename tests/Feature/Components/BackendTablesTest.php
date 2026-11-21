@@ -12,12 +12,13 @@ it('returns 2 table variants', function () {
     expect(BackendTables::list())->toHaveCount(2);
 });
 
-it('returns default options', function () {
+it('returns table options', function () {
     $options = BackendTables::options();
 
-    expect($options->disableFlex)->toBeFalse()
+    expect($options->disableFlex)->toBeTrue()
         ->and($options->flexColumn)->toBeFalse()
-        ->and($options->flexGap)->toBe('flex-gap-sm');
+        ->and($options->flexGap)->toBe('flex-gap-sm')
+        ->and($options->justifyCenter)->toBeTrue();
 });
 
 it('renders a plain table', function () {
@@ -29,6 +30,14 @@ it('renders a plain table', function () {
         ->toContain('Name')
         ->toContain('<td')
         ->toContain('alice@example.com');
+});
+
+it('wraps a table in a spaced container', function () {
+    $html = (string) $this->blade('{{ $table }}', ['table' => BackendTables::container([BackendTables::plain()])]);
+
+    expect($html)->toContain('<div')
+        ->toContain('mb-3')
+        ->toContain('<table');
 });
 
 it('renders cells with themes, attributes and nested components', function () {

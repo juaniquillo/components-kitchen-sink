@@ -33,6 +33,10 @@ final class MainMenu
                 'route' => route('emails'),
             ],
             [
+                'name' => 'Design System',
+                'route' => route('design-system'),
+            ],
+            [
                 'name' => 'Builder',
                 'route' => route('builder'),
             ],

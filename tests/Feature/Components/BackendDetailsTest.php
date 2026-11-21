@@ -8,8 +8,8 @@ it('has the correct NAME constant', function () {
     expect(BackendDetails::NAME)->toBe('Backend Details');
 });
 
-it('returns 3 details variants', function () {
-    expect(BackendDetails::list())->toHaveCount(3);
+it('returns 4 details variants', function () {
+    expect(BackendDetails::list())->toHaveCount(4);
 });
 
 it('returns the group options', function () {
@@ -42,5 +42,17 @@ it('renders a themed summary', function () {
     $html = (string) $this->blade('{{ $details }}', ['details' => BackendDetails::themed()]);
 
     expect($html)->toContain('<summary')
-        ->toContain('text-cyan-500');
+        ->toContain('px-4')
+        ->toContain('bg-blue-700')
+        ->toContain('rounded-sm')
+        ->toContain('text-white')
+        ->toContain('p-2');
+});
+
+it('renders a named accordion group', function () {
+    $html = (string) $this->blade('{{ $details }}', ['details' => BackendDetails::named()]);
+
+    expect(substr_count($html, 'name="details"'))->toBe(3)
+        ->and($html)->toContain('What is this page 2?')
+        ->and($html)->toContain('cursor-pointer');
 });

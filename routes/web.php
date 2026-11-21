@@ -9,6 +9,8 @@ use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
 use App\Cruds\CrudCollection;
+use App\DesignSystem\DesignRegistry;
+use App\DesignSystem\DesignSystemCollection;
 use App\Emails\EmailCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +47,16 @@ Route::get('components/{group}', function ($group) {
         ->with('links', $routes::makeLinks());
 
 })->name('component');
+
+Route::get('design-system', function (Request $request) {
+    $design = DesignRegistry::get($request->query('design', 'base')) ?? abort(404);
+
+    return view('design-system')
+        ->with('design', $design)
+        ->with('designs', DesignRegistry::all())
+        ->with('boxes', DesignSystemCollection::boxes($design));
+
+})->name('design-system');
 
 Route::get('/cruds', function (Request $request) {
 

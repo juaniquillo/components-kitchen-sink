@@ -19,6 +19,7 @@ class BackendDetails implements Component
         return [
             'Closed details' => self::closed(),
             'Open details' => self::open(),
+            'Named details' => self::named(),
             'Themed summary' => self::themed(),
         ];
     }
@@ -49,20 +50,79 @@ class BackendDetails implements Component
             ->setContents([
                 ComponentFactory::make(ComponentEnum::SUMMARY)
                     ->setContent('What is this page?')
-                    ->setTheme('color', 'info'),
+                    ->setTheme('padding', [
+                        'x-sm',
+                        'y-xs',
+                    ])
+                    ->setTheme('background', 'default')
+                    ->setTheme('border-radius', 'sm')
+                    ->setTheme('color', 'light'),
                 ComponentFactory::make(ComponentEnum::PARAGRAPH)
+                    ->setTheme('padding', 'xs')
                     ->setContent('A kitchen sink of components built with backend-component trees.'),
             ]);
     }
 
-    private static function details(string $summary): BackendComponent
+    public static function named(?string $content = null): BackendComponent
+    {
+        $fallback = 'A kitchen sink of components built with backend-component trees.';
+
+        return ComponentFactory::make(ComponentEnum::DIV)
+            ->setTheme('background', 'secondary')
+            ->setTheme('color', 'light')
+            ->setTheme('border-radius', 'sm')
+            ->setTheme('padding', [
+                'x-sm',
+                'y-xs',
+            ])
+            ->setContents([
+                ComponentFactory::make(ComponentEnum::DETAILS)
+                    ->setAttribute('name', 'details')
+                    ->setTheme('border', 'bottom-sm')
+                    ->setTheme('padding', 'xs')
+                    ->setContents([
+                        ComponentFactory::make(ComponentEnum::SUMMARY)
+                            ->setTheme('cursor', 'pointer')
+                            ->setContent('What is this page?'),
+                        ComponentFactory::make(ComponentEnum::PARAGRAPH)
+                            ->setTheme('padding', 'xs')
+                            ->setContent($content ?? $fallback),
+                    ]),
+                ComponentFactory::make(ComponentEnum::DETAILS)
+                    ->setAttribute('name', 'details')
+                    ->setTheme('border', 'bottom-sm')
+                    ->setTheme('padding', 'xs')
+                    ->setContents([
+                        ComponentFactory::make(ComponentEnum::SUMMARY)
+                            ->setTheme('cursor', 'pointer')
+                            ->setContent('What is this page 2?'),
+                        ComponentFactory::make(ComponentEnum::PARAGRAPH)
+                            ->setTheme('padding', 'xs')
+                            ->setContent($content ?? $fallback),
+                    ]),
+                ComponentFactory::make(ComponentEnum::DETAILS)
+                    ->setAttribute('name', 'details')
+                    // ->setTheme('border', 'bottom-sm')
+                    ->setTheme('padding', 'xs')
+                    ->setContents([
+                        ComponentFactory::make(ComponentEnum::SUMMARY)
+                            ->setTheme('cursor', 'pointer')
+                            ->setContent('What is this page 3?'),
+                        ComponentFactory::make(ComponentEnum::PARAGRAPH)
+                            ->setTheme('padding', 'xs')
+                            ->setContent($content ?? $fallback),
+                    ]),
+            ]);
+    }
+
+    private static function details(string $summary, ?string $content = null): BackendComponent
     {
         return ComponentFactory::make(ComponentEnum::DETAILS)
             ->setContents([
                 ComponentFactory::make(ComponentEnum::SUMMARY)
                     ->setContent($summary),
                 ComponentFactory::make(ComponentEnum::PARAGRAPH)
-                    ->setContent('A kitchen sink of components built with backend-component trees.'),
+                    ->setContent($content ?? 'A kitchen sink of components built with backend-component trees.'),
             ]);
     }
 }

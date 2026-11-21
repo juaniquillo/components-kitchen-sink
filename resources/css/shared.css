@@ -87,3 +87,14 @@
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     }
 }
+
+/*
+| The design system's required marker.
+| A label immediately followed by a required input gets its asterisk from
+| the stylesheet, so requiredness stays an attribute of the input: the
+| label component never learns about it. Scoped to the design-system
+| page so the builder's own labels are untouched.
+*/
+.design-system label:has(+ input:required)::after {
+    content: ' *';
+}

@@ -20,14 +20,21 @@ class BackendTables implements Component
     public static function list(): array
     {
         return [
-            'Plain table' => self::plain(),
+            'Plain table' => self::container([self::plain()]),
             'Themed cells' => self::cells(),
         ];
     }
 
     public static function options(): ContainerOptions
     {
-        return new ContainerOptions;
+        return new ContainerOptions(disableFlex: true);
+    }
+
+    public static function container(array $contents): BackendComponent
+    {
+        return ComponentFactory::make(ComponentEnum::DIV)
+            ->setTheme('margin', 'bottom-sm')
+            ->setContents($contents);
     }
 
     public static function plain(): BackendComponent

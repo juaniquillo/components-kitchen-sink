@@ -33,7 +33,15 @@ class BackendModals implements Component
     public static function default(): BackendComponent
     {
         return ModalUtil::make(
-            'This is a default modal.'
+            'This is a default modal.',
+            button: ComponentFactory::make(ComponentEnum::BUTTON)
+                ->setTheme('color', 'light')
+                ->setContent('Default Alpine Modal')
+                ->setAttribute('type', 'button')
+                ->setAttribute('@click', 'showModal = true')
+                ->setTheme('action', 'default')
+                ->setTheme('padding', 'button-compact')
+                ->setTheme('border-radius', 'sm')
         )->getComponent();
     }
 
@@ -51,7 +59,7 @@ class BackendModals implements Component
                 ->setTheme('border', 'solid'),
             ComponentFactory::make(ComponentEnum::BUTTON)
                 ->setTheme('color', 'light')
-                ->setContent('Simple Modal')
+                ->setContent('Simple Alpine Modal')
                 ->setAttribute('type', 'button')
                 ->setAttribute('@click', 'showModal = true')
                 ->setTheme('action', 'success')
@@ -153,7 +161,6 @@ class BackendModals implements Component
                                     ->setAttributes([
                                         'command' => 'close',
                                         'commandfor' => 'my-dialog-1',
-
                                     ]),
                             ])
                     )
