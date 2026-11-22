@@ -32,7 +32,6 @@ use App\Components\Groups\Svg\SvgPaint;
 use App\Components\Groups\Svg\SvgPaths;
 use App\Components\Groups\Svg\SvgReuse;
 use App\Components\Groups\Svg\SvgThemedIcons;
-use App\Components\Groups\Themes\ThemeLayers;
 use App\Menu\Concerns\Links;
 
 class RouteCollectionGroup
@@ -109,13 +108,6 @@ class RouteCollectionGroup
                     new SvgMedia,
                     new SvgThemedIcons,
                     new SvgBrandIcons,
-                ]),
-                'assets' => [],
-            ],
-            'themes' => [
-                'name' => 'Themes',
-                'components' => ComponentCollection::make()->addComponents([
-                    new ThemeLayers,
                 ]),
                 'assets' => [],
             ],
