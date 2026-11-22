@@ -9,13 +9,13 @@ use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
 use App\Cruds\CrudCollection;
-use App\DesignSystem\DesignRegistry;
 use App\DesignSystem\DesignSystemCollection;
 use App\Emails\EmailCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Juaniquillo\BackendDesignSystem\Designs\Design;
 
 Route::get('/', function () {
 
@@ -49,11 +49,31 @@ Route::get('components/{group}', function ($group) {
 })->name('component');
 
 Route::get('design-system', function (Request $request) {
-    $design = DesignRegistry::get($request->query('design', 'base')) ?? abort(404);
+    $designs = collect(config('backend-design-system.designs', []))
+        ->map(fn (array $definition, string $key): array => [
+            'key' => $key,
+            'label' => (string) ($definition['label'] ?? $key),
+        ])
+        ->values();
+
+    $key = (string) $request->query('design', config('backend-design-system.default', 'base'));
+
+    if (! $designs->contains('key', $key)) {
+        abort(404);
+    }
+
+    // The package binds one design, resolved from the configured default.
+    // Switching here means switching the default before the binding is
+    // first resolved, which is why nothing may resolve it earlier in the
+    // request.
+    config(['backend-design-system.default' => $key]);
+    app()->forgetInstance(Design::class);
+
+    $design = app(Design::class);
 
     return view('design-system')
         ->with('design', $design)
-        ->with('designs', DesignRegistry::all())
+        ->with('designs', $designs)
         ->with('boxes', DesignSystemCollection::boxes($design));
 
 })->name('design-system');

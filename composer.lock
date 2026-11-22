@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1b7a2af678aec957dbe89401ed042608",
+    "content-hash": "0e34011a0aa0fea723ef22b55aee6ba7",
     "packages": [
         {
             "name": "brick/math",
@@ -1127,6 +1127,126 @@
                 }
             ],
             "time": "2026-08-24T17:13:02+00:00"
+        },
+        {
+            "name": "juaniquillo/backend-design-system",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/backend-design-system"
+            },
+            "require": {
+                "illuminate/contracts": "^12.0||^13.0",
+                "illuminate/support": "^12.0||^13.0",
+                "juaniquillo/base-backend-component": "^0.1.0",
+                "juaniquillo/laravel-backend-component": "^0.12.0",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.9",
+                "laravel/pint": "^1.29",
+                "orchestra/testbench": "^10.0||^11.0",
+                "pestphp/pest": "^4.6||^5.0",
+                "pestphp/pest-plugin-laravel": "^4.0||^5.0",
+                "pestphp/pest-plugin-type-coverage": "^4.0||^5.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.2",
+                "rector/rector": "^2.6"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Juaniquillo\\BackendDesignSystem\\BackendDesignSystemServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Juaniquillo\\BackendDesignSystem\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Juaniquillo\\BackendDesignSystem\\Tests\\": "tests/",
+                    "Workbench\\App\\": "workbench/app/",
+                    "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+                    "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@clear",
+                    "@prepare"
+                ],
+                "clear": [
+                    "@php vendor/bin/testbench package:purge-skeleton --ansi"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "build": [
+                    "@php vendor/bin/testbench workbench:build --ansi"
+                ],
+                "serve": [
+                    "Composer\\Config::disableProcessTimeout",
+                    "@build",
+                    "@php vendor/bin/testbench serve --ansi"
+                ],
+                "lint": [
+                    "vendor/bin/pint --parallel"
+                ],
+                "lint:check": [
+                    "vendor/bin/pint --parallel --test"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse --memory-limit=1G"
+                ],
+                "rector": [
+                    "vendor/bin/rector process"
+                ],
+                "rector:check": [
+                    "vendor/bin/rector process --dry-run"
+                ],
+                "test:unit": [
+                    "@php bin/pest.php"
+                ],
+                "test:types": [
+                    "vendor/bin/pest --type-coverage --min=100"
+                ],
+                "qa": [
+                    "@analyse",
+                    "@rector:check",
+                    "@lint:check",
+                    "@test:types",
+                    "@test:unit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Victor Sánchez",
+                    "email": "juaniquillo@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel design system: PHP components, Tailwind theme files, config-driven designs.",
+            "homepage": "https://github.com/juaniquillo/backend-design-system",
+            "keywords": [
+                "backend-design-system",
+                "juaniquillo",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/juaniquillo/backend-design-system/issues",
+                "source": "https://github.com/juaniquillo/backend-design-system"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "juaniquillo/base-backend-component",
@@ -10980,6 +11100,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "juaniquillo/backend-design-system": 20,
         "juaniquillo/crud-assistant": 20,
         "juaniquillo/flux-backend-components": 20,
         "juaniquillo/laravel-backend-component": 20,
@@ -10994,5 +11115,5 @@
         "ext-zip": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }

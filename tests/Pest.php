@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\TreeMutator;
-use App\DesignSystem\Design;
-use App\DesignSystem\DesignRegistry;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -89,14 +87,6 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
-}
-
-/**
- * The austere base design of the design-system showcase.
- */
-function designSystemBase(): Design
-{
-    return DesignRegistry::get('base');
 }
 
 /**

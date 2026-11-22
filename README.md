@@ -29,7 +29,7 @@ Four different CRUD implementations demonstrating various theming approaches:
 | `unstyled` | Unstyled Crud | Basic form without special theming |
 | `simple_crud` | Simple Themed Crud | Themed form with labels, inputs, and avatar |
 | `flux` | Flux Crud | Flux-styled form built with the `flux-backend-components` package |
-| `input_group` | Input Group WC | Form with label/input groups using custom `LabelInputGroup` and `FormGroupWebComponentBuilder` |
+| `input_group` | Input Group WC | Form with label/input groups using a custom `LabelInputGroup` and the `form-group-web-component` view |
 
 ### Component Library
 
@@ -45,68 +45,48 @@ Components are organized into groups registered in `App\Components\RouteCollecti
 
 #### Design System
 
-A small design system is showcased at `/design-system`, separate from the component kitchen sink. A `Design` pairs a key and label with a `ThemeManager`; the registry (`App\DesignSystem\DesignRegistry`) lists the available looks, and every component (`Button`, `Badge`, `Card`, `Input`, `Field`, `Alert` in `App\DesignSystem\Components`) renders through the active design's manager. The `?design=` query string switches looks (unknown keys 404), so each design gets a linkable page.
+A small design system is showcased at `/design-system`, separate from the component kitchen sink. It is a package, `juaniquillo/backend-design-system` (0.1.0, installed from `../../packages/backend-design-system` through a path repository while it is pre-release). The package owns the `Design` value object, the theme managers, the components, the key enums and three bundled designs — `base` (light only), `base-dark` (dark only) and `base-dual` (adaptive). This app owns only the gallery: no theme copies and no `config/backend-design-system.php`; the package defaults are used as they ship. `?design=` switches looks (unknown keys 404), so each design gets a linkable page.
 
-Components declare fixed, typed slots (`string|BackendComponent`) and terminate in `component()`, a plain backend component with the full package API. Interaction attributes go through `attributes()`, applied after structure and themes so they merge instead of replacing. Adding a design is a theme folder under `resources/views/_themes/designs/` plus one registry entry; the `base` look is austere and light-only on purpose, `base-dark` is the same look for dark surfaces, and both are a stable footing for polished layers later. A design declares its dark mode (`none`, `adaptive`, `always`); single-mode designs must not contain `dark:` branches, and adaptive designs must pair every color with its dark counterpart — both enforced by tests.
+A design is a key, a label, a dark mode and a theme manager, and the manager owns the folder — which is what lets a bundled design read from the package while an application design reads from `resources/views`. The provider binds one `Design` from `backend-design-system.default` and throws on an unknown key rather than rendering the wrong look. An explicit `Design` argument wins per call. The gallery needs a design other than the default, so its route validates the key, sets the config default and forgets the resolved binding before resolving it again.
+
+Theme groups follow two rules: a **look** variant is a complete appearance, while a **state** variant (`disabled`, `loading`, `current`) carries only the affordance and is appended by the component — so a theme never needs a `primary-disabled` for every combination, and the package fails a state variant that carries colors. Sizes live in the component's own file as `size.*` keys, so a look can never collide with a size name. Three shared scales keep spacing, type and corners tunable per design: `space`, `text` and `radius`.
+
+The package ships twenty-one components — `Button`, `Badge`, `Card`, `Alert`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Field`, `Label`, `Form`, `Text`, `Heading`, `Link`, `Divider`, `Stack`, `Inline`, `Accordion`, `Breadcrumb` and `ChoiceGroup` — and the gallery exercises eleven of them directly. `Form` builds plain HTML by default and emits `@csrf` plus the hidden `_method` field only when asked (`csrf()`, `methodInput()`).
 
 Accessibility is part of the contract: `Field` derives an id from the input, points the label's `for` at it, gives the error `id="{id}-error"`, and sets `aria-describedby` plus `aria-invalid` on the control. `required` lives on the input (`Input::required()`, forwarded by `Field::required()`), and the visible asterisk is pure CSS (`label:has(+ input:required)::after`), so the label component never learns about it. A test walks the gallery and fails on duplicate ids or a `for` that resolves to nothing.
 
 The gallery itself lives in `App\DesignSystem\DesignSystemCollection::boxes($design)`; the route only picks the design and renders it. Labels are shown inside the field components rather than in a box of their own.
 
-Consumers rarely pass a design: `config/design-system.php` sets the default (`DESIGN_SYSTEM_DESIGN`, `base` out of the box), and `DesignRegistry::current()` resolves it, throwing on an unknown key rather than rendering the wrong look. An explicit `Design` argument still wins per call, which is how the gallery switches designs and how a multi-brand app would scope a section.
+Keys are enums (`Juaniquillo\BackendDesignSystem\Theme\*`): `ButtonVariant`, `BadgeVariant`, `AlertVariant`, `HeadingLevel`, plus the shared `Look`, `Size` and `State`. Components therefore take enums instead of strings, and `ThemeVariants` is the one place that knows how a key is spelled. The classes themselves stay in the `.blade.php` theme files, and those files live in the package, so Tailwind has to be pointed at them — see below.
 
-Theme groups follow two rules: a **look** variant is a complete appearance, while a **state** variant (`disabled`) carries only the affordance and is appended by the component — so a theme never needs a `primary-disabled` for every combination, and tests fail a state variant that carries colors. Sizes live in their own group (`button-size`) so a look can never collide with a size name.
+#### Using the default classes
 
-Two scale groups keep spacing and type tunable per design: `space` (`xs`/`sm`/`md`/`lg` gaps, used by the form, the choice rows and card spacing) and `text` (`xs`→`lg`, used by card titles and choice labels). The component set covers `Button`, `Badge`, `Card`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Field`, `Alert` and `Form`; `Form` builds plain HTML by default and emits `@csrf` plus the hidden `_method` field only when asked (`csrf()`, `methodInput()`).
+The bundled designs ship their Tailwind classes in `.blade.php` files inside the package. Tailwind only generates a utility it has seen, and `vendor/` is excluded from its scan, so the package views have to be added explicitly. This app does it with one line in `resources/css/app.css`:
 
-Keys are enums (`App\DesignSystem\Theme\*`): `ButtonVariant`, `BadgeVariant`, `AlertVariant`, plus the shared `Size`, `State` and `Look`. Components therefore take enums instead of strings, and `ThemeVariants` is the one place that knows how a key is spelled. The classes themselves stay in the `.blade.php` theme files, so Tailwind finds them with the Laravel default scan and no extra `@source` is needed; a test fails any enum value that looks like a class.
+```css
+@source '../../vendor/juaniquillo/backend-design-system/resources/views/**/*.blade.php';
+```
+
+Nothing is copied, and a package update changes the design on the next `npm run build`. With Tailwind v3, list the same path in `tailwind.config.js` under `content` instead.
+
+Two alternatives, for when a theme should be app-owned:
+
+- **Publish the bundled themes.** `php artisan vendor:publish --tag=backend-design-system-themes` (or `--tag=backend-design-system-theme-base-dual` for one design) copies them into `resources/views/backend-design-system`, inside Laravel's default scan, so no `@source` line is needed. The bundled designs still render from the package; to edit a copy, point a design at it with `path`.
+- **Scaffold a theme.** `php artisan design-system:make-theme app` copies `base` to `resources/views/backend-design-system/app`, adds an `app` design with a `path` entry to `config/backend-design-system.php` (publishing that config first if it does not exist) and makes it the default. `--from`, `--dark`, `--to`, `--keep-default` and `--force` cover the rest.
+
+Run `npm run build` after any of these. If a design loses its colours after a build, the classes never reached the scanner: check the source line or the published copy.
 
 #### Adding a component
 
-A component is a class plus theme files; nothing central needs editing.
+Components belong to `juaniquillo/backend-design-system`; this app does not define its own. Adding one to the gallery is a box in `DesignSystemCollection::boxes()` plus its title in the gallery test.
 
-1. Create `app/DesignSystem/Components/Accordion.php`. Use the trait for the shared plumbing and write only the slots and the build:
-
-```php
-final class Accordion implements DesignComponent
-{
-    use IsDesignComponent;
-
-    /** @var array<int, array{title: string|BackendComponent, body: string|BackendComponent}> */
-    private array $items = [];
-
-    private ?string $name = null;
-
-    public function name(?string $name): static { /* … */ }
-
-    public function items(array $items): static { /* … */ }
-
-    protected function build(): MainBackendComponent
-    {
-        $details = [];
-
-        foreach ($this->items as $item) {
-            $details[] = $this->makeComponent(ComponentEnum::DETAILS)
-                ->setThemeManager($this->design->themeManager)
-                ->setAttribute('name', $this->name ?? '')
-                ->setContents([/* SUMMARY, body */]);
-        }
-
-        return $this->makeComponent(ComponentEnum::DIV)
-            ->setThemeManager($this->design->themeManager)
-            ->setContents($details);
-    }
-}
-```
-
-2. Add `accordion.blade.php` to each design folder under `resources/views/_themes/designs/`, with the same keys in all of them (a gate fails a design that disagrees).
-3. Add an enum under `App\DesignSystem\Theme` only if the component has variants, and list it in the conventions test's expectations map.
-4. Add a test mirroring an existing one, and a box in `DesignSystemCollection` plus its title in `DesignSystemCollectionTest`.
+A new component in the package is a class using `IsDesignComponent` plus one theme file per bundled design; the package's gates cover key parity, enum coverage and the no-colour rule for `state.*`.
 
 #### Adding a design
 
-- **In an app**: a folder under `resources/views/_themes/designs/<key>` and one entry in `config/design-system.php` (`label`, `path`, `dark`). The path is relative to `resources/`.
-- **In a package**: a `ThemeManager` class whose constructor sets its own path, named in the config's `manager` key. The design's folder then travels with the package and no app path is involved.
+- **Bundled designs**: nothing to do; they are part of the package.
+- **An app-owned design**: `php artisan design-system:make-theme <key>` scaffolds the folder and the config entry, or write the entry by hand in `config/backend-design-system.php` (`label`, `path`, `dark`), with `path` relative to `resources/`.
+- **A packaged design**: a `ThemeManager` class whose constructor sets its own path, named in the config's `manager` key. Its theme files still need to reach Tailwind, through the `@source` line or a published copy.
 
 A folder has to provide every theme group the components use. Layering (a design that only overrides what it changes) is the planned follow-up, and the reason the theme manager, not the `Design`, owns the path.
 

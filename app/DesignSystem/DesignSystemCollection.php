@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace App\DesignSystem;
 
-use App\DesignSystem\Components\Alert;
-use App\DesignSystem\Components\Badge;
-use App\DesignSystem\Components\Button;
-use App\DesignSystem\Components\Card;
-use App\DesignSystem\Components\Checkbox;
-use App\DesignSystem\Components\Field;
-use App\DesignSystem\Components\Form;
-use App\DesignSystem\Components\Input;
-use App\DesignSystem\Components\Radio;
-use App\DesignSystem\Components\Select;
-use App\DesignSystem\Components\Textarea;
-use App\DesignSystem\Contracts\DesignComponent;
-use App\DesignSystem\Theme\AlertVariant;
-use App\DesignSystem\Theme\BadgeVariant;
-use App\DesignSystem\Theme\ButtonVariant;
-use App\DesignSystem\Theme\Size;
+use Juaniquillo\BackendDesignSystem\Components\Alert;
+use Juaniquillo\BackendDesignSystem\Components\Badge;
+use Juaniquillo\BackendDesignSystem\Components\Button;
+use Juaniquillo\BackendDesignSystem\Components\Card;
+use Juaniquillo\BackendDesignSystem\Components\Checkbox;
+use Juaniquillo\BackendDesignSystem\Components\Field;
+use Juaniquillo\BackendDesignSystem\Components\Form;
+use Juaniquillo\BackendDesignSystem\Components\Input;
+use Juaniquillo\BackendDesignSystem\Components\Radio;
+use Juaniquillo\BackendDesignSystem\Components\Select;
+use Juaniquillo\BackendDesignSystem\Components\Textarea;
+use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
+use Juaniquillo\BackendDesignSystem\Designs\Design;
+use Juaniquillo\BackendDesignSystem\Theme\AlertVariant;
+use Juaniquillo\BackendDesignSystem\Theme\BadgeVariant;
+use Juaniquillo\BackendDesignSystem\Theme\ButtonVariant;
+use Juaniquillo\BackendDesignSystem\Theme\Size;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
 /**
