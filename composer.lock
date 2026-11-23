@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0e34011a0aa0fea723ef22b55aee6ba7",
+    "content-hash": "9dc2b07c5aa88683d8991ea2ca57cc36",
     "packages": [
         {
             "name": "brick/math",
@@ -1130,10 +1130,17 @@
         },
         {
             "name": "juaniquillo/backend-design-system",
-            "version": "0.1.0",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/juaniquillo/backend-design-system.git",
+                "reference": "7a246d6b32e91505394c35f904ad2a7e2b975769"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../packages/backend-design-system"
+                "type": "zip",
+                "url": "https://api.github.com/repos/juaniquillo/backend-design-system/zipball/7a246d6b32e91505394c35f904ad2a7e2b975769",
+                "reference": "7a246d6b32e91505394c35f904ad2a7e2b975769",
+                "shasum": ""
             },
             "require": {
                 "illuminate/contracts": "^12.0||^13.0",
@@ -1166,62 +1173,7 @@
                     "Juaniquillo\\BackendDesignSystem\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Juaniquillo\\BackendDesignSystem\\Tests\\": "tests/",
-                    "Workbench\\App\\": "workbench/app/",
-                    "Workbench\\Database\\Factories\\": "workbench/database/factories/",
-                    "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
-                }
-            },
-            "scripts": {
-                "post-autoload-dump": [
-                    "@clear",
-                    "@prepare"
-                ],
-                "clear": [
-                    "@php vendor/bin/testbench package:purge-skeleton --ansi"
-                ],
-                "prepare": [
-                    "@php vendor/bin/testbench package:discover --ansi"
-                ],
-                "build": [
-                    "@php vendor/bin/testbench workbench:build --ansi"
-                ],
-                "serve": [
-                    "Composer\\Config::disableProcessTimeout",
-                    "@build",
-                    "@php vendor/bin/testbench serve --ansi"
-                ],
-                "lint": [
-                    "vendor/bin/pint --parallel"
-                ],
-                "lint:check": [
-                    "vendor/bin/pint --parallel --test"
-                ],
-                "analyse": [
-                    "vendor/bin/phpstan analyse --memory-limit=1G"
-                ],
-                "rector": [
-                    "vendor/bin/rector process"
-                ],
-                "rector:check": [
-                    "vendor/bin/rector process --dry-run"
-                ],
-                "test:unit": [
-                    "@php bin/pest.php"
-                ],
-                "test:types": [
-                    "vendor/bin/pest --type-coverage --min=100"
-                ],
-                "qa": [
-                    "@analyse",
-                    "@rector:check",
-                    "@lint:check",
-                    "@test:types",
-                    "@test:unit"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1235,18 +1187,16 @@
             "description": "Laravel design system: PHP components, Tailwind theme files, config-driven designs.",
             "homepage": "https://github.com/juaniquillo/backend-design-system",
             "keywords": [
+                "Juaniquillo",
                 "backend-design-system",
-                "juaniquillo",
                 "laravel"
             ],
             "support": {
                 "issues": "https://github.com/juaniquillo/backend-design-system/issues",
                 "source": "https://github.com/juaniquillo/backend-design-system"
             },
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "time": "2026-11-23T23:10:02+00:00",
+            "published-time": "2026-11-23T23:11:41+00:00"
         },
         {
             "name": "juaniquillo/base-backend-component",
@@ -11100,7 +11050,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "juaniquillo/backend-design-system": 20,
         "juaniquillo/crud-assistant": 20,
         "juaniquillo/flux-backend-components": 20,
         "juaniquillo/laravel-backend-component": 20,

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Components\ContainerOptions;
 use App\DesignSystem\DesignSystemCollection;
 use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
 use Juaniquillo\BackendDesignSystem\Designs\Design;
@@ -14,11 +15,15 @@ it('builds the gallery boxes against the given design', function () {
         'Buttons',
         'Badges',
         'Cards',
+        'Typography',
+        'Layout',
         'Inputs',
         'Choices',
         'Select and Textarea',
         'Fields',
         'Form',
+        'Disclosure',
+        'Navigation',
         'Alerts',
     ]);
 
@@ -34,7 +39,7 @@ it('builds the gallery boxes against the given design', function () {
 it('renders every box on the page', function () {
     $response = $this->get('/design-system');
 
-    foreach (['Buttons', 'Badges', 'Cards', 'Inputs', 'Fields', 'Alerts'] as $title) {
+    foreach (['Buttons', 'Badges', 'Cards', 'Typography', 'Layout', 'Inputs', 'Fields', 'Disclosure', 'Navigation', 'Alerts'] as $title) {
         $response->assertSee($title, false);
     }
 
@@ -54,6 +59,20 @@ it('uses a backend component where a box needs a finished element', function () 
 
     expect($cards)->not->toBeEmpty()
         ->and($cards[0]->component())->toBeInstanceOf(BackendComponent::class);
+});
+
+it('gives every box its own container options', function () {
+    $boxes = collect(DesignSystemCollection::boxes(app(Design::class)))->keyBy('title');
+
+    foreach ($boxes as $box) {
+        expect($box['options'])->toBeInstanceOf(ContainerOptions::class);
+    }
+
+    expect($boxes['Buttons']['options']->disableFlex)->toBeFalse()
+        ->and($boxes['Buttons']['options']->flexColumn)->toBeFalse()
+        ->and($boxes['Typography']['options']->disableFlex)->toBeTrue()
+        ->and($boxes['Disclosure']['options']->flexColumn)->toBeTrue()
+        ->and($boxes['Disclosure']['options']->justifyCenter)->toBeFalse();
 });
 
 it('renders the gallery in every design', function () {

@@ -4,22 +4,33 @@ declare(strict_types=1);
 
 namespace App\DesignSystem;
 
+use App\Components\ContainerOptions;
+use Juaniquillo\BackendDesignSystem\Components\Accordion;
 use Juaniquillo\BackendDesignSystem\Components\Alert;
 use Juaniquillo\BackendDesignSystem\Components\Badge;
+use Juaniquillo\BackendDesignSystem\Components\Breadcrumb;
 use Juaniquillo\BackendDesignSystem\Components\Button;
 use Juaniquillo\BackendDesignSystem\Components\Card;
 use Juaniquillo\BackendDesignSystem\Components\Checkbox;
+use Juaniquillo\BackendDesignSystem\Components\ChoiceGroup;
+use Juaniquillo\BackendDesignSystem\Components\Divider;
 use Juaniquillo\BackendDesignSystem\Components\Field;
 use Juaniquillo\BackendDesignSystem\Components\Form;
+use Juaniquillo\BackendDesignSystem\Components\Heading;
+use Juaniquillo\BackendDesignSystem\Components\Inline;
 use Juaniquillo\BackendDesignSystem\Components\Input;
+use Juaniquillo\BackendDesignSystem\Components\Link;
 use Juaniquillo\BackendDesignSystem\Components\Radio;
 use Juaniquillo\BackendDesignSystem\Components\Select;
+use Juaniquillo\BackendDesignSystem\Components\Stack;
+use Juaniquillo\BackendDesignSystem\Components\Text;
 use Juaniquillo\BackendDesignSystem\Components\Textarea;
 use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
 use Juaniquillo\BackendDesignSystem\Designs\Design;
 use Juaniquillo\BackendDesignSystem\Theme\AlertVariant;
 use Juaniquillo\BackendDesignSystem\Theme\BadgeVariant;
 use Juaniquillo\BackendDesignSystem\Theme\ButtonVariant;
+use Juaniquillo\BackendDesignSystem\Theme\HeadingLevel;
 use Juaniquillo\BackendDesignSystem\Theme\Size;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
@@ -33,13 +44,14 @@ use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 final class DesignSystemCollection
 {
     /**
-     * @return array<int, array{title: string, components: array<int, DesignComponent|BackendComponent>}>
+     * @return array<int, array{title: string, options: ContainerOptions, components: array<int, DesignComponent|BackendComponent>}>
      */
     public static function boxes(Design $design): array
     {
         return [
             [
                 'title' => 'Buttons',
+                'options' => self::options(),
                 'components' => [
                     Button::make($design)->label('Primary')->variant(ButtonVariant::Primary),
                     Button::make($design)->label('Secondary')->variant(ButtonVariant::Secondary),
@@ -52,6 +64,7 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Badges',
+                'options' => self::options(),
                 'components' => [
                     Badge::make($design)->label('Default'),
                     Badge::make($design)->label('Active')->variant(BadgeVariant::Success),
@@ -62,18 +75,63 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Cards',
+                'options' => self::options(),
                 'components' => [
                     Card::make($design)
                         ->title('Billing')
                         ->body('Your plan renews on the first of every month.')
-                        ->footer(Button::make($design)->label('Manage')->variant(ButtonVariant::Primary)->component()),
+                        ->footer(Button::make($design)->label('Manage')->variant(ButtonVariant::Primary)),
                     Card::make($design)
                         ->title('About')
                         ->body('A kitchen sink of components built with backend-component trees.'),
                 ],
             ],
             [
+                'title' => 'Typography',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Stack::make($design)
+                        ->space(Size::Sm)
+                        ->children([
+                            Heading::make($design)->text('Billing overview')->level(HeadingLevel::H3),
+                            Text::make($design)->text('Your plan renews on the first of every month.'),
+                            Text::make($design)->text('Prices exclude taxes.')->size(Size::Sm),
+                            Inline::make($design)
+                                ->space(Size::Sm)
+                                ->children([
+                                    Link::make($design)->label('Manage billing')->href('#typography'),
+                                    Link::make($design)->label('Current page')->href('#typography')->current(),
+                                    Link::make($design)->label('Documentation')->href('https://example.com/docs')->external(),
+                                ]),
+                            Divider::make($design),
+                        ]),
+                ],
+            ],
+            [
+                'title' => 'Layout',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Stack::make($design)
+                        ->space(Size::Lg)
+                        ->children([
+                            Stack::make($design)
+                                ->space(Size::Sm)
+                                ->children([
+                                    Text::make($design)->text('Stacked heading'),
+                                    Text::make($design)->text('Stacked body copy.')->size(Size::Sm),
+                                ]),
+                            Inline::make($design)
+                                ->space(Size::Sm)
+                                ->children([
+                                    Button::make($design)->label('Cancel'),
+                                    Button::make($design)->label('Save')->variant(ButtonVariant::Primary),
+                                ]),
+                        ]),
+                ],
+            ],
+            [
                 'title' => 'Inputs',
+                'options' => self::options(),
                 'components' => [
                     Input::make($design)->name('email')->type('email')->placeholder('you@example.com')->attributes(['aria-label' => 'Email']),
                     Input::make($design)->name('password')->type('password')->placeholder('Password')->required()->attributes(['aria-label' => 'Password']),
@@ -82,17 +140,39 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Choices',
+                'options' => self::options(disableFlex: true),
                 'components' => [
-                    Checkbox::make($design)->name('terms')->label('I accept the terms')->checked(),
-                    Checkbox::make($design)->name('newsletter')->label('Send me the newsletter'),
-                    Checkbox::make($design)->name('locked')->label('Locked choice')->disabled(),
-                    Radio::make($design)->name('plan')->value('free')->label('Free')->checked(),
-                    Radio::make($design)->name('plan')->value('pro')->label('Pro'),
-                    Radio::make($design)->name('plan')->value('team')->label('Team'),
+                    Stack::make($design)
+                        ->space(Size::Sm)
+                        ->children([
+                            Inline::make($design)
+                                ->space(Size::Sm)
+                                ->children([
+                                    Checkbox::make($design)->name('terms')->label('I accept the terms')->checked(),
+                                    Checkbox::make($design)->name('newsletter')->label('Send me the newsletter'),
+                                    Checkbox::make($design)->name('locked')->label('Locked choice')->disabled(),
+                                ]),
+                            Inline::make($design)
+                                ->space(Size::Sm)
+                                ->children([
+                                    Radio::make($design)->name('plan')->value('free')->label('Free')->checked(),
+                                    Radio::make($design)->name('plan')->value('pro')->label('Pro'),
+                                    Radio::make($design)->name('plan')->value('team')->label('Team'),
+                                ]),
+                            ChoiceGroup::make($design)
+                                ->legend('Billing cycle')
+                                ->id('billing-cycle')
+                                ->choices([
+                                    Radio::make($design)->name('cycle')->value('monthly')->label('Monthly'),
+                                    Radio::make($design)->name('cycle')->value('yearly')->label('Yearly'),
+                                ])
+                                ->error('Choose a billing cycle.'),
+                        ]),
                 ],
             ],
             [
                 'title' => 'Select and Textarea',
+                'options' => self::options(flexColumn: true),
                 'components' => [
                     Select::make($design)->name('country')->options([
                         '' => 'Choose a country',
@@ -106,10 +186,11 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Fields',
+                'options' => self::options(),
                 'components' => [
                     Field::make($design)
                         ->label('Email')
-                        ->input(Input::make($design)->name('email')->type('email')->attributes(['id' => 'signup-email'])->component()),
+                        ->input(Input::make($design)->name('email')->type('email')->attributes(['id' => 'signup-email'])),
                     Field::make($design)
                         ->label('Backup email')
                         ->input('backup-email')
@@ -119,6 +200,7 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Form',
+                'options' => self::options(disableFlex: true),
                 'components' => [
                     Form::make($design)
                         ->action('/subscribe')
@@ -126,15 +208,40 @@ final class DesignSystemCollection
                         ->fields([
                             Field::make($design)->label('Email')->input('form-email')->required(),
                             Field::make($design)->label('Country')->input(
-                                Select::make($design)->name('form-country')->options(['' => 'Choose', 'es' => 'Spain', 'fr' => 'France'])->component()
+                                Select::make($design)->name('form-country')->options(['' => 'Choose', 'es' => 'Spain', 'fr' => 'France'])
                             ),
                             Checkbox::make($design)->name('form-terms')->label('I accept the terms'),
                         ])
-                        ->actions(Button::make($design)->label('Subscribe')->variant(ButtonVariant::Primary)->type('submit')->component()),
+                        ->actions(Button::make($design)->label('Subscribe')->variant(ButtonVariant::Primary)->type('submit')),
+                ],
+            ],
+            [
+                'title' => 'Disclosure',
+                'options' => self::options(flexColumn: true),
+                'components' => [
+                    Accordion::make($design)
+                        ->summary('Shipping details')
+                        ->content('Ships in two business days.'),
+                    Accordion::make($design)
+                        ->summary('Returns')
+                        ->content('Thirty days, unused and in the original box.')
+                        ->open(),
+                ],
+            ],
+            [
+                'title' => 'Navigation',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Breadcrumb::make($design)->items([
+                        ['label' => 'Home', 'href' => '#navigation'],
+                        ['label' => 'Billing', 'href' => '#navigation'],
+                        ['label' => 'Invoices'],
+                    ]),
                 ],
             ],
             [
                 'title' => 'Alerts',
+                'options' => self::options(),
                 'components' => [
                     Alert::make($design)->variant(AlertVariant::Info)->title('Heads up')->body('Your trial ends in three days.'),
                     Alert::make($design)->variant(AlertVariant::Success)->title('Saved')->body('Your changes are live.'),
@@ -143,5 +250,24 @@ final class DesignSystemCollection
                 ],
             ],
         ];
+    }
+
+    /**
+     * The container each box's components sit in.
+     *
+     * The gallery reuses the options of the kitchen-sink groups, so a box can
+     * turn flex off or sit in a column without a new view change.
+     */
+    private static function options(
+        bool $disableFlex = false,
+        bool $flexColumn = false,
+        bool $justifyCenter = false,
+    ): ContainerOptions {
+        return new ContainerOptions(
+            disableFlex: $disableFlex,
+            flexColumn: $flexColumn,
+            flexGap: 'flex-gap',
+            justifyCenter: $justifyCenter,
+        );
     }
 }

@@ -2,10 +2,10 @@
   --cmp-bg-color: #ededed;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --cmp-bg-color: #2b3647;
-    }
+/* The app toggles dark with a class (see @custom-variant in app.css), so the
+   showcase chrome must follow the class instead of the OS preference. */
+.dark {
+  --cmp-bg-color: #2b3647;
 }
 
 .p-sm {

@@ -19,7 +19,7 @@
             <div class="component-box-bg p-sm">
                 <h2 class="component-box-h2">{{ $box['title'] }}</h2>
 
-                <div class="mt-sm flex flex-wrap items-center flex-gap">
+                <div class="{{ $box['options']->getContainerCSS() }}">
                     @foreach ($box['components'] as $component)
                         {{ $component }}
                     @endforeach
