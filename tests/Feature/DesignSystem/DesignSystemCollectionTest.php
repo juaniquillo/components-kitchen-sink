@@ -56,13 +56,14 @@ it('uses a backend component where a box needs a finished element', function () 
         ->and($cards[0]->component())->toBeInstanceOf(BackendComponent::class);
 });
 
-it('renders the gallery in each bundled design', function () {
+it('renders the gallery in every design', function () {
     // One class per design proves the gallery reaches the requested theme;
     // the package owns the component-level assertions.
     $expectations = [
         'base' => 'bg-zinc-900',
         'base-dark' => 'bg-zinc-100',
         'base-dual' => 'dark:bg-zinc-100',
+        'soft' => 'bg-indigo-600',
     ];
 
     foreach ($expectations as $design => $token) {

@@ -25,7 +25,7 @@ it('lists the bundled designs and marks the requested one', function () {
         $labels[] = trim($link->textContent);
     }
 
-    expect($labels)->toBe(['Base', 'Base Dark', 'Base Dual']);
+    expect($labels)->toBe(['Base', 'Base Dark', 'Base Dual', 'Soft']);
 
     $active = $xpath->query('//a[contains(@href, "design=base-dual")]')->item(0);
 
