@@ -29,7 +29,8 @@ class BackendDetails implements Component
         return new ContainerOptions(
             flexColumn: true,
             flexGap: 'flex-gap',
-            justifyCenter: false
+            justify: 'start',
+            items: 'stretch',
         );
     }
 

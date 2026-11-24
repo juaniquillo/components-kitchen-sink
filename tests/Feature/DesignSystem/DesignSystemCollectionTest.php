@@ -24,6 +24,9 @@ it('builds the gallery boxes against the given design', function () {
         'Form',
         'Disclosure',
         'Navigation',
+        'Data table',
+        'Tabs',
+        'Dialog',
         'Alerts',
     ]);
 
@@ -39,7 +42,7 @@ it('builds the gallery boxes against the given design', function () {
 it('renders every box on the page', function () {
     $response = $this->get('/design-system');
 
-    foreach (['Buttons', 'Badges', 'Cards', 'Typography', 'Layout', 'Inputs', 'Fields', 'Disclosure', 'Navigation', 'Alerts'] as $title) {
+    foreach (['Buttons', 'Badges', 'Cards', 'Typography', 'Layout', 'Inputs', 'Fields', 'Disclosure', 'Navigation', 'Data table', 'Tabs', 'Dialog', 'Alerts'] as $title) {
         $response->assertSee($title, false);
     }
 
@@ -70,9 +73,52 @@ it('gives every box its own container options', function () {
 
     expect($boxes['Buttons']['options']->disableFlex)->toBeFalse()
         ->and($boxes['Buttons']['options']->flexColumn)->toBeFalse()
+        ->and($boxes['Buttons']['options']->justify)->toBe('start')
+        ->and($boxes['Buttons']['options']->items)->toBe('center')
         ->and($boxes['Typography']['options']->disableFlex)->toBeTrue()
         ->and($boxes['Disclosure']['options']->flexColumn)->toBeTrue()
-        ->and($boxes['Disclosure']['options']->justifyCenter)->toBeFalse();
+        ->and($boxes['Disclosure']['options']->justify)->toBe('start')
+        ->and($boxes['Disclosure']['options']->items)->toBe('stretch');
+});
+
+it('wires the interactive boxes without script', function () {
+    $html = $this->get('/design-system?design=soft')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    // The dialog starts closed, named by its own title, and the buttons
+    // command it natively: show-modal opens, close closes.
+    $dialog = $xpath->query('//dialog[@id="billing-dialog"]')->item(0);
+
+    expect($dialog)->toBeInstanceOf(DOMElement::class)
+        ->and($dialog->hasAttribute('open'))->toBeFalse();
+
+    $titleId = $dialog->getAttribute('aria-labelledby');
+
+    expect($titleId)->not->toBe('')
+        ->and($xpath->query('//*[@id="'.$titleId.'"]')->length)->toBe(1);
+
+    $open = $xpath->query('//button[@command="show-modal"][@commandfor="billing-dialog"]')->item(0);
+
+    expect($open)->toBeInstanceOf(DOMElement::class)
+        ->and(trim($open->textContent))->toBe('Open dialog');
+
+    $close = $xpath->query('//button[@command="close"][@commandfor="billing-dialog"]');
+
+    expect($close->length)->toBe(2);
+
+    // Tabs are a labelled navigation with the current item marked.
+    $current = $xpath->query('//*[@role="navigation"][@aria-label="Billing sections"]//*[@aria-current="page"]')->item(0);
+
+    expect($current)->toBeInstanceOf(DOMElement::class)
+        ->and(trim($current->textContent))->toBe('Overview');
+
+    // Both tables keep their header semantics, and the first has a caption.
+    expect($xpath->query('//table//th[@scope="col"]')->length)->toBe(5)
+        ->and($xpath->query('//table//caption')->item(0)?->textContent)->toContain('Invoices');
 });
 
 it('renders the gallery in every design', function () {

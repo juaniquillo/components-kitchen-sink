@@ -18,7 +18,7 @@ it('returns table options', function () {
     expect($options->disableFlex)->toBeTrue()
         ->and($options->flexColumn)->toBeFalse()
         ->and($options->flexGap)->toBe('flex-gap-sm')
-        ->and($options->justifyCenter)->toBeTrue();
+        ->and($options->justify)->toBe('center');
 });
 
 it('renders a plain table', function () {

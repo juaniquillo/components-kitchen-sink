@@ -10,7 +10,8 @@
     "packages": [
         "livewire/blaze",
         "juaniquillo/laravel-backend-component",
-        "juaniquillo/svg-backend-components"
+        "juaniquillo/svg-backend-components",
+        "juaniquillo/backend-design-system"
     ],
     "sail": false,
     "skills": [
@@ -20,6 +21,7 @@
         "fluxui-development",
         "livewire-development",
         "tailwindcss-development",
+        "backend-design-system-development",
         "backend-component",
         "svg-backend-development",
         "blaze-optimize",

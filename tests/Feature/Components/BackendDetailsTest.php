@@ -18,7 +18,8 @@ it('returns the group options', function () {
     expect($options->disableFlex)->toBeFalse()
         ->and($options->flexColumn)->toBeTrue()
         ->and($options->flexGap)->toBe('flex-gap')
-        ->and($options->justifyCenter)->toBeFalse();
+        ->and($options->justify)->toBe('start')
+        ->and($options->items)->toBe('stretch');
 });
 
 it('renders a closed details', function () {

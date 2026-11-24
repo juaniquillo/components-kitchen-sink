@@ -13,6 +13,7 @@ use Juaniquillo\BackendDesignSystem\Components\Button;
 use Juaniquillo\BackendDesignSystem\Components\Card;
 use Juaniquillo\BackendDesignSystem\Components\Checkbox;
 use Juaniquillo\BackendDesignSystem\Components\ChoiceGroup;
+use Juaniquillo\BackendDesignSystem\Components\Dialog;
 use Juaniquillo\BackendDesignSystem\Components\Divider;
 use Juaniquillo\BackendDesignSystem\Components\Field;
 use Juaniquillo\BackendDesignSystem\Components\Form;
@@ -23,6 +24,8 @@ use Juaniquillo\BackendDesignSystem\Components\Link;
 use Juaniquillo\BackendDesignSystem\Components\Radio;
 use Juaniquillo\BackendDesignSystem\Components\Select;
 use Juaniquillo\BackendDesignSystem\Components\Stack;
+use Juaniquillo\BackendDesignSystem\Components\Table;
+use Juaniquillo\BackendDesignSystem\Components\Tabs;
 use Juaniquillo\BackendDesignSystem\Components\Text;
 use Juaniquillo\BackendDesignSystem\Components\Textarea;
 use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
@@ -172,7 +175,7 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Select and Textarea',
-                'options' => self::options(flexColumn: true),
+                'options' => self::options(flexColumn: true, items: 'stretch'),
                 'components' => [
                     Select::make($design)->name('country')->options([
                         '' => 'Choose a country',
@@ -192,9 +195,9 @@ final class DesignSystemCollection
                         ->label('Email')
                         ->input(Input::make($design)->name('email')->type('email')->attributes(['id' => 'signup-email'])),
                     Field::make($design)
-                        ->label('Backup email')
-                        ->input('backup-email')
-                        ->error('That address is already taken.')
+                        ->label('Confirm email')
+                        ->input('confirm-email')
+                        ->error('The email addresses do not match.')
                         ->required(),
                 ],
             ],
@@ -217,7 +220,7 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Disclosure',
-                'options' => self::options(flexColumn: true),
+                'options' => self::options(flexColumn: true, items: 'stretch'),
                 'components' => [
                     Accordion::make($design)
                         ->summary('Shipping details')
@@ -237,6 +240,64 @@ final class DesignSystemCollection
                         ['label' => 'Billing', 'href' => '#navigation'],
                         ['label' => 'Invoices'],
                     ]),
+                ],
+            ],
+            [
+                'title' => 'Data table',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Stack::make($design)
+                        ->space(Size::Md)
+                        ->children([
+                            Table::make($design)
+                                ->caption('Invoices')
+                                ->headers(['Invoice', 'Status', 'Amount'])
+                                ->rows([
+                                    ['INV-001', 'Paid', '€120.00'],
+                                    ['INV-002', 'Open', '€80.00'],
+                                ])
+                                ->footer(['', '', '€200.00']),
+                            Table::make($design)
+                                ->headers(['Invoice', 'Status'])
+                                ->empty('No invoices yet.'),
+                        ]),
+                ],
+            ],
+            [
+                'title' => 'Tabs',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Tabs::make($design)
+                        ->label('Billing sections')
+                        ->items([
+                            ['label' => 'Overview', 'href' => '#tabs', 'current' => true],
+                            ['label' => 'Invoices', 'href' => '#tabs'],
+                            ['label' => 'Settings'],
+                        ]),
+                ],
+            ],
+            [
+                'title' => 'Dialog',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Button::make($design)->label('Open dialog')->variant(ButtonVariant::Primary)->attributes([
+                        'command' => 'show-modal',
+                        'commandfor' => 'billing-dialog',
+                    ]),
+                    Dialog::make($design)
+                        ->id('billing-dialog')
+                        ->title('Cancel subscription')
+                        ->body('You keep access until the end of the billing period.')
+                        ->footer(Inline::make($design)->space(Size::Sm)->children([
+                            Button::make($design)->label('Keep plan')
+                                ->attributes([
+                                    'command' => 'close', 'commandfor' => 'billing-dialog',
+                                ]),
+                            Button::make($design)->label('Cancel plan')->variant(ButtonVariant::Danger)
+                                ->attributes([
+                                    'command' => 'close', 'commandfor' => 'billing-dialog',
+                                ]),
+                        ])),
                 ],
             ],
             [
@@ -261,13 +322,15 @@ final class DesignSystemCollection
     private static function options(
         bool $disableFlex = false,
         bool $flexColumn = false,
-        bool $justifyCenter = false,
+        string $justify = 'start',
+        string $items = 'center',
     ): ContainerOptions {
         return new ContainerOptions(
             disableFlex: $disableFlex,
             flexColumn: $flexColumn,
             flexGap: 'flex-gap',
-            justifyCenter: $justifyCenter,
+            justify: $justify,
+            items: $items,
         );
     }
 }

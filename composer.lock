@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9dc2b07c5aa88683d8991ea2ca57cc36",
+    "content-hash": "0106b62d4a660277913d51cd6efdc454",
     "packages": [
         {
             "name": "brick/math",
@@ -1130,16 +1130,16 @@
         },
         {
             "name": "juaniquillo/backend-design-system",
-            "version": "v0.1.0",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/juaniquillo/backend-design-system.git",
-                "reference": "7a246d6b32e91505394c35f904ad2a7e2b975769"
+                "reference": "e4840a5324458931da25967c585b46769731e301"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juaniquillo/backend-design-system/zipball/7a246d6b32e91505394c35f904ad2a7e2b975769",
-                "reference": "7a246d6b32e91505394c35f904ad2a7e2b975769",
+                "url": "https://api.github.com/repos/juaniquillo/backend-design-system/zipball/e4840a5324458931da25967c585b46769731e301",
+                "reference": "e4840a5324458931da25967c585b46769731e301",
                 "shasum": ""
             },
             "require": {
@@ -1195,8 +1195,8 @@
                 "issues": "https://github.com/juaniquillo/backend-design-system/issues",
                 "source": "https://github.com/juaniquillo/backend-design-system"
             },
-            "time": "2026-11-23T23:10:02+00:00",
-            "published-time": "2026-11-23T23:11:41+00:00"
+            "time": "2026-11-24T15:40:18+00:00",
+            "published-time": "2026-11-24T15:40:57+00:00"
         },
         {
             "name": "juaniquillo/base-backend-component",
