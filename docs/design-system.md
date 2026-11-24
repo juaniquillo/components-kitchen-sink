@@ -18,11 +18,13 @@ Keys are enums (`Juaniquillo\BackendDesignSystem\Theme\*`): `ButtonVariant`, `Ba
 
 ## Using the default classes
 
-The bundled designs ship their Tailwind classes in `.blade.php` files inside the package. Tailwind only generates a utility it has seen, and `vendor/` is excluded from its scan, so the package views have to be added explicitly. This app does it with one line in `resources/css/app.css`:
+The bundled designs ship their Tailwind classes in `.blade.php` files inside the package. Tailwind only generates a utility it has seen, and `vendor/` is excluded from its scan, so the package views have to be added explicitly. This app does it in `resources/css/design-system.css`, the gallery's own entry:
 
 ```css
 @source '../../vendor/juaniquillo/backend-design-system/resources/views/**/*.blade.php';
 ```
+
+That entry imports `base.css` and is loaded by `/design-system` instead of `app.css`, so the package's theme classes never reach the rest of the site. `app.css` scans the app's own sources only; anything the gallery does not use is not downloaded by other pages.
 
 Nothing is copied, and a package update changes the design on the next `npm run build`. With Tailwind v3, list the same path in `tailwind.config.js` under `content` instead.
 

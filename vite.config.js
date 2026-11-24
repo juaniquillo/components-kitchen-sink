@@ -8,7 +8,8 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/css/app.css', 
+                'resources/css/app.css',
+                'resources/css/design-system.css',
                 'resources/js/app.js',
                 'resources/js/form-group.js',
                 'resources/sass/bootstrap.scss',

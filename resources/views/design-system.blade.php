@@ -1,4 +1,7 @@
-<x-layouts.default page-title="Design System">
+<x-layouts.default
+    page-title="Design System"
+    :replace-assets="['resources/css/design-system.css', 'resources/js/app.js']"
+>
 
     <div class="design-system">
         <div class="text-center">

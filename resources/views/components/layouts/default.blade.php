@@ -51,8 +51,8 @@
 </head>
 <body class="font-sans antialiased bg-gray-200 dark:bg-slate-700 dark:text-white">
 
-    <div class="max-w-7xl mx-auto p-6">
-        <nav>
+    <div class="main-wrapper">
+        <nav class="main-nav">
             {{ $mainMenu }}
         </nav>
         <main>

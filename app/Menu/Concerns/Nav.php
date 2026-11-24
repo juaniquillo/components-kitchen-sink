@@ -28,8 +28,7 @@ trait Nav
     public static function getNavList(array $contents): CompoundComponent
     {
         return ComponentFactory::make(ComponentEnum::UL)
-            ->setContents($contents)
-            ->setThemes(self::getNavListTheme());
+            ->setContents($contents) ;
     }
 
     public static function getNavListItem(array $link): CompoundComponent
@@ -37,8 +36,7 @@ trait Nav
         return ComponentFactory::make(name: ComponentEnum::LI)
             ->setContent(
                 content: self::getLink($link)
-            )
-            ->setThemes(self::getNavListItemsTheme());
+            );
     }
 
     public static function getLink(array $link): CompoundComponent
@@ -52,26 +50,6 @@ trait Nav
                 'href' => $route,
             ])
             ->setThemes(self::getLinkTheme());
-    }
-
-    public static function getNavListTheme(): array
-    {
-        return [
-            'text' => 'center',
-            'margin' => 'bottom-md',
-        ];
-    }
-
-    public static function getNavListItemsTheme(): array
-    {
-        return [
-            'display' => 'inline-block',
-            'margin' => [
-                'right-sm',
-                'left-sm',
-                'top-sm',
-            ],
-        ];
     }
 
     public static function getLinkTheme(): array

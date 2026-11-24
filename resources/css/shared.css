@@ -8,8 +8,37 @@
   --cmp-bg-color: #2b3647;
 }
 
+.main-wrapper {
+    padding:2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.main-nav ul {
+    display: block;
+    list-style-type: none;
+    margin-block-start: 0;
+    margin-block-end: 1em;
+    padding-inline: 0;
+    unicode-bidi: isolate;
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+}
+
+.main-nav li {
+    display: list-item;
+    unicode-bidi: isolate;
+    list-style-type: none;
+}
+
+
 .p-sm {
     padding: 1.5rem;
+}
+
+.p-mid {
+    padding: 2rem;
 }
 
 .mt-sm {
@@ -86,15 +115,4 @@
     @media (min-width: 576px) {
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     }
-}
-
-/*
-| The design system's required marker.
-| A label immediately followed by a required input gets its asterisk from
-| the stylesheet, so requiredness stays an attribute of the input: the
-| label component never learns about it. Scoped to the design-system
-| page so the builder's own labels are untouched.
-*/
-.design-system label:has(+ input:required)::after {
-    content: ' *';
 }

@@ -1,0 +1,20 @@
+/* The design system's own build: loaded only by /design-system, so its
+   theme classes never reach the rest of the site. */
+@import './base.css';
+
+@source '../views';
+@source '../../app/Components/**/*.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+@source '../../vendor/juaniquillo/laravel-backend-component/resources/views/**/*.blade.php';
+@source '../../vendor/juaniquillo/backend-design-system/resources/views/**/*.blade.php';
+
+/*
+| The required marker.
+| A label immediately followed by a required input gets its asterisk from
+| the stylesheet, so requiredness stays an attribute of the input: the
+| label component never learns about it. Scoped to the design-system
+| page so the builder's own labels are untouched.
+*/
+.design-system label:has(+ input:required)::after {
+    content: ' *';
+}

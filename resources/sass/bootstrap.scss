@@ -66,23 +66,6 @@ a {
     -webkit-text-decoration: inherit;
     text-decoration: inherit;
 }
-nav ul {
-    display: block;
-    list-style-type: none;
-    margin-block-start: 0;
-    margin-block-end: 1em;
-    padding-inline: 0;
-    unicode-bidi: isolate;
-    display: flex;
-    justify-content: center;
-    gap: 1.2rem;
-}
-
-nav li {
-    display: list-item;
-    unicode-bidi: isolate;
-    list-style-type: none;
-}
 
 .text-blue-500 {
     color: oklch(0.62 0.21 259.82);
