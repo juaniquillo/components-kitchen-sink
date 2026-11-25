@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Slate;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\BoxOptions;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\Enums\Overflow;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\BaseBackendComponent\Contracts\ContentComponent;
 use Juaniquillo\SlateBackendComponents\SlateBackendComponent;
@@ -23,10 +26,11 @@ class SlateTables implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions(
-            disableFlex: true,
+        return new GroupOptions(
+            container: new ContainerOptions(disableFlex: true),
+            box: new BoxOptions(overflow: Overflow::Hidden),
         );
     }
 

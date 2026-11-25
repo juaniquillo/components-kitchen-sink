@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\BackendComponent;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\Enums\Items;
+use App\Components\Options\Enums\Justify;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
@@ -24,13 +27,15 @@ class BackendDetails implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions(
-            flexColumn: true,
-            flexGap: 'flex-gap',
-            justify: 'start',
-            items: 'stretch',
+        return new GroupOptions(
+            container: new ContainerOptions(
+                flexColumn: true,
+                flexGap: 'flex-gap',
+                justify: Justify::Start,
+                items: Items::Stretch,
+            ),
         );
     }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Flux;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\FluxBackendComponents\Factories\FluxComponentFactory;
 use Juaniquillo\FluxBackendComponents\FluxComponentEnum;
 
@@ -25,9 +25,9 @@ class FluxUIButtons implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions;
+        return new GroupOptions;
     }
 
     public static function primary(): mixed

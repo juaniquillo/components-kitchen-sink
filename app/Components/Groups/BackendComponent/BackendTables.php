@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\BackendComponent;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\GroupOptions;
+use App\Components\Support\TableOverflowUtil;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Themes\LocalThemeManager;
@@ -21,20 +23,22 @@ class BackendTables implements Component
     {
         return [
             'Plain table' => self::container([self::plain()]),
-            'Themed cells' => self::cells(),
+            'Themed cells' => self::container([self::cells()]),
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions(disableFlex: true);
+        return new GroupOptions(container: new ContainerOptions(disableFlex: true));
     }
 
     public static function container(array $contents): BackendComponent
     {
-        return ComponentFactory::make(ComponentEnum::DIV)
-            ->setTheme('margin', 'bottom-sm')
-            ->setContents($contents);
+        return TableOverflowUtil::wrapContainer(
+            ComponentFactory::make(ComponentEnum::DIV)
+                ->setTheme('margin', 'bottom-sm')
+                ->setContents($contents),
+        );
     }
 
     public static function plain(): BackendComponent

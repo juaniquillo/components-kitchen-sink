@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Components\ContainerOptions;
+use App\Components\Options\Enums\Items;
+use App\Components\Options\Enums\Justify;
+use App\Components\Options\GroupOptions;
 use App\DesignSystem\DesignSystemCollection;
 use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
 use Juaniquillo\BackendDesignSystem\Designs\Design;
@@ -68,17 +70,18 @@ it('gives every box its own container options', function () {
     $boxes = collect(DesignSystemCollection::boxes(app(Design::class)))->keyBy('title');
 
     foreach ($boxes as $box) {
-        expect($box['options'])->toBeInstanceOf(ContainerOptions::class);
+        expect($box['options'])->toBeInstanceOf(GroupOptions::class);
     }
 
-    expect($boxes['Buttons']['options']->disableFlex)->toBeFalse()
-        ->and($boxes['Buttons']['options']->flexColumn)->toBeFalse()
-        ->and($boxes['Buttons']['options']->justify)->toBe('start')
-        ->and($boxes['Buttons']['options']->items)->toBe('center')
-        ->and($boxes['Typography']['options']->disableFlex)->toBeTrue()
-        ->and($boxes['Disclosure']['options']->flexColumn)->toBeTrue()
-        ->and($boxes['Disclosure']['options']->justify)->toBe('start')
-        ->and($boxes['Disclosure']['options']->items)->toBe('stretch');
+    expect($boxes['Buttons']['options']->container->disableFlex)->toBeFalse()
+        ->and($boxes['Buttons']['options']->container->flexColumn)->toBeFalse()
+        ->and($boxes['Buttons']['options']->container->justify)->toBe(Justify::Start)
+        ->and($boxes['Buttons']['options']->container->items)->toBe(Items::Center)
+        ->and($boxes['Buttons']['options']->box->getCSS())->toBe('p-sm')
+        ->and($boxes['Typography']['options']->container->disableFlex)->toBeTrue()
+        ->and($boxes['Disclosure']['options']->container->flexColumn)->toBeTrue()
+        ->and($boxes['Disclosure']['options']->container->justify)->toBe(Justify::Start)
+        ->and($boxes['Disclosure']['options']->container->items)->toBe(Items::Stretch);
 });
 
 it('wires the interactive boxes without script', function () {

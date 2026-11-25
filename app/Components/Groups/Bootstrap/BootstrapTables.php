@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Bootstrap;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\BoxOptions;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\Enums\Overflow;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BackendComponents\Utils\CellBag;
@@ -29,10 +32,11 @@ class BootstrapTables implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions(
-            disableFlex: true,
+        return new GroupOptions(
+            container: new ContainerOptions(disableFlex: true),
+            box: new BoxOptions(overflow: Overflow::Hidden),
         );
     }
 
@@ -218,9 +222,13 @@ class BootstrapTables implements Component
         $tableContents[] = ComponentFactory::make(ComponentEnum::TBODY)
             ->setContents($rows);
 
-        return ComponentFactory::make(ComponentEnum::TABLE)
-            ->setAttribute('class', $class)
-            ->setContents($tableContents);
+        return ComponentFactory::make(ComponentEnum::DIV)
+            ->setAttribute('class', 'table-responsive')
+            ->setContent(
+                ComponentFactory::make(ComponentEnum::TABLE)
+                    ->setAttribute('class', $class)
+                    ->setContents($tableContents)
+            );
     }
 
     private static function resolveContent(string|CellBag|CompoundComponent $value): string|CompoundComponent

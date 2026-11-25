@@ -13,7 +13,7 @@ it('returns 7 table variants', function () {
 });
 
 it('sets disable-flex option', function () {
-    expect(BootstrapTables::options()->disableFlex)->toBeTrue();
+    expect(BootstrapTables::options()->container->disableFlex)->toBeTrue();
 });
 
 it('renders a basic table with thead and tbody', function () {
@@ -21,6 +21,7 @@ it('renders a basic table with thead and tbody', function () {
 
     expect($html)->toContain('<table')
         ->toContain('class="table"')
+        ->toContain('table-responsive')
         ->toContain('<thead')
         ->toContain('<tbody')
         ->toContain('Name')

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\DesignSystem;
 
-use App\Components\ContainerOptions;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\Enums\Items;
+use App\Components\Options\Enums\Justify;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendDesignSystem\Components\Accordion;
 use Juaniquillo\BackendDesignSystem\Components\Alert;
 use Juaniquillo\BackendDesignSystem\Components\Badge;
@@ -47,7 +50,7 @@ use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 final class DesignSystemCollection
 {
     /**
-     * @return array<int, array{title: string, options: ContainerOptions, components: array<int, DesignComponent|BackendComponent>}>
+     * @return array<int, array{title: string, options: GroupOptions, components: array<int, DesignComponent|BackendComponent>}>
      */
     public static function boxes(Design $design): array
     {
@@ -74,6 +77,30 @@ final class DesignSystemCollection
                     Badge::make($design)->label('New')->variant(BadgeVariant::Info),
                     Badge::make($design)->label('Expiring')->variant(BadgeVariant::Warning),
                     Badge::make($design)->label('Failed')->variant(BadgeVariant::Danger),
+                ],
+            ],
+            [
+                'title' => 'Dialog',
+                'options' => self::options(disableFlex: true),
+                'components' => [
+                    Button::make($design)->label('Open dialog')->variant(ButtonVariant::Primary)->attributes([
+                        'command' => 'show-modal',
+                        'commandfor' => 'billing-dialog',
+                    ]),
+                    Dialog::make($design)
+                        ->id('billing-dialog')
+                        ->title('Cancel subscription')
+                        ->body('You keep access until the end of the billing period.')
+                        ->footer(Inline::make($design)->space(Size::Sm)->children([
+                            Button::make($design)->label('Keep plan')
+                                ->attributes([
+                                    'command' => 'close', 'commandfor' => 'billing-dialog',
+                                ]),
+                            Button::make($design)->label('Cancel plan')->variant(ButtonVariant::Danger)
+                                ->attributes([
+                                    'command' => 'close', 'commandfor' => 'billing-dialog',
+                                ]),
+                        ])),
                 ],
             ],
             [
@@ -175,7 +202,7 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Select and Textarea',
-                'options' => self::options(flexColumn: true, items: 'stretch'),
+                'options' => self::options(flexColumn: true, items: Items::Stretch),
                 'components' => [
                     Select::make($design)->name('country')->options([
                         '' => 'Choose a country',
@@ -220,7 +247,7 @@ final class DesignSystemCollection
             ],
             [
                 'title' => 'Disclosure',
-                'options' => self::options(flexColumn: true, items: 'stretch'),
+                'options' => self::options(flexColumn: true, items: Items::Stretch),
                 'components' => [
                     Accordion::make($design)
                         ->summary('Shipping details')
@@ -276,30 +303,7 @@ final class DesignSystemCollection
                         ]),
                 ],
             ],
-            [
-                'title' => 'Dialog',
-                'options' => self::options(disableFlex: true),
-                'components' => [
-                    Button::make($design)->label('Open dialog')->variant(ButtonVariant::Primary)->attributes([
-                        'command' => 'show-modal',
-                        'commandfor' => 'billing-dialog',
-                    ]),
-                    Dialog::make($design)
-                        ->id('billing-dialog')
-                        ->title('Cancel subscription')
-                        ->body('You keep access until the end of the billing period.')
-                        ->footer(Inline::make($design)->space(Size::Sm)->children([
-                            Button::make($design)->label('Keep plan')
-                                ->attributes([
-                                    'command' => 'close', 'commandfor' => 'billing-dialog',
-                                ]),
-                            Button::make($design)->label('Cancel plan')->variant(ButtonVariant::Danger)
-                                ->attributes([
-                                    'command' => 'close', 'commandfor' => 'billing-dialog',
-                                ]),
-                        ])),
-                ],
-            ],
+            
             [
                 'title' => 'Alerts',
                 'options' => self::options(),
@@ -322,15 +326,17 @@ final class DesignSystemCollection
     private static function options(
         bool $disableFlex = false,
         bool $flexColumn = false,
-        string $justify = 'start',
-        string $items = 'center',
-    ): ContainerOptions {
-        return new ContainerOptions(
-            disableFlex: $disableFlex,
-            flexColumn: $flexColumn,
-            flexGap: 'flex-gap',
-            justify: $justify,
-            items: $items,
+        Justify $justify = Justify::Start,
+        Items $items = Items::Center,
+    ): GroupOptions {
+        return new GroupOptions(
+            container: new ContainerOptions(
+                disableFlex: $disableFlex,
+                flexColumn: $flexColumn,
+                flexGap: 'flex-gap',
+                justify: $justify,
+                items: $items,
+            ),
         );
     }
 }

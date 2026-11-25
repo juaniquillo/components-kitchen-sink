@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Slate;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\SlateBackendComponents\Factories\SlateComponentFactory;
 use Juaniquillo\SlateBackendComponents\SlateComponentEnum;
@@ -24,20 +25,21 @@ class SlateCarousel implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions;
+        return new GroupOptions;
     }
 
     public static function placeholder(string $alt = ''): BackendComponent
     {
-        return ComponentFactory::make(ComponentEnum::IMG)
+        return LocalThemeComponentFactory::make(ComponentEnum::IMG)
             ->setAttributes([
                 'alt' => $alt,
                 'src' => 'https://placehold.co/400x200/',
                 'width' => 400,
                 'height' => 200,
-            ]);
+            ])
+            ->setTheme('images', 'responsive');
     }
 
     public static function simple(): BackendComponent

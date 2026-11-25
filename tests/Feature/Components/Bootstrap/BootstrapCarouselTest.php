@@ -15,9 +15,9 @@ it('returns 3 carousel variants', function () {
 it('returns default options', function () {
     $options = BootstrapCarousel::options();
 
-    expect($options->disableFlex)->toBeFalse()
-        ->and($options->flexColumn)->toBeFalse()
-        ->and($options->flexGap)->toBe('flex-gap-sm');
+    expect($options->container->disableFlex)->toBeFalse()
+        ->and($options->container->flexColumn)->toBeFalse()
+        ->and($options->container->flexGap)->toBe('flex-gap-sm');
 });
 
 it('renders a default carousel with slides', function () {

@@ -13,7 +13,7 @@ it('returns 1 tab variant', function () {
 });
 
 it('sets flex-column option to false', function () {
-    expect(SlateTabs::options()->flexColumn)->toBeFalse();
+    expect(SlateTabs::options()->container->flexColumn)->toBeFalse();
 });
 
 it('renders tabs with triggers and content panels', function () {

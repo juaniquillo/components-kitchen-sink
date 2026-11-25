@@ -13,7 +13,7 @@ it('returns 5 skeleton variants', function () {
 });
 
 it('sets disable-flex option', function () {
-    expect(FluxUISkeletons::options()->disableFlex)->toBeTrue();
+    expect(FluxUISkeletons::options()->container->disableFlex)->toBeTrue();
 });
 
 it('renders a basic skeleton', function () {

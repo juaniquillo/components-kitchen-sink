@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Flux;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
@@ -28,10 +29,10 @@ class FluxUICards implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions(
-            flexColumn: true,
+        return new GroupOptions(
+            container: new ContainerOptions(flexColumn: true),
         );
     }
 

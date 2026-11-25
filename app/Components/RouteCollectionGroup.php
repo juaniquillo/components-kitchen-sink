@@ -12,6 +12,7 @@ use App\Components\Groups\Bootstrap\BootstrapButton;
 use App\Components\Groups\Bootstrap\BootstrapCard;
 use App\Components\Groups\Bootstrap\BootstrapCarousel;
 use App\Components\Groups\Bootstrap\BootstrapTables;
+use App\Components\Groups\Flux\FluxUIBadges;
 use App\Components\Groups\Flux\FluxUIButtons;
 use App\Components\Groups\Flux\FluxUICards;
 use App\Components\Groups\Flux\FluxUIFileInputs;
@@ -67,6 +68,7 @@ class RouteCollectionGroup
                 'components' => ComponentCollection::make()->addComponents([
                     new FluxUIButtons,
                     new FluxUIModals,
+                    new FluxUIBadges,
                     new FluxUISkeletons,
                     new FluxUICards,
                     new FluxUITables,

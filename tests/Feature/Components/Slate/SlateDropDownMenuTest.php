@@ -15,9 +15,9 @@ it('returns 1 dropdown menu variant', function () {
 it('returns default options', function () {
     $options = SlateDropDownMenu::options();
 
-    expect($options->disableFlex)->toBeFalse()
-        ->and($options->flexColumn)->toBeFalse()
-        ->and($options->flexGap)->toBe('flex-gap-sm');
+    expect($options->container->disableFlex)->toBeFalse()
+        ->and($options->container->flexColumn)->toBeFalse()
+        ->and($options->container->flexGap)->toBe('flex-gap-sm');
 });
 
 it('renders a dropdown menu with trigger and items', function () {

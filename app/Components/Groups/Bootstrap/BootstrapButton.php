@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Bootstrap;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
@@ -25,9 +25,9 @@ class BootstrapButton implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions;
+        return new GroupOptions;
     }
 
     public static function primary(): BackendComponent

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Slate;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\ContainerOptions;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
@@ -22,10 +23,10 @@ class SlateTabs implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions(
-            flexColumn: false,
+        return new GroupOptions(
+            container: new ContainerOptions(flexColumn: false),
         );
     }
 

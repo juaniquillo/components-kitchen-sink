@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Components\Groups\BackendComponent\BackendDetails;
+use App\Components\Options\Enums\Items;
+use App\Components\Options\Enums\Justify;
 
 it('has the correct NAME constant', function () {
     expect(BackendDetails::NAME)->toBe('Backend Details');
@@ -15,11 +17,11 @@ it('returns 4 details variants', function () {
 it('returns the group options', function () {
     $options = BackendDetails::options();
 
-    expect($options->disableFlex)->toBeFalse()
-        ->and($options->flexColumn)->toBeTrue()
-        ->and($options->flexGap)->toBe('flex-gap')
-        ->and($options->justify)->toBe('start')
-        ->and($options->items)->toBe('stretch');
+    expect($options->container->disableFlex)->toBeFalse()
+        ->and($options->container->flexColumn)->toBeTrue()
+        ->and($options->container->flexGap)->toBe('flex-gap')
+        ->and($options->container->justify)->toBe(Justify::Start)
+        ->and($options->container->items)->toBe(Items::Stretch);
 });
 
 it('renders a closed details', function () {

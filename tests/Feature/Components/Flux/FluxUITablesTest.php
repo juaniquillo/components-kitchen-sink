@@ -13,7 +13,7 @@ it('returns 7 table variants', function () {
 });
 
 it('sets disable-flex option', function () {
-    expect(FluxUITables::options()->disableFlex)->toBeTrue();
+    expect(FluxUITables::options()->container->disableFlex)->toBeTrue();
 });
 
 it('renders a basic table with columns and rows', function () {

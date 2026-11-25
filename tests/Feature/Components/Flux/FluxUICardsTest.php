@@ -13,7 +13,7 @@ it('has the correct NAME constant', function () {
 });
 
 it('sets flex-column option', function () {
-    expect(FluxUICards::options()->flexColumn)->toBeTrue();
+    expect(FluxUICards::options()->container->flexColumn)->toBeTrue();
 });
 
 it('renders a simple card with heading and text', function () {

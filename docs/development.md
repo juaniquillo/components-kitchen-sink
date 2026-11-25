@@ -78,7 +78,7 @@ This project experiments with the `juaniquillo/laravel-backend-component` packag
 - **`ComponentEnum`** - Enumeration of all available component types
 - **Theme system** - Default theme manager with configurable themes, plus app-level Tailwind theme files
 - **Content system** - HasContent concern for managing component content
-- **`Component` contract** - Each group implements `App\Components\Contracts\Component` with `list()` and `options()` returning a `ContainerOptions` DTO (flex on/off, column, gap, justification and cross-axis alignment)
+- **`Component` contract** - Each group implements `App\Components\Contracts\Component` with `list()` and `options()` returning a `GroupOptions` DTO: `ContainerOptions` for flex on/off, column, gap, justification and cross-axis alignment, and `BoxOptions` for the outer box's padding and overflow
 - **`RouteCollectionGroup`** - Central registry mapping each route group to its components and static assets
 - **`ComponentCollection`** - Collection that aggregates group components for rendering
 - **`MjmlComponentFactory`** - Fluent factory for MJML trees; shorthands exist for `document`, `head`, `preview`, `font`, `attributes`, `style`, `section`, and `text`, every other `MjmlComponentEnum` case goes through generic `make()`

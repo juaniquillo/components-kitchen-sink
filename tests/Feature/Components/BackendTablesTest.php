@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Components\Groups\BackendComponent\BackendTables;
+use App\Components\Options\Enums\Justify;
 
 it('has the correct NAME constant', function () {
     expect(BackendTables::NAME)->toBe('Backend Tables');
@@ -15,10 +16,10 @@ it('returns 2 table variants', function () {
 it('returns table options', function () {
     $options = BackendTables::options();
 
-    expect($options->disableFlex)->toBeTrue()
-        ->and($options->flexColumn)->toBeFalse()
-        ->and($options->flexGap)->toBe('flex-gap-sm')
-        ->and($options->justify)->toBe('center');
+    expect($options->container->disableFlex)->toBeTrue()
+        ->and($options->container->flexColumn)->toBeFalse()
+        ->and($options->container->flexGap)->toBe('flex-gap-sm')
+        ->and($options->container->justify)->toBe(Justify::Center);
 });
 
 it('renders a plain table', function () {
@@ -37,6 +38,7 @@ it('wraps a table in a spaced container', function () {
 
     expect($html)->toContain('<div')
         ->toContain('mb-3')
+        ->toContain('overflow-x-auto')
         ->toContain('<table');
 });
 

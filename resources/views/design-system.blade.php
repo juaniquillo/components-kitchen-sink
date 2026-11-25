@@ -19,10 +19,10 @@
 
     <div class="component-container mt-sm">
         @foreach ($boxes as $box)
-            <div class="component-box-bg p-sm">
+            <div class="component-box-bg {{ $box['options']->box->getCSS() }}">
                 <h2 class="component-box-h2">{{ $box['title'] }}</h2>
 
-                <div class="{{ $box['options']->getContainerCSS() }}">
+                <div class="{{ $box['options']->container->getCSS() }}">
                     @foreach ($box['components'] as $component)
                         {{ $component }}
                     @endforeach

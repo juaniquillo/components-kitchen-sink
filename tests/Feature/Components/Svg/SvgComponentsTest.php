@@ -30,9 +30,9 @@ it('returns default options', function () {
     foreach ($groups as $group) {
         $options = $group->options();
 
-        expect($options->disableFlex)->toBeFalse()
-            ->and($options->flexColumn)->toBeFalse()
-            ->and($options->flexGap)->toBe('flex-gap-sm');
+        expect($options->container->disableFlex)->toBeFalse()
+            ->and($options->container->flexColumn)->toBeFalse()
+            ->and($options->container->flexGap)->toBe('flex-gap-sm');
     }
 });
 

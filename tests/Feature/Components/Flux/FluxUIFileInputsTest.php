@@ -13,7 +13,7 @@ it('returns 10 input variants', function () {
 });
 
 it('sets flex-column option', function () {
-    expect(FluxUIFileInputs::options()->flexColumn)->toBeTrue();
+    expect(FluxUIFileInputs::options()->container->flexColumn)->toBeTrue();
 });
 
 it('renders a text input with placeholder', function () {

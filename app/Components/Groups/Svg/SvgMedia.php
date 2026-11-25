@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Components\Groups\Svg;
 
-use App\Components\ContainerOptions;
 use App\Components\Contracts\Component;
+use App\Components\Options\GroupOptions;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
@@ -21,9 +21,9 @@ class SvgMedia implements Component
         ];
     }
 
-    public static function options(): ContainerOptions
+    public static function options(): GroupOptions
     {
-        return new ContainerOptions;
+        return new GroupOptions;
     }
 
     public static function image(): BackendComponent
