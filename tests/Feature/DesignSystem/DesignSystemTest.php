@@ -32,7 +32,8 @@ it('lists the bundled designs and marks the requested one', function () {
     $active = $xpath->query('//a[contains(@href, "design=base-dual")]')->item(0);
 
     expect($active)->toBeInstanceOf(DOMElement::class)
-        ->and($active->getAttribute('class'))->toContain('bg-zinc-900');
+        ->and($active->getAttribute('aria-current'))->toBe('page')
+        ->and($active->getAttribute('class'))->toContain('rounded-full');
 });
 
 it('switches designs through the query string', function () {

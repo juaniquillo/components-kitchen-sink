@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Menu\Concerns;
 
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
-use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 use Juaniquillo\BaseBackendComponent\Contracts\CompoundComponent;
 
 trait Links
@@ -24,17 +24,17 @@ trait Links
     /** @param array<int, CompoundComponent> $items */
     public static function getLinksList(array $items): CompoundComponent
     {
-        return ComponentFactory::make(ComponentEnum::DIV)
+        return LocalThemeComponentFactory::make(ComponentEnum::DIV)
             ->setContents($items)
             ->setAttribute('class', 'mt-sm display-flex flex-center flex-gap-sm flex-wrap p-sm');
     }
 
     public static function getLinksListItem(array $link): CompoundComponent
     {
-        return ComponentFactory::make(ComponentEnum::LINK)
+        return LocalThemeComponentFactory::make(ComponentEnum::LINK)
             ->setAttribute('href', $link['route'])
             ->setContent($link['name'])
-            ->setAttribute('class', 'text-blue-500 underline hover:no-underline font-bold text-lg');
+            ->setThemes(['nav' => 'item-sm']);
 
     }
 

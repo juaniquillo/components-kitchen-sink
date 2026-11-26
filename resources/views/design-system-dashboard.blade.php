@@ -1,6 +1,6 @@
 <x-layouts.canvas
     page-title="Dashboard · Design System"
-    :replace-assets="['resources/css/design-system.css', 'resources/js/app.js']"
+    :replace-assets="['resources/css/design-system.css', 'resources/js/app.ts']"
     :body-class="$bodyClass"
 >
 
@@ -8,7 +8,9 @@
         <div class="text-center">
             <h1 class="mt-sm text-4xl font-bold">Dashboard</h1>
 
-            @include('partials.design-switcher', ['designs' => $designs, 'design' => $design, 'switchRoute' => 'design-system.dashboard'])
+            <div class="mt-sm">
+                {{ \App\Menu\DesignSwitcher::make($designs, $design->key, 'design-system.dashboard') }}
+            </div>
 
             <p class="mt-sm text-sm">
                 <a

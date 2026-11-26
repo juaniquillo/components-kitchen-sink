@@ -2,8 +2,8 @@
 
 // Classic dual: hairline card with a sub-panel header, paired per mode.
 return [
-    'container' => 'border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900',
-    'title' => 'border-b border-slate-200 bg-slate-50 px-4 py-2 font-semibold text-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-100',
+    'container' => 'border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800',
+    'title' => 'border-b border-slate-200 bg-slate-50 px-4 py-2 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-700/60 dark:text-slate-100',
     'body' => 'px-4 py-3 text-sm text-slate-700 dark:text-slate-300',
-    'foot' => 'border-t border-slate-200 bg-slate-50 px-4 py-2 dark:border-slate-800 dark:bg-slate-800/50',
+    'foot' => 'border-t border-slate-200 bg-slate-50 px-4 py-2 dark:border-slate-700 dark:bg-slate-700/60',
 ];

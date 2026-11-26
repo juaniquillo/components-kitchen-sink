@@ -18,7 +18,7 @@ final class DesignCanvas
      * @var array<string, string>
      */
     private const OVERRIDES = [
-        'classic' => 'bg-slate-100 dark:bg-slate-950',
+        'classic' => 'bg-slate-100 dark:bg-slate-900',
     ];
 
     public static function override(string $key): ?string

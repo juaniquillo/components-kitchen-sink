@@ -1,13 +1,15 @@
 <x-layouts.default
     page-title="Design System"
-    :replace-assets="['resources/css/design-system.css', 'resources/js/app.js']"
+    :replace-assets="['resources/css/design-system.css', 'resources/js/app.ts']"
 >
 
     <div class="design-system">
         <div class="text-center">
         <h1 class="mt-sm text-4xl font-bold">Design System</h1>
 
-        @include('partials.design-switcher', ['designs' => $designs, 'design' => $design, 'switchRoute' => 'design-system'])
+        <div class="mt-sm">
+            {{ \App\Menu\DesignSwitcher::make($designs, $design->key, 'design-system') }}
+        </div>
 
         <p class="mt-sm text-sm">
             <a

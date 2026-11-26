@@ -48,6 +48,12 @@ Run Pint to format code:
 vendor/bin/pint --format agent
 ```
 
+TypeScript under `resources/js` is type-checked separately — Vite transpiles it but never checks types:
+
+```bash
+npm run typecheck
+```
+
 ## Testing
 
 Run the test suite:

@@ -20,8 +20,12 @@
         if(count($replaceAssets) > 0) {
              $assets = $replaceAssets;
         } else {
-            $assets = array_merge(['resources/css/app.css', 'resources/js/app.js'], $additionalAssets);
+            $assets = array_merge(['resources/css/app.css', 'resources/js/app.ts'], $additionalAssets);
         }
+
+        // The site chrome ships its own entries, so it renders on pages
+        // that replace the default assets with their own bundle.
+        $assets = array_merge($assets, ['resources/css/navigation.css', 'resources/js/appearance.ts']);
 
         $remoteAssets = $remoteAssets ?? [];
 
@@ -45,10 +49,19 @@
 
     @livewireStyles
     @fluxAppearance
+    <script>
+        // Bootstrap 5.3 follows the same mode without waiting for the module.
+        document.documentElement.dataset.bsTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    </script>
 </head>
 <body class="font-sans antialiased {{ $bodyClass ?? 'bg-zinc-100 dark:bg-zinc-900' }} dark:text-white">
 
     <main>
+        @if (!($disableLocalAssets ?? false))
+            <div class="canvas-appearance">
+                {{ \App\Menu\AppearanceToggle::make() }}
+            </div>
+        @endif
         {{ $slot }}
     </main>
 

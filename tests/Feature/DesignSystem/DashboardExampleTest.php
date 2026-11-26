@@ -44,15 +44,15 @@ it('404s on an unknown dashboard design', function () {
 it('gives classic its own canvas', function () {
     $classic = $this->get('/design-system/dashboard')->assertOk()->getContent();
 
-    expect($classic)->toContain('bg-slate-100');
+    expect($classic)->toContain('<body class="font-sans antialiased bg-slate-100 dark:bg-slate-900');
 
     $soft = $this->get('/design-system/dashboard?design=soft')->assertOk()->getContent();
 
-    expect($soft)->toContain('bg-zinc-100');
+    expect($soft)->toContain('<body class="font-sans antialiased bg-zinc-100 dark:bg-zinc-900');
 
     $gallery = $this->get('/design-system?design=classic')->assertOk()->getContent();
 
-    expect($gallery)->toContain('dark:bg-slate-950');
+    expect($gallery)->toContain('<div class="bg-slate-100 dark:bg-slate-900 p-sm">');
 
     $base = $this->get('/design-system')->assertOk()->getContent();
 

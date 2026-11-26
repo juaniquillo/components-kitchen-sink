@@ -4,7 +4,7 @@ use Juaniquillo\BackendDesignSystem\Theme\State;
 
 // Classic dual: underline tabs with a navy current, paired per mode.
 return [
-    'container' => 'border-b border-slate-200 text-sm dark:border-slate-800',
+    'container' => 'border-b border-slate-200 text-sm dark:border-slate-700',
     'list' => 'flex flex-wrap gap-1',
     'item' => 'flex',
     'link' => 'border-b-2 border-transparent px-3 py-2 text-slate-600 hover:border-slate-300 hover:text-slate-900 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-100',

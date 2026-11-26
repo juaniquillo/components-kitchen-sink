@@ -10,7 +10,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/design-system.css',
-                'resources/js/app.js',
+                'resources/css/navigation.css',
+                'resources/js/app.ts',
+                'resources/js/appearance.ts',
                 'resources/js/form-group.js',
                 'resources/sass/bootstrap.scss',
                 'resources/js/bootstrap.js',

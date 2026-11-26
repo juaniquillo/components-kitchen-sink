@@ -3,23 +3,13 @@
 @import "./../css/shared.css";
 
 :root {
-  /* Step 1: Tell the browser the site supports both modes */
   color-scheme: light dark;
-
-  /* Step 2: Define design tokens using light-dark(lightColor, darkColor) */
-  --bg-primary: light-dark(#ffffff, #121212);
-  --text-primary: light-dark(#333333, #f5f5f5);
-  --accent: light-dark(#0066cc, #4da6ff);
-  --bg-primary: white;
-
-  --cmp-bg-color: #ededed;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: oklch(37.2% 0.044 257.287);
-        --cmp-bg-color: #2b3647;
-    }
+/* The app toggles dark with a class (see @custom-variant in app.css), so
+   the showcase chrome follows the class instead of the OS preference. */
+.dark {
+  --cmp-bg-color: #2b3647;
 }
 
 *{
@@ -27,11 +17,6 @@
     margin: 0;
     padding: 0;
     border: 0 solid;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
 }
 
 .max-w-7xl {
