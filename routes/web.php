@@ -74,7 +74,7 @@ Route::get('design-system', function (Request $request) {
     return view('design-system')
         ->with('design', $design)
         ->with('designs', $designs)
-        ->with('boxes', DesignSystemCollection::boxes($design));
+        ->with('boxes', DesignSystemCollection::boxes());
 
 })->name('design-system');
 

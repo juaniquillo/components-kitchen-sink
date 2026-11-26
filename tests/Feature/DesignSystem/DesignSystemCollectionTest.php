@@ -5,37 +5,47 @@ declare(strict_types=1);
 use App\Components\Options\Enums\Items;
 use App\Components\Options\Enums\Justify;
 use App\Components\Options\GroupOptions;
+use App\DesignSystem\Boxes\Contracts\Box;
 use App\DesignSystem\DesignSystemCollection;
 use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
 use Juaniquillo\BackendDesignSystem\Designs\Design;
 use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 
-it('builds the gallery boxes against the given design', function () {
-    $boxes = DesignSystemCollection::boxes(app(Design::class));
+it('builds every gallery box for the given design', function () {
+    $design = app(Design::class);
+    $boxes = DesignSystemCollection::boxes();
 
-    expect(array_column($boxes, 'title'))->toBe([
-        'Buttons',
-        'Badges',
-        'Cards',
-        'Typography',
-        'Layout',
-        'Inputs',
-        'Choices',
-        'Select and Textarea',
-        'Fields',
-        'Form',
-        'Disclosure',
-        'Navigation',
-        'Data table',
-        'Tabs',
-        'Dialog',
-        'Alerts',
-    ]);
+    $names = array_map(fn (Box $box): string => $box::NAME, $boxes);
+
+    expect($names)->toHaveCount(16)
+        ->and(array_unique($names))->toHaveCount(16)
+        ->and($names)->toEqualCanonicalizing([
+            'Buttons',
+            'Badges',
+            'Dialog',
+            'Cards',
+            'Typography',
+            'Layout',
+            'Inputs',
+            'Choices',
+            'Select and Textarea',
+            'Fields',
+            'Form',
+            'Disclosure',
+            'Navigation',
+            'Data table',
+            'Tabs',
+            'Alerts',
+        ]);
 
     foreach ($boxes as $box) {
-        expect($box['components'])->not->toBeEmpty();
+        expect($box)->toBeInstanceOf(Box::class);
 
-        foreach ($box['components'] as $component) {
+        $components = $box->components($design);
+
+        expect($components)->not->toBeEmpty();
+
+        foreach ($components as $component) {
             expect($component)->toBeInstanceOf(DesignComponent::class);
         }
     }
@@ -54,34 +64,32 @@ it('renders every box on the page', function () {
 });
 
 it('uses a backend component where a box needs a finished element', function () {
-    $cards = [];
-
-    foreach (DesignSystemCollection::boxes(app(Design::class)) as $box) {
-        if ($box['title'] === 'Cards') {
-            $cards = $box['components'];
-        }
-    }
+    $cards = collect(DesignSystemCollection::boxes())
+        ->first(fn (Box $box): bool => $box::NAME === 'Cards')
+        ?->components(app(Design::class)) ?? [];
 
     expect($cards)->not->toBeEmpty()
         ->and($cards[0]->component())->toBeInstanceOf(BackendComponent::class);
 });
 
 it('gives every box its own container options', function () {
-    $boxes = collect(DesignSystemCollection::boxes(app(Design::class)))->keyBy('title');
+    $boxes = collect(DesignSystemCollection::boxes())->keyBy(fn (Box $box): string => $box::NAME);
 
     foreach ($boxes as $box) {
-        expect($box['options'])->toBeInstanceOf(GroupOptions::class);
+        expect($box->options())->toBeInstanceOf(GroupOptions::class);
     }
 
-    expect($boxes['Buttons']['options']->container->disableFlex)->toBeFalse()
-        ->and($boxes['Buttons']['options']->container->flexColumn)->toBeFalse()
-        ->and($boxes['Buttons']['options']->container->justify)->toBe(Justify::Start)
-        ->and($boxes['Buttons']['options']->container->items)->toBe(Items::Center)
-        ->and($boxes['Buttons']['options']->box->getCSS())->toBe('p-sm')
-        ->and($boxes['Typography']['options']->container->disableFlex)->toBeTrue()
-        ->and($boxes['Disclosure']['options']->container->flexColumn)->toBeTrue()
-        ->and($boxes['Disclosure']['options']->container->justify)->toBe(Justify::Start)
-        ->and($boxes['Disclosure']['options']->container->items)->toBe(Items::Stretch);
+    $buttons = $boxes['Buttons']->options();
+
+    expect($buttons->container->disableFlex)->toBeFalse()
+        ->and($buttons->container->flexColumn)->toBeFalse()
+        ->and($buttons->container->justify)->toBe(Justify::Start)
+        ->and($buttons->container->items)->toBe(Items::Center)
+        ->and($buttons->box->getCSS())->toBe('p-sm')
+        ->and($boxes['Typography']->options()->container->disableFlex)->toBeTrue()
+        ->and($boxes['Disclosure']->options()->container->flexColumn)->toBeTrue()
+        ->and($boxes['Disclosure']->options()->container->justify)->toBe(Justify::Start)
+        ->and($boxes['Disclosure']->options()->container->items)->toBe(Items::Stretch);
 });
 
 it('wires the interactive boxes without script', function () {

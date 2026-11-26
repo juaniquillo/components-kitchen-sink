@@ -28,7 +28,7 @@ trait Nav
     public static function getNavList(array $contents): CompoundComponent
     {
         return ComponentFactory::make(ComponentEnum::UL)
-            ->setContents($contents) ;
+            ->setContents($contents);
     }
 
     public static function getNavListItem(array $link): CompoundComponent
