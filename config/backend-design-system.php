@@ -57,6 +57,11 @@ return [
         ],
 
         // design-system:designs
+        'classic' => [
+            'label' => 'Classic',
+            'path' => 'views/backend-design-system/classic',
+            'dark' => 'adaptive',
+        ],
         'soft' => [
             'label' => 'Soft',
             'path' => 'views/backend-design-system/soft',

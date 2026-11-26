@@ -4,6 +4,7 @@
 
 @source '../views';
 @source '../../app/Components/**/*.php';
+@source '../../app/DesignSystem/**/*.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 @source '../../vendor/juaniquillo/laravel-backend-component/resources/views/**/*.blade.php';
 @source '../../vendor/juaniquillo/backend-design-system/resources/views/**/*.blade.php';

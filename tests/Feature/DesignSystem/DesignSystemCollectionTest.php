@@ -51,6 +51,40 @@ it('builds every gallery box for the given design', function () {
     }
 });
 
+it('gives every box an example list', function () {
+    $boxes = collect(DesignSystemCollection::boxes())->keyBy(fn (Box $box): string => $box::NAME);
+
+    foreach ($boxes as $box) {
+        expect($box->examples())->toBeArray();
+
+        foreach ($box->examples() as $example) {
+            expect($example->label)->not->toBe('')
+                ->and($example->description)->not->toBe('');
+        }
+    }
+
+    // Six boxes show an in-context composition; the rest stay token-only.
+    expect($boxes['Buttons']->examples())->toHaveCount(1)
+        ->and($boxes['Badges']->examples())->toHaveCount(1)
+        ->and($boxes['Cards']->examples())->toHaveCount(1)
+        ->and($boxes['Data table']->examples())->toHaveCount(1)
+        ->and($boxes['Alerts']->examples())->toHaveCount(1)
+        ->and($boxes['Form']->examples())->toHaveCount(1)
+        ->and($boxes['Dialog']->examples())->toBeEmpty();
+});
+
+it('shows the examples below the gallery', function () {
+    $html = $this->get('/design-system')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('In a real project')
+        ->toContain('Page toolbar')
+        ->toContain('KPI card')
+        ->toContain('Invoice list')
+        ->toContain('Form feedback')
+        ->toContain('Preview the classic dashboard');
+});
+
 it('renders every box on the page', function () {
     $response = $this->get('/design-system');
 
@@ -127,8 +161,9 @@ it('wires the interactive boxes without script', function () {
     expect($current)->toBeInstanceOf(DOMElement::class)
         ->and(trim($current->textContent))->toBe('Overview');
 
-    // Both tables keep their header semantics, and the first has a caption.
-    expect($xpath->query('//table//th[@scope="col"]')->length)->toBe(5)
+    // The gallery tables plus the invoice-list example keep their header
+    // semantics, and the first has a caption.
+    expect($xpath->query('//table//th[@scope="col"]')->length)->toBe(8)
         ->and($xpath->query('//table//caption')->item(0)?->textContent)->toContain('Invoices');
 });
 
@@ -139,6 +174,7 @@ it('renders the gallery in every design', function () {
         'base' => 'bg-zinc-900',
         'base-dark' => 'bg-zinc-100',
         'base-dual' => 'dark:bg-zinc-100',
+        'classic' => 'bg-slate-900',
         'soft' => 'bg-indigo-600',
     ];
 

@@ -9,13 +9,15 @@ use App\Components\RouteCollectionGroup;
 use App\Cruds\Actions\Validation\LaravelValidationLabelsAction;
 use App\Cruds\Actions\Validation\LaravelValidationRulesAction;
 use App\Cruds\CrudCollection;
+use App\DesignSystem\DesignCanvas;
+use App\DesignSystem\DesignSwitch;
 use App\DesignSystem\DesignSystemCollection;
+use App\DesignSystem\Examples\Dashboard;
 use App\Emails\EmailCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Juaniquillo\BackendDesignSystem\Designs\Design;
 
 Route::get('/', function () {
 
@@ -49,34 +51,34 @@ Route::get('components/{group}', function ($group) {
 })->name('component');
 
 Route::get('design-system', function (Request $request) {
-    $designs = collect(config('backend-design-system.designs', []))
-        ->map(fn (array $definition, string $key): array => [
-            'key' => $key,
-            'label' => (string) ($definition['label'] ?? $key),
-        ])
-        ->values();
-
-    $key = (string) $request->query('design', config('backend-design-system.default', 'base'));
-
-    if (! $designs->contains('key', $key)) {
-        abort(404);
-    }
-
-    // The package binds one design, resolved from the configured default.
-    // Switching here means switching the default before the binding is
-    // first resolved, which is why nothing may resolve it earlier in the
-    // request.
-    config(['backend-design-system.default' => $key]);
-    app()->forgetInstance(Design::class);
-
-    $design = app(Design::class);
+    $resolved = DesignSwitch::resolve($request, (string) config('backend-design-system.default', 'base'));
 
     return view('design-system')
-        ->with('design', $design)
-        ->with('designs', $designs)
+        ->with('design', $resolved['design'])
+        ->with('designs', $resolved['designs'])
         ->with('boxes', DesignSystemCollection::boxes());
 
 })->name('design-system');
+
+Route::get('design-system/dashboard', function (Request $request) {
+    $resolved = DesignSwitch::resolve($request, 'classic');
+
+    $design = $resolved['design'];
+
+    return view('design-system-dashboard')
+        ->with('design', $design)
+        ->with('designs', $resolved['designs'])
+        ->with('bodyClass', DesignCanvas::dashboard($resolved['key']))
+        ->with('breadcrumb', Dashboard::breadcrumb($design))
+        ->with('title', Dashboard::title($design))
+        ->with('subtitle', Dashboard::subtitle($design))
+        ->with('actions', Dashboard::actions($design))
+        ->with('notice', Dashboard::notice($design))
+        ->with('kpis', Dashboard::kpis($design))
+        ->with('invoices', Dashboard::invoices($design))
+        ->with('invite', Dashboard::invite($design));
+
+})->name('design-system.dashboard');
 
 Route::get('/cruds', function (Request $request) {
 

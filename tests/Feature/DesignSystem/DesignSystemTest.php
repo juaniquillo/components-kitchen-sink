@@ -21,11 +21,13 @@ it('lists the bundled designs and marks the requested one', function () {
 
     $labels = [];
 
-    foreach ($xpath->query('//a[contains(@href, "design=")]') as $link) {
+    // The dashboard link carries a design too, so the query scopes to the
+    // switcher chips rather than every link with a design parameter.
+    foreach ($xpath->query('//a[contains(@href, "design-system?design=")]') as $link) {
         $labels[] = trim($link->textContent);
     }
 
-    expect($labels)->toBe(['Base', 'Base Dark', 'Base Dual', 'Soft']);
+    expect($labels)->toBe(['Base', 'Base Dark', 'Base Dual', 'Classic', 'Soft']);
 
     $active = $xpath->query('//a[contains(@href, "design=base-dual")]')->item(0);
 

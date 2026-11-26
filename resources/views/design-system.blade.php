@@ -7,14 +7,14 @@
         <div class="text-center">
         <h1 class="mt-sm text-4xl font-bold">Design System</h1>
 
-        <div class="mt-sm flex flex-wrap justify-center gap-2">
-            @foreach ($designs as $option)
-                <a
-                    href="{{ route('design-system', ['design' => $option['key']]) }}"
-                    class="border px-3 py-1 text-sm {{ $option['key'] === $design->key ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-black' : 'border-zinc-300 hover:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800' }}"
-                >{{ $option['label'] }}</a>
-            @endforeach
-        </div>
+        @include('partials.design-switcher', ['designs' => $designs, 'design' => $design, 'switchRoute' => 'design-system'])
+
+        <p class="mt-sm text-sm">
+            <a
+                href="{{ route('design-system.dashboard', ['design' => $design->key]) }}"
+                class="underline underline-offset-2"
+            >Preview the classic dashboard →</a>
+        </p>
     </div>
 
     <div class="component-container mt-sm">
@@ -30,6 +30,25 @@
                 </div>
             </div>
         @endforeach
+    </div>
+
+    <div class="mt-sm">
+        <h2 class="component-box-h2">In a real project</h2>
+
+        <p class="mt-sm text-sm">The same components, composed the way a project uses them.</p>
+
+        <div class="component-container mt-sm">
+            @foreach ($boxes as $box)
+                @foreach ($box->examples() as $example)
+                    <div class="{{ $example->canvas ?? \App\DesignSystem\DesignCanvas::example($design->key) }} p-sm">
+                        <p class="text-xs font-semibold uppercase tracking-wide">{{ $box::NAME }}</p>
+                        <h3 class="mt-sm text-lg font-bold">{{ $example->label }}</h3>
+                        <p class="mt-sm text-sm">{{ $example->description }}</p>
+                        <div class="mt-sm">{{ $example->component($design) }}</div>
+                    </div>
+                @endforeach
+            @endforeach
+        </div>
     </div>
 
     </div>

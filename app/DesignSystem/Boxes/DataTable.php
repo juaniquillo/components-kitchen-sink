@@ -7,9 +7,12 @@ namespace App\DesignSystem\Boxes;
 use App\Components\Options\GroupOptions;
 use App\DesignSystem\Boxes\Concerns\IsDesignSystemBox;
 use App\DesignSystem\Boxes\Contracts\Box;
+use App\DesignSystem\Examples\Example;
+use Juaniquillo\BackendDesignSystem\Components\Badge;
 use Juaniquillo\BackendDesignSystem\Components\Stack;
 use Juaniquillo\BackendDesignSystem\Components\Table;
 use Juaniquillo\BackendDesignSystem\Designs\Design;
+use Juaniquillo\BackendDesignSystem\Theme\BadgeVariant;
 use Juaniquillo\BackendDesignSystem\Theme\Size;
 
 final class DataTable implements Box
@@ -41,6 +44,27 @@ final class DataTable implements Box
                         ->headers(['Invoice', 'Status'])
                         ->empty('No invoices yet.'),
                 ]),
+        ];
+    }
+
+    /**
+     * @return array<int, Example>
+     */
+    public function examples(): array
+    {
+        return [
+            new Example(
+                'Invoice list',
+                'Badges mark the status per row; the footer totals the column.',
+                fn (Design $design): Table => Table::make($design)
+                    ->caption('Invoices')
+                    ->headers(['Invoice', 'Status', 'Amount'])
+                    ->rows([
+                        ['INV-1042', Badge::make($design)->label('Paid')->variant(BadgeVariant::Success), '€1,240.00'],
+                        ['INV-1043', Badge::make($design)->label('Overdue')->variant(BadgeVariant::Warning), '€860.00'],
+                    ])
+                    ->footer(['', 'Total due', '€2,100.00']),
+            ),
         ];
     }
 }
