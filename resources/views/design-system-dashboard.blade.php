@@ -4,23 +4,9 @@
     :body-class="$bodyClass"
 >
 
+    <x-example-header :design="$design" :designs="$designs" route="design-system.dashboard" />
+
     <div class="px-4 py-6" x-data="{}">
-        <div class="flex max-w-6xl flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-3">
-                {{ \Juaniquillo\BackendDesignSystem\Components\Link::make($design)->label('← Gallery')->href(route('design-system', ['design' => $design->key])) }}
-
-                <span aria-hidden="true" class="h-5 w-px bg-current opacity-20"></span>
-
-                <span class="text-xs font-semibold uppercase tracking-wide opacity-70">Design</span>
-                {{ \App\Menu\DesignSwitcher::make($designs, $design->key, 'design-system.dashboard', center: false) }}
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="text-xs font-semibold uppercase tracking-wide opacity-70">Theme</span>
-                {{ \App\Menu\AppearanceToggle::make() }}
-            </div>
-        </div>
-
         <div class="mt-sm flex max-w-6xl items-center justify-between gap-3 lg:hidden">
             {{ $brand }}
 

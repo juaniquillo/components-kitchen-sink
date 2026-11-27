@@ -53,6 +53,8 @@ it('keeps the chrome in plain shared CSS', function () {
 
     expect($css)
         ->toContain('.site-body')
+        ->toContain('.example-header')
+        ->toContain('.example-header__inner')
         ->toContain('.nav-item')
         ->toContain('.theme-switch__button')
         ->toContain('.dashboard-menu-button')

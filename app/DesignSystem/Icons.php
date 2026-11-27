@@ -23,7 +23,7 @@ final class Icons
     /**
      * @var array<int, string>
      */
-    public const FILES = ['sun.svg', 'moon.svg', 'auto.svg', 'overview.svg', 'invoices.svg', 'clients.svg', 'settings.svg', 'menu.svg', 'close.svg'];
+    public const FILES = ['sun.svg', 'moon.svg', 'auto.svg', 'overview.svg', 'invoices.svg', 'clients.svg', 'settings.svg', 'menu.svg', 'close.svg', 'bolt.svg', 'shield.svg', 'layers.svg'];
 
     public static function build(string $directory): void
     {
@@ -37,6 +37,9 @@ final class Icons
             'settings' => self::settings(),
             'menu' => self::menu(),
             'close' => self::close(),
+            'bolt' => self::bolt(),
+            'shield' => self::shield(),
+            'layers' => self::layers(),
         ];
 
         foreach ($icons as $name => $icon) {
@@ -230,6 +233,73 @@ final class Icons
             ->setXmlns()
             ->setViewBox(0, 0, 24, 24)
             ->setContents($lines);
+    }
+
+    /**
+     * A lightning bolt for the landing feature cards.
+     */
+    public static function bolt(): SvgBackendComponent
+    {
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContent(
+                SvgShape::path('M13 2 4 14h6l-1 8 9-12h-6l1-8z')
+                    ->setAttribute('fill', 'black')
+            );
+    }
+
+    /**
+     * A shield outline with a check for the landing feature cards.
+     */
+    public static function shield(): SvgBackendComponent
+    {
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents([
+                SvgShape::path('M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z')
+                    ->setAttribute('fill', 'none')
+                    ->setAttribute('stroke', 'black')
+                    ->setAttribute('stroke-width', '2')
+                    ->setAttribute('stroke-linejoin', 'round'),
+                SvgShape::path('M8.5 12l2.5 2.5 4.5-5')
+                    ->setAttribute('fill', 'none')
+                    ->setAttribute('stroke', 'black')
+                    ->setAttribute('stroke-width', '2')
+                    ->setAttribute('stroke-linecap', 'round')
+                    ->setAttribute('stroke-linejoin', 'round'),
+            ]);
+    }
+
+    /**
+     * Three stacked diamonds for the landing feature cards.
+     */
+    public static function layers(): SvgBackendComponent
+    {
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents([
+                SvgShape::path('M12 3l9 5-9 5-9-5 9-5z')
+                    ->setAttribute('fill', 'black'),
+                SvgShape::polyline('3,12 12,17 21,12')
+                    ->setAttributes([
+                        'fill' => 'none',
+                        'stroke' => 'black',
+                        'stroke-width' => '2',
+                        'stroke-linecap' => 'round',
+                        'stroke-linejoin' => 'round',
+                    ]),
+                SvgShape::polyline('3,16 12,21 21,16')
+                    ->setAttributes([
+                        'fill' => 'none',
+                        'stroke' => 'black',
+                        'stroke-width' => '2',
+                        'stroke-linecap' => 'round',
+                        'stroke-linejoin' => 'round',
+                    ]),
+            ]);
     }
 
     private static function coord(float $value): string

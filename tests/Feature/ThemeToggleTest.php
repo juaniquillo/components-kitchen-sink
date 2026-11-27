@@ -28,6 +28,12 @@ it('shows the theme switch on the canvas dashboard', function () {
     expect($html)->toContain('data-appearance-group');
 });
 
+it('shows the theme switch on the canvas landing page', function () {
+    $html = $this->get('/design-system/landing')->assertOk()->getContent();
+
+    expect($html)->toContain('data-appearance-group');
+});
+
 it('shows the theme switch on a page with replaced assets', function () {
     // The Bootstrap group replaces app.css with its own bundle; the switch
     // ships its own entries so it renders there too.

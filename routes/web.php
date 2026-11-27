@@ -13,6 +13,7 @@ use App\DesignSystem\DesignCanvas;
 use App\DesignSystem\DesignSwitch;
 use App\DesignSystem\DesignSystemCollection;
 use App\DesignSystem\Examples\Dashboard;
+use App\DesignSystem\Examples\Landing;
 use App\Emails\EmailCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -94,6 +95,34 @@ Route::post('design-system/dashboard/invite', function (Request $request) {
 
     return back()->with('dashboard-notice', 'Invite sent to '.$validated['invite-email'].'.');
 })->name('design-system.dashboard.invite');
+
+Route::get('design-system/landing', function (Request $request) {
+    $resolved = DesignSwitch::resolve($request, 'classic');
+
+    $design = $resolved['design'];
+
+    return view('design-system-landing')
+        ->with('design', $design)
+        ->with('designs', $resolved['designs'])
+        ->with('bodyClass', DesignCanvas::dashboard($resolved['key']))
+        ->with('hero', Landing::hero($design))
+        ->with('preview', Landing::preview($design))
+        ->with('proof', Landing::proof($design))
+        ->with('features', Landing::features($design))
+        ->with('pricing', Landing::pricing($design))
+        ->with('faq', Landing::faq($design))
+        ->with('newsletter', Landing::newsletter($design))
+        ->with('footer', Landing::footer($design));
+
+})->name('design-system.landing');
+
+Route::post('design-system/landing/subscribe', function (Request $request) {
+    $request->validate([
+        'newsletter-email' => ['required', 'email'],
+    ]);
+
+    return back()->with('landing-notice', 'You are on the list. See you Thursday.');
+})->name('design-system.landing.subscribe');
 
 Route::post('design-system/dashboard/invoice', function (Request $request) {
     $validated = $request->validate([

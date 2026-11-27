@@ -17,6 +17,13 @@
                 class="underline underline-offset-2"
             >Preview the classic dashboard →</a>
         </p>
+
+        <p class="mt-sm text-sm">
+            <a
+                href="{{ route('design-system.landing', ['design' => $design->key]) }}"
+                class="underline underline-offset-2"
+            >See the Acme Studio landing page →</a>
+        </p>
     </div>
 
     <div class="component-container mt-sm">

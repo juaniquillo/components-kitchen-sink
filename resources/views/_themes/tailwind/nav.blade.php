@@ -23,4 +23,7 @@ return [
     'icon-invoices' => 'nav-icon nav-icon--invoices',
     'icon-clients' => 'nav-icon nav-icon--clients',
     'icon-settings' => 'nav-icon nav-icon--settings',
+    'icon-bolt' => 'nav-icon nav-icon--bolt',
+    'icon-shield' => 'nav-icon nav-icon--shield',
+    'icon-layers' => 'nav-icon nav-icon--layers',
 ];

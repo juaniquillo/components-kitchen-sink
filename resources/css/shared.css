@@ -216,6 +216,21 @@ html.dark .theme-switch__button[aria-pressed="true"] {
     mask: url(/icons/menu.svg) center/contain no-repeat;
 }
 
+.nav-icon--bolt {
+    -webkit-mask: url(/icons/bolt.svg) center/contain no-repeat;
+    mask: url(/icons/bolt.svg) center/contain no-repeat;
+}
+
+.nav-icon--shield {
+    -webkit-mask: url(/icons/shield.svg) center/contain no-repeat;
+    mask: url(/icons/shield.svg) center/contain no-repeat;
+}
+
+.nav-icon--layers {
+    -webkit-mask: url(/icons/layers.svg) center/contain no-repeat;
+    mask: url(/icons/layers.svg) center/contain no-repeat;
+}
+
 .nav-icon--close {
     -webkit-mask: url(/icons/close.svg) center/contain no-repeat;
     mask: url(/icons/close.svg) center/contain no-repeat;
@@ -251,6 +266,31 @@ html.dark .dashboard-menu-panel {
 
 .dashboard-menu-panel::backdrop {
     background-color: rgb(0 0 0 / 0.5);
+}
+
+/* The chrome every example page shares: sticky, translucent, neutral in
+   both modes so it reads the same above every design's surface. */
+.example-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 1px solid #e4e4e7;
+    background-color: rgb(255 255 255 / 0.85);
+    backdrop-filter: blur(8px);
+}
+
+html.dark .example-header {
+    border-bottom-color: #27272a;
+    background-color: rgb(24 24 27 / 0.85);
+}
+
+.example-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
 }
 
 
