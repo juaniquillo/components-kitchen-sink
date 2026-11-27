@@ -8,6 +8,7 @@ use App\Components\Options\GroupOptions;
 use App\DesignSystem\Boxes\Concerns\IsDesignSystemBox;
 use App\DesignSystem\Boxes\Contracts\Box;
 use App\DesignSystem\Examples\Example;
+use Juaniquillo\BackendComponents\Utils\CellBag;
 use Juaniquillo\BackendDesignSystem\Components\Badge;
 use Juaniquillo\BackendDesignSystem\Components\Stack;
 use Juaniquillo\BackendDesignSystem\Components\Table;
@@ -36,7 +37,14 @@ final class DataTable implements Box
                         ->caption('Invoices')
                         ->headers(['Invoice', 'Status', 'Amount'])
                         ->rows([
-                            ['INV-001', 'Paid', '€120.00'],
+                            ['cells' => [
+                                'INV-001',
+                                new CellBag(
+                                    content: Badge::make($design)->label('Paid')->variant(BadgeVariant::Success)->component(),
+                                    attributes: ['data-status' => 'paid'],
+                                ),
+                                '€120.00',
+                            ], 'attributes' => ['data-invoice' => 'INV-001']],
                             ['INV-002', 'Open', '€80.00'],
                         ])
                         ->footer(['', '', '€200.00']),

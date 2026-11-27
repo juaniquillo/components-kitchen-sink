@@ -27,6 +27,7 @@ final class EmailPresenter implements EmailPresenterInterface
                     ->setContent(
                         ComponentFactory::make(ComponentEnum::BUTTON)
                             ->setTheme('action', 'default')
+                            ->setTheme('color', 'light')
                             ->setTheme('padding', 'xs')
                             ->setTheme('border-radius', 'sm')
                             ->setContent($email::name())

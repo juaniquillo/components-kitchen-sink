@@ -27,9 +27,12 @@ final class Tabs implements Box
             TabsComponent::make($design)
                 ->label('Billing sections')
                 ->items([
-                    ['label' => 'Overview', 'href' => '#tabs', 'current' => true],
-                    ['label' => 'Invoices', 'href' => '#tabs'],
-                    ['label' => 'Settings'],
+                    ['label' => 'Overview', 'href' => '#tabs', 'current' => true,
+                        'attributes' => ['id' => 'tab-overview', 'data-tab' => 'overview']],
+                    ['label' => 'Invoices', 'href' => '#tabs',
+                        'attributes' => ['id' => 'tab-invoices', 'data-tab' => 'invoices']],
+                    ['label' => 'Settings',
+                        'attributes' => ['data-tab' => 'settings']],
                 ]),
         ];
     }

@@ -24,9 +24,10 @@
             $assets = array_merge(['resources/css/app.css', 'resources/js/app.ts'], $additionalAssets);
         }
 
-        // The site chrome ships its own entries, so it renders on pages
-        // that replace the default assets with their own bundle.
-        $assets = array_merge($assets, ['resources/css/navigation.css', 'resources/js/appearance.ts']);
+        // The site chrome ships its own stylesheet before the page bundle,
+        // so the page utilities win any same-specificity tie. The script
+        // stays last; it only wires the toggle.
+        $assets = array_merge(['resources/css/navigation.css'], $assets, ['resources/js/appearance.ts']);
 
         // A remote asset has no entry in the Vite manifest, so it is loaded
         // as it is instead of going through Vite.

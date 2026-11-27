@@ -75,6 +75,7 @@ Route::get('design-system/dashboard', function (Request $request) {
         ->with('actions', Dashboard::actions($design))
         ->with('notice', Dashboard::notice($design))
         ->with('kpis', Dashboard::kpis($design))
+        ->with('revenue', Dashboard::revenue($design))
         ->with('invoices', Dashboard::invoices($design))
         ->with('invite', Dashboard::invite($design));
 

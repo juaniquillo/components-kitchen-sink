@@ -167,6 +167,36 @@ it('wires the interactive boxes without script', function () {
         ->and($xpath->query('//table//caption')->item(0)?->textContent)->toContain('Invoices');
 });
 
+it('passes per-item attributes through to the markup', function () {
+    $html = $this->get('/design-system?design=soft')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    // The Tabs box tags each tab; ids stay unique across the page.
+    $overview = $xpath->query('//a[@data-tab="overview"]')->item(0);
+
+    expect($overview)->toBeInstanceOf(DOMElement::class)
+        ->and($overview->getAttribute('id'))->toBe('tab-overview')
+        ->and($xpath->query('//a[@data-tab="invoices"]')->length)->toBe(1);
+
+    // The DataTable box attributes land on the row and the cell, and the
+    // cell still renders its badge.
+    $row = $xpath->query('//tr[@data-invoice="INV-001"]')->item(0);
+
+    expect($row)->toBeInstanceOf(DOMElement::class);
+
+    $status = $xpath->query('//td[@data-status="paid"]')->item(0);
+
+    expect($status)->toBeInstanceOf(DOMElement::class)
+        ->and($status->textContent)->toContain('Paid');
+
+    // The Navigation box tags its first crumb.
+    expect($xpath->query('//a[@data-crumb="home"]')->length)->toBe(1);
+});
+
 it('renders the gallery in every design', function () {
     // One class per design proves the gallery reaches the requested theme;
     // the package owns the component-level assertions.

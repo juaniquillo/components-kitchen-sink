@@ -25,7 +25,8 @@ final class Navigation implements Box
     {
         return [
             Breadcrumb::make($design)->items([
-                ['label' => 'Home', 'href' => '#navigation'],
+                ['label' => 'Home', 'href' => '#navigation',
+                    'attributes' => ['data-crumb' => 'home']],
                 ['label' => 'Billing', 'href' => '#navigation'],
                 ['label' => 'Invoices'],
             ]),

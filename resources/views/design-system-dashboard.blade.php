@@ -38,6 +38,8 @@
             @endforeach
         </div>
 
+        <div class="mt-sm">{{ $revenue }}</div>
+
         <div class="mt-sm grid gap-4 lg:grid-cols-3">
             <div class="lg:col-span-2">{{ $invoices }}</div>
             <div>{{ $invite }}</div>

@@ -41,6 +41,94 @@ it('404s on an unknown dashboard design', function () {
     $this->get('/design-system/dashboard?design=nope')->assertNotFound();
 });
 
+it('charts revenue with accessible SVGs', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    // The bar chart is a labelled image: twelve bars over a baseline.
+    $chart = $xpath->query('//svg[@role="img"]')->item(0);
+
+    expect($chart)->toBeInstanceOf(DOMElement::class)
+        ->and($chart->getAttribute('aria-label'))->toContain('Revenue')
+        ->and($xpath->query('.//rect', $chart)->length)->toBe(12)
+        ->and($xpath->query('.//line', $chart)->length)->toBe(1);
+
+    // The sparkline decorates the KPI number, so it hides from assistive tech.
+    $sparkline = $xpath->query('//svg[@aria-hidden="true"]')->item(0);
+
+    expect($sparkline)->toBeInstanceOf(DOMElement::class)
+        ->and($xpath->query('.//polyline', $sparkline)->length)->toBe(1);
+
+    // Both charts inherit the card colour; nothing hardcodes a hex fill.
+    expect($html)
+        ->toContain('fill="currentColor"')
+        ->toContain('+18.2% vs last year');
+});
+
+it('wires the invoice tabs as a real tablist', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    $tablist = $xpath->query('//*[@role="tablist"][@aria-label="Invoice filters"]');
+
+    expect($tablist->length)->toBe(1);
+
+    $tabs = $xpath->query('//*[@role="tab"]');
+    $panels = $xpath->query('//*[@role="tabpanel"]');
+
+    expect($tabs->length)->toBe(3)
+        ->and($panels->length)->toBe(3);
+
+    // Every tab controls a panel that exists, and Alpine owns the state.
+    $ids = [];
+
+    foreach ($panels as $panel) {
+        $ids[] = $panel->getAttribute('id');
+    }
+
+    foreach ($tabs as $tab) {
+        expect($ids)->toContain($tab->getAttribute('aria-controls'));
+    }
+
+    expect($html)
+        ->toContain('x-data')
+        ->toContain('x-show')
+        ->toContain('x-bind:aria-selected')
+        ->toContain('invoice-panel-paid')
+        ->toContain('INV-1042');
+});
+
+it('styles the tablist from the active design', function () {
+    foreach (['base', 'base-dual', 'classic', 'soft'] as $key) {
+        $html = $this->get('/design-system/dashboard?design='.$key)->assertOk()->getContent();
+
+        $dom = new DOMDocument;
+        @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+        $xpath = new DOMXPath($dom);
+        $tablist = $xpath->query('//*[@role="tablist"]')->item(0);
+
+        expect($tablist)->toBeInstanceOf(DOMElement::class);
+
+        // The container's bottom rule and the list's flex row: without the
+        // design's theme manager the strip renders bare and stacks.
+        expect($tablist->getAttribute('class'))->toContain('border-b');
+
+        $list = $xpath->query('//*[@role="tablist"]/ul')->item(0);
+
+        expect($list)->toBeInstanceOf(DOMElement::class)
+            ->and($list->getAttribute('class'))->toContain('flex');
+    }
+});
+
 it('gives classic its own canvas', function () {
     $classic = $this->get('/design-system/dashboard')->assertOk()->getContent();
 
