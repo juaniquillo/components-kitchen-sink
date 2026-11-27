@@ -22,22 +22,80 @@ final class RuntimeTailwind
      */
     public static function declarations(): string
     {
-        $css = @file_get_contents(resource_path('css/app.css'));
+        $entry = resource_path('css/app.css');
 
-        if ($css === false) {
+        $css = self::inlineImports($entry, []);
+
+        if ($css === '') {
             return '';
         }
 
         $declarations = [];
 
-        if (preg_match('/@theme\s*\{.*?\}/s', $css, $matches) === 1) {
-            $declarations[] = $matches[0];
+        if (preg_match_all('/@theme\s*\{.*?\}/s', $css, $matches) > 0) {
+            foreach ($matches[0] as $block) {
+                $declarations[] = $block;
+            }
         }
 
-        if (preg_match('/@custom-variant\s+dark\s*[^;]+;/', $css, $matches) === 1) {
-            $declarations[] = $matches[0];
+        if (preg_match_all('/@custom-variant\s+dark\s*[^;]+;/', $css, $matches) > 0) {
+            foreach ($matches[0] as $block) {
+                $declarations[] = $block;
+            }
         }
 
         return implode("\n\n", $declarations);
+    }
+
+    /**
+     * The entry stylesheet with relative imports inlined.
+     *
+     * The custom theme lives in the imported file, not in the entry, so
+     * the entry alone yields no declarations. Only relative imports are
+     * followed; package imports (tailwindcss, plugins, vendor css) are
+     * left to the compiler that owns them.
+     *
+     * @param  array<string, true>  $visited
+     */
+    private static function inlineImports(string $path, array $visited): string
+    {
+        $real = realpath($path);
+
+        if ($real === false || isset($visited[$real])) {
+            return '';
+        }
+
+        $visited[$real] = true;
+
+        $css = @file_get_contents($real);
+
+        if ($css === false) {
+            return '';
+        }
+
+        $dir = dirname($real);
+
+        if (preg_match_all('/@import\s+(?:url\(\s*)?[\'"]([^\'"]+)[\'"]\s*[^;]*;/', $css, $matches) > 0) {
+
+            foreach ($matches[1] as $specifier) {
+                if (! str_starts_with($specifier, '.')) {
+                    continue;
+                }
+
+                $resolved = realpath($dir.'/'.$specifier);
+
+                if ($resolved === false || ! str_ends_with($resolved, '.css')) {
+                    continue;
+                }
+
+                $inlined = self::inlineImports($resolved, $visited);
+
+                if ($inlined !== '') {
+                    $css .= "\n".$inlined;
+                }
+            }
+        }
+
+        return $css;
     }
 }

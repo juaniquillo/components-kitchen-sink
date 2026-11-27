@@ -85,6 +85,25 @@ Route::get('design-system/dashboard', function (Request $request) {
 
 })->name('design-system.dashboard');
 
+Route::post('design-system/dashboard/invite', function (Request $request) {
+    $validated = $request->validate([
+        'invite-email' => ['required', 'email'],
+        'invite-role' => ['required', 'in:member,admin'],
+    ]);
+
+    return back()->with('dashboard-notice', 'Invite sent to '.$validated['invite-email'].'.');
+})->name('design-system.dashboard.invite');
+
+Route::post('design-system/dashboard/invoice', function (Request $request) {
+    $validated = $request->validate([
+        'invoice-client' => ['required', 'string', 'max:255'],
+        'invoice-amount' => ['nullable', 'numeric'],
+        'invoice-due' => ['nullable', 'date'],
+    ]);
+
+    return back()->with('dashboard-notice', 'Invoice for '.$validated['invoice-client'].' created.');
+})->name('design-system.dashboard.invoice');
+
 Route::get('/cruds', function (Request $request) {
 
     $oldValues = $request->old();

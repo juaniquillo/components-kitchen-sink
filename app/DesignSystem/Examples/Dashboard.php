@@ -292,8 +292,9 @@ final class Dashboard
         return Card::make($design)
             ->title('Invite a teammate')
             ->body(FormComponent::make($design)
-                ->action('#invite')
+                ->action(route('design-system.dashboard.invite'))
                 ->method('post')
+                ->csrf()
                 ->fields([
                     Field::make($design)->label('Email')->input('invite-email')->required(),
                     Field::make($design)->label('Role')->input(
@@ -339,8 +340,9 @@ final class Dashboard
             ->id('new-invoice')
             ->title('New invoice')
             ->body(FormComponent::make($design)
-                ->action('#new-invoice')
+                ->action(route('design-system.dashboard.invoice'))
                 ->method('post')
+                ->csrf()
                 ->attributes(['id' => 'new-invoice-form'])
                 ->fields([
                     Field::make($design)->label('Client')->input('invoice-client')->required(),

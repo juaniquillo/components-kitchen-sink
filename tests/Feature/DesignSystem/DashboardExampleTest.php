@@ -347,3 +347,44 @@ it('renders every box example in every design', function () {
         }
     }
 });
+
+it('sends invites and creates invoices without a 405', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain(route('design-system.dashboard.invite'))
+        ->toContain(route('design-system.dashboard.invoice'))
+        ->toContain('name="_token"');
+
+    $this->post(route('design-system.dashboard.invite'), [
+        'invite-email' => 'sam@example.com',
+        'invite-role' => 'member',
+    ])
+        ->assertRedirect()
+        ->assertSessionHas('dashboard-notice', 'Invite sent to sam@example.com.');
+
+    $this->post(route('design-system.dashboard.invoice'), [
+        'invoice-client' => 'Acme',
+        'invoice-amount' => '120.50',
+    ])
+        ->assertRedirect()
+        ->assertSessionHas('dashboard-notice', 'Invoice for Acme created.');
+
+    $this->post(route('design-system.dashboard.invite'), [
+        'invite-email' => 'not-an-email',
+        'invite-role' => 'member',
+    ])->assertSessionHasErrors('invite-email');
+});
+
+it('shows the dashboard flash after a demo submit', function () {
+    $this
+        ->post(route('design-system.dashboard.invite'), [
+            'invite-email' => 'sam@example.com',
+            'invite-role' => 'member',
+        ])
+        ->assertRedirect();
+
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    expect($html)->toContain('Invite sent to sam@example.com.');
+});

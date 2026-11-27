@@ -72,6 +72,11 @@ it('styles the builder chrome locally and compiles the canvas in the browser', f
 
     // The canvas compiles typed classes at runtime with Tailwind v4.
     expect($html)->toContain('https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4');
+
+    // The runtime build is handed the app theme, so dark mode follows it.
+    expect($html)->toContain('type="text/tailwindcss"')
+        ->toContain('@theme')
+        ->toContain('@custom-variant dark');
 });
 
 it('turns a malformed address away', function () {
