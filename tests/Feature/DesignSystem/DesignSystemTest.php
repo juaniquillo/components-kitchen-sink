@@ -33,7 +33,7 @@ it('lists the bundled designs and marks the requested one', function () {
 
     expect($active)->toBeInstanceOf(DOMElement::class)
         ->and($active->getAttribute('aria-current'))->toBe('page')
-        ->and($active->getAttribute('class'))->toContain('rounded-full');
+        ->and($active->getAttribute('class'))->toContain('nav-item');
 });
 
 it('switches designs through the query string', function () {

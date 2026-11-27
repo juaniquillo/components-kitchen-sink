@@ -23,7 +23,7 @@ final class Icons
     /**
      * @var array<int, string>
      */
-    public const FILES = ['sun.svg', 'moon.svg', 'auto.svg'];
+    public const FILES = ['sun.svg', 'moon.svg', 'auto.svg', 'overview.svg', 'invoices.svg', 'clients.svg', 'settings.svg', 'menu.svg', 'close.svg'];
 
     public static function build(string $directory): void
     {
@@ -31,6 +31,12 @@ final class Icons
             'sun' => self::sun(),
             'moon' => self::moon(),
             'auto' => self::auto(),
+            'overview' => self::overview(),
+            'invoices' => self::invoices(),
+            'clients' => self::clients(),
+            'settings' => self::settings(),
+            'menu' => self::menu(),
+            'close' => self::close(),
         ];
 
         foreach ($icons as $name => $icon) {
@@ -76,6 +82,26 @@ final class Icons
             );
     }
 
+    /**
+     * Three round-capped lines for the mobile menu button.
+     */
+    public static function menu(): SvgBackendComponent
+    {
+        $lines = [];
+
+        foreach ([6, 12, 18] as $y) {
+            $lines[] = SvgShape::line(4, $y, 20, $y)
+                ->setAttribute('stroke', 'black')
+                ->setAttribute('stroke-width', '2')
+                ->setAttribute('stroke-linecap', 'round');
+        }
+
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents($lines);
+    }
+
     public static function auto(): SvgBackendComponent
     {
         return SvgComponentFactory::make(SvgComponentEnum::SVG)
@@ -90,6 +116,120 @@ final class Icons
                     SvgPath::start(12, 4)->arcTo(8, 8, 0, false, true, 12, 20)->close()
                 )->setAttribute('fill', 'black'),
             ]);
+    }
+
+    /**
+     * A 2x2 grid of rounded squares.
+     */
+    public static function overview(): SvgBackendComponent
+    {
+        $cells = [];
+
+        foreach ([[3, 3], [14, 3], [3, 14], [14, 14]] as [$x, $y]) {
+            $cells[] = SvgShape::rect($x, $y, 7, 7)
+                ->setAttribute('fill', 'black')
+                ->setAttribute('rx', 2);
+        }
+
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents($cells);
+    }
+
+    /**
+     * A page outline with three ruled lines.
+     */
+    public static function invoices(): SvgBackendComponent
+    {
+        $lines = [];
+
+        foreach ([[9, 8, 15, 8], [9, 12, 15, 12], [9, 16, 13, 16]] as [$x1, $y1, $x2, $y2]) {
+            $lines[] = SvgShape::line($x1, $y1, $x2, $y2)
+                ->setAttribute('stroke', 'black')
+                ->setAttribute('stroke-width', '2')
+                ->setAttribute('stroke-linecap', 'round');
+        }
+
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents([
+                SvgShape::rect(6, 3, 12, 18)
+                    ->setAttribute('fill', 'none')
+                    ->setAttribute('stroke', 'black')
+                    ->setAttribute('stroke-width', '2')
+                    ->setAttribute('rx', '2'),
+                ...$lines,
+            ]);
+    }
+
+    /**
+     * Two heads over two shoulder arcs.
+     */
+    public static function clients(): SvgBackendComponent
+    {
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents([
+                SvgShape::circle(9, 8, 3)
+                    ->setAttribute('fill', 'black'),
+                SvgShape::path('M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5')
+                    ->setAttribute('fill', 'none')
+                    ->setAttribute('stroke', 'black')
+                    ->setAttribute('stroke-width', '2')
+                    ->setAttribute('stroke-linecap', 'round'),
+                SvgShape::circle(17, 9, 2)
+                    ->setAttribute('fill', 'black'),
+                SvgShape::path('M15.5 14.3c2.4.5 4 2.2 4 4.7')
+                    ->setAttribute('fill', 'none')
+                    ->setAttribute('stroke', 'black')
+                    ->setAttribute('stroke-width', '2')
+                    ->setAttribute('stroke-linecap', 'round'),
+            ]);
+    }
+
+    /**
+     * Three sliders with knobs.
+     */
+    public static function settings(): SvgBackendComponent
+    {
+        $contents = [];
+
+        foreach ([[6, 9], [12, 15], [18, 8]] as [$y, $knob]) {
+            $contents[] = SvgShape::line(3, $y, 21, $y)
+                ->setAttribute('stroke', 'black')
+                ->setAttribute('stroke-width', '2')
+                ->setAttribute('stroke-linecap', 'round');
+            $contents[] = SvgShape::circle($knob, $y, 3)
+                ->setAttribute('fill', 'black');
+        }
+
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents($contents);
+    }
+
+    /**
+     * An X for the sheet close button.
+     */
+    public static function close(): SvgBackendComponent
+    {
+        $lines = [];
+
+        foreach ([[6, 6, 18, 18], [18, 6, 6, 18]] as [$x1, $y1, $x2, $y2]) {
+            $lines[] = SvgShape::line($x1, $y1, $x2, $y2)
+                ->setAttribute('stroke', 'black')
+                ->setAttribute('stroke-width', '2')
+                ->setAttribute('stroke-linecap', 'round');
+        }
+
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 24, 24)
+            ->setContents($lines);
     }
 
     private static function coord(float $value): string

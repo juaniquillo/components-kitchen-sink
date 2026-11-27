@@ -10,12 +10,12 @@ use Juaniquillo\BackendComponents\MainBackendComponent;
 use RuntimeException;
 
 /**
- * The light/auto/dark switch, built like the rest of the site.
+ * The light/auto/dark switch, built from the site chrome theme.
  *
- * Three icon buttons instead of text pills, so the switch cannot be
- * mistaken for navigation. The icons are static mask files painted with
- * the button's text colour; aria-pressed flips client-side and the
- * pressed fill comes from the theme, not from script-written classes.
+ * It renders through the app's nav theme, never a design's button theme:
+ * the switch is page chrome and looks the same on every page and design.
+ * The pressed fill lives in the theme (`aria-pressed:` utilities), so no
+ * script-written classes are needed.
  */
 final class AppearanceToggle
 {
@@ -43,15 +43,15 @@ final class AppearanceToggle
 
     private static function button(string $value, string $label, string $icon, bool $pressed): MainBackendComponent
     {
-        $button = LocalThemeComponentFactory::make(ComponentEnum::BUTTON);
-
-        if (! $button instanceof MainBackendComponent) {
-            throw new RuntimeException('AppearanceToggle builds MainBackendComponent instances.');
-        }
-
         $glyph = LocalThemeComponentFactory::make(ComponentEnum::SPAN);
 
         if (! $glyph instanceof MainBackendComponent) {
+            throw new RuntimeException('AppearanceToggle builds MainBackendComponent instances.');
+        }
+
+        $button = LocalThemeComponentFactory::make(ComponentEnum::BUTTON);
+
+        if (! $button instanceof MainBackendComponent) {
             throw new RuntimeException('AppearanceToggle builds MainBackendComponent instances.');
         }
 
@@ -68,6 +68,6 @@ final class AppearanceToggle
                 'aria-label' => $label,
                 'title' => $label,
             ])
-            ->setThemes(['nav' => 'toggle-item']);
+            ->setThemes(['nav' => 'toggle-button']);
     }
 }

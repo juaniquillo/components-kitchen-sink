@@ -49,13 +49,27 @@ it('charts revenue with accessible SVGs', function () {
 
     $xpath = new DOMXPath($dom);
 
-    // The bar chart is a labelled image: twelve bars over a baseline.
+    // The bar chart is a labelled image: twelve grouped columns over a baseline.
     $chart = $xpath->query('//svg[@role="img"]')->item(0);
 
     expect($chart)->toBeInstanceOf(DOMElement::class)
         ->and($chart->getAttribute('aria-label'))->toContain('Revenue')
-        ->and($xpath->query('.//rect', $chart)->length)->toBe(12)
+        ->and($xpath->query('.//rect', $chart)->length)->toBe(24)
         ->and($xpath->query('.//line', $chart)->length)->toBe(1);
+
+    $columns = $xpath->query('.//g[@class="group"]', $chart);
+
+    expect($columns->length)->toBe(12);
+
+    foreach ($columns as $column) {
+        expect($xpath->query('.//rect', $column)->length)->toBe(2)
+            ->and($xpath->query('.//text', $column)->length)->toBe(1);
+    }
+
+    // Hovering a column lifts the bar and the label.
+    expect($html)
+        ->toContain('group-hover:brightness-110')
+        ->toContain('group-hover:opacity-100');
 
     // The sparkline decorates the KPI number, so it hides from assistive tech.
     $sparkline = $xpath->query('//svg[@aria-hidden="true"]')->item(0);
@@ -67,6 +81,31 @@ it('charts revenue with accessible SVGs', function () {
     expect($html)
         ->toContain('fill="currentColor"')
         ->toContain('+18.2% vs last year');
+});
+
+it('paints charts from the design chart theme', function () {
+    $classic = $this->get('/design-system/dashboard?design=classic')->assertOk()->getContent();
+
+    expect($classic)
+        ->toContain('fill-blue-600')
+        ->toContain('stroke-blue-600')
+        ->toContain('fill-blue-200')
+        ->toContain('stroke-slate-300');
+
+    $soft = $this->get('/design-system/dashboard?design=soft')->assertOk()->getContent();
+
+    expect($soft)
+        ->toContain('fill-indigo-600')
+        ->toContain('stroke-indigo-600');
+
+    // Bundled designs ship no chart theme, so the charts fall back to
+    // the card's text colour.
+    $dual = $this->get('/design-system/dashboard?design=base-dual')->assertOk()->getContent();
+
+    expect($dual)
+        ->toContain('fill-current')
+        ->not->toContain('fill-blue-600')
+        ->not->toContain('fill-indigo-600');
 });
 
 it('wires the invoice tabs as a real tablist', function () {
@@ -125,7 +164,35 @@ it('reads as an app, not a showcase page', function () {
 
     expect($current)->toBeInstanceOf(DOMElement::class)
         ->and(trim($current->textContent))->toBe('Overview')
-        ->and($xpath->query('//a[contains(@href, "design-system?design=")]')->length)->toBeGreaterThan(0);
+        ->and($xpath->query('//a[contains(@href, "design-system?design=")]')->length)->toBeGreaterThan(0)
+        ->and($xpath->query('//aside//a//span[contains(@class, "nav-icon--overview")]')->length)->toBe(1)
+        ->and($xpath->query('//aside//a//span[contains(@class, "nav-icon--settings")]')->length)->toBe(1);
+
+    // Full width capped at 6xl and left-aligned; the aside becomes a
+    // native dialog sheet on mobile.
+    expect($html)
+        ->toContain('<div class="px-4 py-6"')
+        ->toContain('max-w-6xl')
+        ->toContain('id="dashboard-menu"')
+        ->toContain('aria-label="Menu"')
+        ->toContain('aria-haspopup="dialog"')
+        ->toContain('aria-controls="dashboard-menu"')
+        ->toContain('nav-icon--menu')
+        ->toContain('nav-icon--close')
+        ->toContain('dashboard-menu-button');
+
+    $menu = $xpath->query('//dialog[@id="dashboard-menu"]')->item(0);
+
+    expect($menu)->toBeInstanceOf(DOMElement::class);
+
+    $close = $xpath->query('//dialog[@id="dashboard-menu"]//button[@aria-label="Close menu"]')->item(0);
+
+    expect($close)->toBeInstanceOf(DOMElement::class);
+
+    $aside = $xpath->query('//aside')->item(0);
+
+    expect($aside)->toBeInstanceOf(DOMElement::class)
+        ->and($aside->getAttribute('class'))->toContain('hidden lg:block');
 });
 
 it('builds the shell from design links and labels each switcher', function () {
@@ -215,7 +282,8 @@ it('covers keyboard tabs, empty states and bar tooltips', function () {
     expect($html)
         ->toContain('x-on:keydown.arrow-right')
         ->toContain('x-on:keydown.home')
-        ->toContain('January · €4.1k');
+        ->toContain('January · €4.1k')
+        ->toContain("\$el.closest('dialog')?.close()");
 });
 
 it('styles the tablist from the active design', function () {

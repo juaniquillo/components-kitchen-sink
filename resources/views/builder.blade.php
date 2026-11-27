@@ -6,7 +6,7 @@
     // variant live in the stylesheet of the application, which the browser
     // build does not read, so they are taken from it and handed over.
     $assets = [
-        'js' => ['https://cdn.tailwindcss.com']
+        'js' => ['https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4']
     ];
 
     $tailwindDeclarations = RuntimeTailwind::declarations();
@@ -14,6 +14,10 @@
 
 <x-layouts.default page-title="Builder" :remoteAssets="$assets" :disableLocalAssets="true">
     <x-slot name="head">
+        {{-- Site chrome without the app bundles: the page disables local
+            assets, but the head slot still loads, so shared.css keeps the
+            nav and body looking like the rest of the site. --}}
+        @vite('resources/css/shared.css')
         @if ($tailwindDeclarations !== '')
             <style type="text/tailwindcss">{!! $tailwindDeclarations !!}</style>
         @endif

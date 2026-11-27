@@ -23,10 +23,10 @@
             $assets = array_merge(['resources/css/app.css', 'resources/js/app.ts'], $additionalAssets);
         }
 
-        // The site chrome ships its own stylesheet before the page bundle,
-        // so the page utilities win any same-specificity tie. The script
-        // stays last; it only wires the toggle.
-        $assets = array_merge(['resources/css/navigation.css'], $assets, ['resources/js/appearance.ts']);
+        // The toggle ships its own script, so it works on pages that
+        // replace the default assets with their own bundle. Its styles
+        // live in shared.css, outside any cascade layer.
+        $assets = array_merge($assets, ['resources/js/appearance.ts']);
 
         $remoteAssets = $remoteAssets ?? [];
 

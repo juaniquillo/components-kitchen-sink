@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DesignSystem\Examples;
 
+use Juaniquillo\BackendDesignSystem\Designs\Design;
+use Juaniquillo\BaseBackendComponent\Exceptions\ThemeDoesNotExistsException;
 use Juaniquillo\SvgBackendComponents\Factories\SvgComponentFactory;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgPath;
 use Juaniquillo\SvgBackendComponents\Shapes\SvgShape;
@@ -13,9 +15,10 @@ use Juaniquillo\SvgBackendComponents\SvgComponentEnum;
 /**
  * Small SVG charts for the dashboard example.
  *
- * Everything paints currentColor, so the charts inherit the card body's
- * design-themed text colour in every design, light or dark. Opacity
- * carries the hierarchy: the latest value is full, context is quiet.
+ * Paint comes from the design's own `chart` theme group where one
+ * exists (accent for the latest value, muted for context, grid for the
+ * baseline). Designs without one fall back to currentColor, so the chart
+ * inherits the card's text colour.
  */
 final class Chart
 {
@@ -26,22 +29,23 @@ final class Chart
      * @param  array<int, string>  $labels
      * @param  array<int, string>  $tooltips
      */
-    public static function bars(array $values, array $labels, string $label, array $tooltips = []): SvgBackendComponent
+    public static function bars(Design $design, array $values, array $labels, string $label, array $tooltips = []): SvgBackendComponent
     {
+        $palette = self::palette($design);
         $max = max($values) ?: 1;
         $count = count($values);
         $step = 20;
         $barWidth = 12;
         $baseline = 72;
 
-        $bars = [];
+        $columns = [];
 
         foreach ($values as $index => $value) {
             $height = max(2, (int) round($value / $max * 60));
 
             $bar = SvgShape::rect($index * $step, $baseline - $height, $barWidth, $height)
-                ->setAttribute('fill', 'currentColor')
-                ->setAttribute('opacity', $index === $count - 1 ? '1' : '0.35')
+                ->setAttribute('class', ($index === $count - 1 ? $palette['accent'] : $palette['muted']).' transition duration-150 group-hover:brightness-110 group-hover:opacity-100 motion-reduce:transition-none')
+                ->setAttribute('opacity', $index === $count - 1 ? '1' : $palette['mutedOpacity'])
                 ->setAttribute('rx', 2);
 
             if (isset($tooltips[$index])) {
@@ -50,21 +54,23 @@ final class Chart
                 );
             }
 
-            $bars[] = $bar;
-        }
-
-        $months = [];
-
-        foreach ($labels as $index => $month) {
-            $months[] = SvgComponentFactory::make(SvgComponentEnum::TEXT)
-                ->setContent($month)
-                ->setAttributes([
-                    'x' => $index * $step + 6,
-                    'y' => 86,
-                    'text-anchor' => 'middle',
-                    'font-size' => '6',
-                    'fill' => 'currentColor',
-                    'opacity' => '0.6',
+            $columns[] = SvgComponentFactory::make(SvgComponentEnum::G)
+                ->setAttribute('class', 'group')
+                ->setContents([
+                    SvgShape::rect($index * $step, 0, $step, 96)
+                        ->setAttribute('fill', 'transparent'),
+                    $bar,
+                    SvgComponentFactory::make(SvgComponentEnum::TEXT)
+                        ->setContent($labels[$index] ?? '')
+                        ->setAttributes([
+                            'x' => $index * $step + 6,
+                            'y' => 86,
+                            'text-anchor' => 'middle',
+                            'font-size' => '6',
+                            'fill' => 'currentColor',
+                            'opacity' => '0.6',
+                            'class' => 'transition-opacity duration-150 group-hover:opacity-100 motion-reduce:transition-none',
+                        ]),
                 ]);
         }
 
@@ -80,10 +86,9 @@ final class Chart
                 SvgComponentFactory::make(SvgComponentEnum::TITLE)->setContent($label),
                 SvgComponentFactory::make(SvgComponentEnum::DESC)->setContent('Monthly revenue for the last twelve months.'),
                 SvgShape::line(0, $baseline, 232, $baseline)
-                    ->setAttribute('stroke', 'currentColor')
-                    ->setAttribute('opacity', '0.2'),
-                ...$bars,
-                ...$months,
+                    ->setAttribute('class', $palette['grid'])
+                    ->setAttribute('opacity', '0.6'),
+                ...$columns,
             ]);
     }
 
@@ -93,8 +98,9 @@ final class Chart
      *
      * @param  array<int, float|int>  $values
      */
-    public static function sparkline(array $values): SvgBackendComponent
+    public static function sparkline(Design $design, array $values): SvgBackendComponent
     {
+        $palette = self::palette($design);
         $max = max($values) ?: 1;
         $min = min($values);
         $range = ($max - $min) ?: 1;
@@ -130,18 +136,46 @@ final class Chart
             ])
             ->setContents([
                 SvgShape::path($area)
-                    ->setAttribute('fill', 'currentColor')
+                    ->setAttribute('class', $palette['accent'])
                     ->setAttribute('opacity', '0.15'),
                 SvgShape::polyline(implode(' ', $points))
                     ->setAttributes([
                         'fill' => 'none',
-                        'stroke' => 'currentColor',
+                        'class' => $palette['stroke'],
                         'stroke-width' => '2',
                         'stroke-linecap' => 'round',
                         'stroke-linejoin' => 'round',
                     ]),
                 SvgShape::circle($lastX, $lastY, 3)
-                    ->setAttribute('fill', 'currentColor'),
+                    ->setAttribute('class', $palette['accent']),
             ]);
+    }
+
+    /**
+     * The design's chart paint, or currentColor everywhere when the
+     * design ships no chart theme. A missing file and a missing variant
+     * both throw, so one catch covers the whole fallback.
+     *
+     * @return array{accent: string, stroke: string, muted: string, mutedOpacity: string, grid: string}
+     */
+    private static function palette(Design $design): array
+    {
+        try {
+            return [
+                'accent' => (string) $design->themeManager->processTheme('chart', 'accent'),
+                'stroke' => (string) $design->themeManager->processTheme('chart', 'stroke'),
+                'muted' => (string) $design->themeManager->processTheme('chart', 'muted'),
+                'mutedOpacity' => '1',
+                'grid' => (string) $design->themeManager->processTheme('chart', 'grid'),
+            ];
+        } catch (ThemeDoesNotExistsException) {
+            return [
+                'accent' => 'fill-current',
+                'stroke' => 'stroke-current',
+                'muted' => 'fill-current',
+                'mutedOpacity' => '0.35',
+                'grid' => 'stroke-current',
+            ];
+        }
     }
 }

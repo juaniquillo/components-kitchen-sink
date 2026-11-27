@@ -28,40 +28,33 @@ it('marks the current section in the site nav', function () {
         ->and(trim($current->item(0)->textContent))->toBe('Components');
 });
 
-it('shares one pill across nav, chips and toggle', function () {
+it('shares one chrome language across nav, chips and toggle', function () {
     $html = $this->get('/design-system')->assertOk()->getContent();
 
     expect($html)
-        ->toContain('rounded-full')
+        ->toContain('nav-item')
         ->toContain('aria-current="page"')
         ->toContain('data-appearance-group')
+        ->toContain('theme-switch__button')
         ->not->toContain('text-blue-500 underline');
 });
 
 it('paints the site chrome zinc', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
-    expect($html)->toContain('<body class="font-sans antialiased bg-zinc-200 dark:bg-zinc-900');
+    expect($html)->toContain('<body class="site-body">');
 });
 
-it('scopes the navigation stylesheet to the nav theme', function () {
-    // Without source(none) the chrome entry scans the whole project and
-    // its utilities can override page bundles at the same specificity.
-    $css = file_get_contents(resource_path('css/navigation.css'));
+it('keeps the chrome in plain shared CSS', function () {
+    // Unlayered page rules beat layered Tailwind utilities, so the chrome
+    // lives outside any cascade layer: shared.css is imported by every
+    // bundle, including the ones that replace app.css.
+    $css = file_get_contents(resource_path('css/shared.css'));
 
-    expect($css)->toContain('source(none)')
-        ->toContain("@source '../views/_themes/tailwind/nav.blade.php'");
-});
-
-it('loads the navigation stylesheet before the page bundle', function () {
-    // Same specificity, so order decides: a late nav utility once beat
-    // base-dual's dark:border-zinc-700 with a plain .border-zinc-300.
-    $html = $this->get('/design-system')->assertOk()->getContent();
-
-    $nav = strpos($html, 'navigation-');
-    $page = strpos($html, 'design-system-');
-
-    expect($nav)->not->toBeFalse()
-        ->and($page)->not->toBeFalse()
-        ->and($nav)->toBeLessThan($page);
+    expect($css)
+        ->toContain('.site-body')
+        ->toContain('.nav-item')
+        ->toContain('.theme-switch__button')
+        ->toContain('.dashboard-menu-button')
+        ->toContain('.nav-icon--sun');
 });

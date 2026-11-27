@@ -24,10 +24,10 @@
             $assets = array_merge(['resources/css/app.css', 'resources/js/app.ts'], $additionalAssets);
         }
 
-        // The site chrome ships its own stylesheet before the page bundle,
-        // so the page utilities win any same-specificity tie. The script
-        // stays last; it only wires the toggle.
-        $assets = array_merge(['resources/css/navigation.css'], $assets, ['resources/js/appearance.ts']);
+        // The toggle ships its own script, so it works on pages that
+        // replace the default assets with their own bundle. Its styles
+        // live in shared.css, outside any cascade layer.
+        $assets = array_merge($assets, ['resources/js/appearance.ts']);
 
         // A remote asset has no entry in the Vite manifest, so it is loaded
         // as it is instead of going through Vite.
@@ -58,7 +58,7 @@
         document.documentElement.dataset.bsTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     </script>
 </head>
-<body class="font-sans antialiased bg-zinc-200 dark:bg-zinc-900 dark:text-white">
+<body class="site-body">
 
     <div class="main-wrapper">
         <nav class="main-nav">
@@ -67,8 +67,7 @@
                 {{ \App\Menu\AppearanceToggle::make() }}
             @endif
         </nav>
-        <main>
-        
+        <main class="mt-sm">
             {{ $slot }}
         </main>
     </div>

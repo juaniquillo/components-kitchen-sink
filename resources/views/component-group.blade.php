@@ -8,7 +8,7 @@
     
     <div>
         
-        <h1 class="mt-sm text-4xl font-bold text-center">{{ $name }}</h1>
+        <h1 class="text-4xl font-bold text-center">{{ $name }}</h1>
 
         {{ $links }}
 

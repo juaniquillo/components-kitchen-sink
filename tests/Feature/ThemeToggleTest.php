@@ -16,9 +16,10 @@ it('shows the theme switch as labelled icon buttons', function () {
         ->toContain('aria-label="Light"')
         ->toContain('aria-label="Auto"')
         ->toContain('aria-label="Dark"')
-        ->toContain('mask:url(/icons/sun.svg)')
-        ->toContain('mask:url(/icons/auto.svg)')
-        ->toContain('mask:url(/icons/moon.svg)');
+        ->toContain('nav-icon--sun')
+        ->toContain('nav-icon--auto')
+        ->toContain('nav-icon--moon')
+        ->toContain('theme-switch__button');
 });
 
 it('shows the theme switch on the canvas dashboard', function () {
@@ -35,6 +36,34 @@ it('shows the theme switch on a page with replaced assets', function () {
     expect($html)
         ->toContain('data-appearance-group')
         ->toContain('data-appearance="system"');
+});
+
+it('keeps the switch identical on every design', function () {
+    // The toggle is page chrome, not a design component: the classic and
+    // soft buttons must render byte-identical classes.
+    $classic = $this->get('/design-system/dashboard?design=classic')->assertOk()->getContent();
+    $soft = $this->get('/design-system/dashboard?design=soft')->assertOk()->getContent();
+
+    $classes = function (string $html): array {
+        $dom = new DOMDocument;
+        @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+        $xpath = new DOMXPath($dom);
+        $found = [];
+
+        foreach ($xpath->query('//*[@data-appearance]') as $button) {
+            $found[] = $button->getAttribute('class');
+        }
+
+        return $found;
+    };
+
+    $classicButtons = $classes($classic);
+    $softButtons = $classes($soft);
+
+    expect($classicButtons)->toHaveCount(3)
+        ->and($softButtons)->toBe($classicButtons)
+        ->and($classicButtons[0])->toContain('theme-switch__button');
 });
 
 it('hides the theme switch where its script cannot load', function () {

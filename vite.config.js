@@ -10,7 +10,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/design-system.css',
-                'resources/css/navigation.css',
+                'resources/css/shared.css',
                 'resources/js/app.ts',
                 'resources/js/appearance.ts',
                 'resources/js/form-group.js',

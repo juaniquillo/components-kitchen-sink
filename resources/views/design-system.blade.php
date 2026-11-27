@@ -5,7 +5,7 @@
 
     <div class="design-system">
         <div class="text-center">
-        <h1 class="mt-sm text-4xl font-bold">Design System</h1>
+        <h1 class="text-4xl font-bold">Design System</h1>
 
         <div class="mt-sm">
             {{ \App\Menu\DesignSwitcher::make($designs, $design->key, 'design-system') }}

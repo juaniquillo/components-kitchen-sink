@@ -62,6 +62,18 @@ it('opens a workspace by its address', function () {
         ->assertSee($id, false);
 });
 
+it('styles the builder chrome locally and compiles the canvas in the browser', function () {
+    $id = freshWorkspace();
+
+    $html = $this->get(route('builder.workspace', $id))->assertOk()->getContent();
+
+    // Site chrome comes from the local shared build, not the app bundles.
+    expect($html)->toContain('build/assets/shared-');
+
+    // The canvas compiles typed classes at runtime with Tailwind v4.
+    expect($html)->toContain('https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4');
+});
+
 it('turns a malformed address away', function () {
     $this->get('/builder/not-a-workspace')->assertNotFound();
 });

@@ -4,8 +4,8 @@
     :body-class="$bodyClass"
 >
 
-    <div class="mx-auto max-w-6xl px-4 py-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="px-4 py-6" x-data="{}">
+        <div class="flex max-w-6xl flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
                 {{ \Juaniquillo\BackendDesignSystem\Components\Link::make($design)->label('← Gallery')->href(route('design-system', ['design' => $design->key])) }}
 
@@ -21,8 +21,23 @@
             </div>
         </div>
 
-        <div class="mt-sm grid gap-6 lg:grid-cols-[12rem_1fr]">
-            <aside>{{ $sidebar }}</aside>
+        <div class="mt-sm flex max-w-6xl items-center justify-between gap-3 lg:hidden">
+            {{ $brand }}
+
+            <button
+                type="button"
+                class="theme-switch__button dashboard-menu-button"
+                aria-label="Menu"
+                aria-haspopup="dialog"
+                aria-controls="dashboard-menu"
+                x-on:click="$refs.menuPanel.showModal()"
+            >
+                <span class="nav-icon nav-icon--menu" aria-hidden="true"></span>
+            </button>
+        </div>
+
+        <div class="mt-sm grid max-w-6xl gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
+            <aside class="hidden lg:block">{{ $sidebar }}</aside>
 
             <div class="min-w-0">
                 <div class="mt-sm">{{ $breadcrumb }}</div>
@@ -51,6 +66,8 @@
                 </div>
             </div>
         </div>
+
+        {{ $sheet }}
     </div>
 
     {{ $dialog }}

@@ -84,6 +84,11 @@ it('keeps every application theme complete against its bundled source', function
         glob(base_path('vendor/juaniquillo/backend-design-system/resources/views/backend-design-system/base-dual/*.blade.php')) ?: []
     );
 
+    // App-owned groups the package does not ship: the dashboard charts
+    // resolve them through the design manager and fall back to
+    // currentColor when a design has none.
+    $expected[] = 'chart.blade.php';
+
     foreach (['soft', 'classic'] as $key) {
         $actual = array_map(fn (string $file): string => basename($file), applicationThemeFiles($key));
 

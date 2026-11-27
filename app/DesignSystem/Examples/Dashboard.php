@@ -6,6 +6,7 @@ namespace App\DesignSystem\Examples;
 
 use Juaniquillo\BackendComponents\Enums\ComponentEnum;
 use Juaniquillo\BackendComponents\Factories\ComponentFactory;
+use Juaniquillo\BackendComponents\Factories\LocalThemeComponentFactory;
 use Juaniquillo\BackendComponents\MainBackendComponent;
 use Juaniquillo\BackendDesignSystem\Components\Alert;
 use Juaniquillo\BackendDesignSystem\Components\Badge;
@@ -96,7 +97,7 @@ final class Dashboard
                 ->title('Total revenue')
                 ->body(Stack::make($design)->children([
                     Heading::make($design)->text('$48,290')->level(2),
-                    Chart::sparkline([12, 18, 15, 22, 28, 25, 34, 41, 38, 48]),
+                    Chart::sparkline($design, [12, 18, 15, 22, 28, 25, 34, 41, 38, 48]),
                 ]))
                 ->footer(Badge::make($design)->label('+12.4% vs last month')->variant(BadgeVariant::Success)),
             Card::make($design)
@@ -166,6 +167,7 @@ final class Dashboard
         return Card::make($design)
             ->title('Revenue by month')
             ->body(Chart::bars(
+                $design,
                 [4.1, 4.4, 3.9, 4.8, 5.2, 5.0, 5.6, 5.9, 5.4, 6.1, 6.4, 6.9],
                 ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
                 'Revenue by month, January to December',
@@ -175,46 +177,114 @@ final class Dashboard
     }
 
     /**
+     * The Acme brand mark, shared by the sidebar and the mobile bar.
+     */
+    public static function brand(Design $design): MainBackendComponent
+    {
+        return self::element($design, ComponentEnum::DIV)
+            ->setAttribute('class', 'flex items-center gap-2')
+            ->setContents([
+                Badge::make($design)->label('A')->component(),
+                Heading::make($design)->text('Acme')->level(3)->component(),
+            ]);
+    }
+
+    /**
      * The app shell sidebar: brand, section nav and user, built from
      * design components. The section links are the design's own links,
      * so the shell follows the active look.
      */
     public static function sidebar(Design $design): MainBackendComponent
     {
+        return self::element($design, ComponentEnum::DIV)
+            ->setAttribute('class', 'flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start')
+            ->setContents([
+                self::element($design, ComponentEnum::DIV)
+                    ->setAttribute('class', 'hidden items-center gap-2 lg:flex')
+                    ->setContent(self::brand($design)),
+                self::element($design, ComponentEnum::UL)
+                    ->setAttribute('class', 'flex flex-col gap-2')
+                    ->setContents(self::sectionItems($design)),
+            ]);
+    }
+
+    /**
+     * The mobile navigation: a native dialog sheet reusing the section
+     * nav. The browser provides the backdrop, Escape and focus handling;
+     * Alpine only opens it and closes it on backdrop taps.
+     */
+    public static function menuSheet(Design $design): MainBackendComponent
+    {
+        $glyph = LocalThemeComponentFactory::make(ComponentEnum::SPAN);
+
+        if (! $glyph instanceof MainBackendComponent) {
+            throw new RuntimeException('Dashboard builds MainBackendComponent instances.');
+        }
+
+        $close = self::element($design, ComponentEnum::BUTTON)
+            ->setContent(
+                $glyph
+                    ->setAttributes(['aria-hidden' => 'true'])
+                    ->setThemes(['nav' => 'icon-close'])
+            )
+            ->setAttributes([
+                'type' => 'button',
+                'class' => 'theme-switch__button',
+                'aria-label' => 'Close menu',
+                'x-on:click' => '$refs.menuPanel.close()',
+            ]);
+
+        return self::element($design, ComponentEnum::DIALOG)
+            ->setAttributes([
+                'id' => 'dashboard-menu',
+                'class' => 'dashboard-menu-panel',
+                'x-ref' => 'menuPanel',
+                'aria-label' => 'Menu',
+                'x-on:click' => 'if ($event.target === $event.currentTarget) $event.currentTarget.close()',
+            ])
+            ->setContents([
+                self::element($design, ComponentEnum::DIV)
+                    ->setAttribute('class', 'mb-4 flex items-center justify-between gap-3')
+                    ->setContents([
+                        Heading::make($design)->text('Menu')->level(2)->component(),
+                        $close,
+                    ]),
+                self::element($design, ComponentEnum::UL)
+                    ->setAttribute('class', 'flex flex-col gap-2')
+                    ->setContents(self::sectionItems($design)),
+            ]);
+    }
+
+    /**
+     * @return array<int, MainBackendComponent>
+     */
+    private static function sectionItems(Design $design): array
+    {
         $sections = [
-            ['label' => 'Overview', 'href' => '#overview', 'current' => true],
-            ['label' => 'Invoices', 'href' => '#invoices'],
-            ['label' => 'Clients', 'href' => '#clients'],
-            ['label' => 'Settings', 'href' => '#settings'],
+            ['label' => 'Overview', 'href' => '#overview', 'icon' => 'overview', 'current' => true],
+            ['label' => 'Invoices', 'href' => '#invoices', 'icon' => 'invoices'],
+            ['label' => 'Clients', 'href' => '#clients', 'icon' => 'clients'],
+            ['label' => 'Settings', 'href' => '#settings', 'icon' => 'settings'],
         ];
 
-        $links = [];
+        $items = [];
 
         foreach ($sections as $section) {
             $isCurrent = $section['current'] ?? false;
 
-            $link = Link::make($design)->label($section['label'])->href($section['href']);
+            $link = Link::make($design)
+                ->label(self::iconLabel($section['label'], $section['icon']))
+                ->href($section['href'])
+                ->attributes(['x-on:click' => "\$el.closest('dialog')?.close()"]);
 
             if ($isCurrent) {
                 $link->current();
             }
 
-            $links[] = self::element($design, ComponentEnum::LI)->setContent($link->component());
+            $items[] = self::element($design, ComponentEnum::LI)->setContent($link->component());
         }
 
-        return self::element($design, ComponentEnum::DIV)
-            ->setAttribute('class', 'flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start')
-            ->setContents([
-                self::element($design, ComponentEnum::DIV)
-                    ->setAttribute('class', 'flex items-center gap-2')
-                    ->setContents([
-                        Badge::make($design)->label('A')->component(),
-                        Heading::make($design)->text('Acme')->level(3)->component(),
-                    ]),
-                self::element($design, ComponentEnum::UL)
-                    ->setAttribute('class', 'flex flex-col gap-2')
-                    ->setContents($links),
-            ]);
+        return $items;
     }
 
     public static function invite(Design $design): Card
@@ -405,6 +475,35 @@ final class Dashboard
             $current,
             $key,
         );
+    }
+
+    /**
+     * A nav label: an icon glyph plus text, passed to the design's Link
+     * as one component label. The glyph paints currentColor, so it
+     * follows the link colour in every design.
+     */
+    private static function iconLabel(string $text, string $icon): MainBackendComponent
+    {
+        $glyph = LocalThemeComponentFactory::make(ComponentEnum::SPAN);
+
+        if (! $glyph instanceof MainBackendComponent) {
+            throw new RuntimeException('Dashboard builds MainBackendComponent instances.');
+        }
+
+        $label = LocalThemeComponentFactory::make(ComponentEnum::SPAN);
+
+        if (! $label instanceof MainBackendComponent) {
+            throw new RuntimeException('Dashboard builds MainBackendComponent instances.');
+        }
+
+        return $label
+            ->setThemes(['nav' => 'icon-label'])
+            ->setContents([
+                $glyph
+                    ->setAttributes(['aria-hidden' => 'true'])
+                    ->setThemes(['nav' => 'icon-'.$icon]),
+                $text,
+            ]);
     }
 
     /**
