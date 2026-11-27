@@ -177,6 +177,49 @@ final class Dashboard
     }
 
     /**
+     * Revenue by channel: a donut with a legend, beside the bar chart.
+     * One array drives both, so the slices and the legend cannot drift.
+     */
+    public static function channels(Design $design): Card
+    {
+        $channels = [
+            ['label' => 'Direct', 'value' => 22.2],
+            ['label' => 'Partners', 'value' => 15.0],
+            ['label' => 'Referrals', 'value' => 11.1],
+        ];
+
+        $total = array_sum(array_column($channels, 'value'));
+
+        $legend = [];
+
+        foreach ($channels as $index => $channel) {
+            $share = (int) round($channel['value'] / $total * 100);
+            $swatch = Chart::swatch($design, $index);
+
+            $legend[] = self::element($design, ComponentEnum::LI)
+                ->setAttribute('class', 'flex items-center gap-2')
+                ->setContents([
+                    self::element($design, ComponentEnum::SPAN)
+                        ->setAttribute('class', 'h-2.5 w-2.5 shrink-0 rounded-full '.$swatch['class'])
+                        ->setAttribute('style', 'opacity: '.$swatch['opacity']),
+                    Text::make($design)->text($channel['label'].' · '.$share.'%')->component(),
+                ]);
+        }
+
+        return Card::make($design)
+            ->title('Revenue by channel')
+            ->body(Stack::make($design)
+                ->space(Size::Md)
+                ->children([
+                    Chart::donut($design, $channels, 'Revenue share by channel'),
+                    self::element($design, ComponentEnum::UL)
+                        ->setAttribute('class', 'flex flex-col gap-1')
+                        ->setContents($legend),
+                ]))
+            ->footer(Badge::make($design)->label('Total €48.3k')->variant(BadgeVariant::Success));
+    }
+
+    /**
      * The Acme brand mark, shared by the sidebar and the mobile bar.
      */
     public static function brand(Design $design): MainBackendComponent

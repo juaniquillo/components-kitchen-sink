@@ -93,6 +93,117 @@ final class Chart
     }
 
     /**
+     * A donut with the total in the middle and a slice per channel.
+     *
+     * Slices are stroked circles sharing one circumference: each dash
+     * is its share of the ring, offset by what came before, and the
+     * group starts at twelve o'clock. Slices differ by stepped opacity
+     * of the design's chart stroke, so no new theme variants are
+     * needed; designs without a chart theme fall back to currentColor.
+     *
+     * @param  array<int, array{label: string, value: float}>  $channels
+     */
+    public static function donut(Design $design, array $channels, string $label): SvgBackendComponent
+    {
+        $palette = self::palette($design);
+        $total = array_sum(array_column($channels, 'value')) ?: 1;
+
+        $radius = 45;
+        $circumference = 2 * M_PI * $radius;
+
+        $offset = 0;
+        $slices = [];
+
+        foreach ($channels as $index => $channel) {
+            $length = $channel['value'] / $total * $circumference;
+
+            $slices[] = SvgShape::circle(60, 60, $radius)
+                ->setAttributes([
+                    'fill' => 'none',
+                    'class' => $palette['stroke'],
+                    'stroke-width' => '16',
+                    'stroke-dasharray' => sprintf('%.2f %.2f', $length, $circumference),
+                    'stroke-dashoffset' => sprintf('%.2f', -$offset),
+                    'stroke-opacity' => (string) self::sliceOpacity($index),
+                ]);
+
+            $offset += $length;
+        }
+
+        $parts = [];
+
+        foreach ($channels as $channel) {
+            $share = (int) round($channel['value'] / $total * 100);
+            $parts[] = $channel['label'].' €'.rtrim(rtrim(sprintf('%.1f', $channel['value']), '0'), '.').'k ('.$share.'%)';
+        }
+
+        return SvgComponentFactory::make(SvgComponentEnum::SVG)
+            ->setXmlns()
+            ->setViewBox(0, 0, 120, 120)
+            ->setAttributes([
+                'class' => 'mx-auto h-44 w-44',
+                'role' => 'img',
+                'aria-label' => $label,
+            ])
+            ->setContents([
+                SvgComponentFactory::make(SvgComponentEnum::TITLE)->setContent($label),
+                SvgComponentFactory::make(SvgComponentEnum::DESC)->setContent(implode(', ', $parts).'.'),
+                SvgShape::circle(60, 60, $radius)
+                    ->setAttributes([
+                        'fill' => 'none',
+                        'class' => $palette['grid'],
+                        'stroke-width' => '16',
+                        'opacity' => '0.25',
+                    ]),
+                SvgComponentFactory::make(SvgComponentEnum::G)
+                    ->setAttribute('transform', 'rotate(-90 60 60)')
+                    ->setContents($slices),
+                SvgComponentFactory::make(SvgComponentEnum::TEXT)
+                    ->setContent('€'.rtrim(rtrim(sprintf('%.1f', $total), '0'), '.').'k')
+                    ->setAttributes([
+                        'x' => '60',
+                        'y' => '64',
+                        'text-anchor' => 'middle',
+                        'font-size' => '16',
+                        'font-weight' => '700',
+                        'fill' => 'currentColor',
+                    ]),
+                SvgComponentFactory::make(SvgComponentEnum::TEXT)
+                    ->setContent('of revenue')
+                    ->setAttributes([
+                        'x' => '60',
+                        'y' => '78',
+                        'text-anchor' => 'middle',
+                        'font-size' => '8',
+                        'fill' => 'currentColor',
+                        'opacity' => '0.6',
+                    ]),
+            ]);
+    }
+
+    /**
+     * Legend swatch paint for the i-th donut slice: the chart stroke
+     * repainted as a background, at the slice's own opacity.
+     *
+     * @return array{class: string, opacity: float}
+     */
+    public static function swatch(Design $design, int $index): array
+    {
+        return [
+            'class' => self::palette($design)['swatch'],
+            'opacity' => self::sliceOpacity($index),
+        ];
+    }
+
+    /**
+     * The stepped opacity that tells donut slices apart.
+     */
+    private static function sliceOpacity(int $index): float
+    {
+        return [1.0, 0.6, 0.35][$index % 3];
+    }
+
+    /**
      * A seven-point area sparkline. Decorative: the KPI number beside it
      * is the data, so the chart hides from assistive technology.
      *
@@ -156,14 +267,17 @@ final class Chart
      * design ships no chart theme. A missing file and a missing variant
      * both throw, so one catch covers the whole fallback.
      *
-     * @return array{accent: string, stroke: string, muted: string, mutedOpacity: string, grid: string}
+     * @return array{accent: string, stroke: string, swatch: string, muted: string, mutedOpacity: string, grid: string}
      */
     private static function palette(Design $design): array
     {
         try {
+            $stroke = (string) $design->themeManager->processTheme('chart', 'stroke');
+
             return [
                 'accent' => (string) $design->themeManager->processTheme('chart', 'accent'),
-                'stroke' => (string) $design->themeManager->processTheme('chart', 'stroke'),
+                'stroke' => $stroke,
+                'swatch' => str_replace('stroke-', 'bg-', $stroke),
                 'muted' => (string) $design->themeManager->processTheme('chart', 'muted'),
                 'mutedOpacity' => '1',
                 'grid' => (string) $design->themeManager->processTheme('chart', 'grid'),
@@ -172,6 +286,7 @@ final class Chart
             return [
                 'accent' => 'fill-current',
                 'stroke' => 'stroke-current',
+                'swatch' => 'bg-current',
                 'muted' => 'fill-current',
                 'mutedOpacity' => '0.35',
                 'grid' => 'stroke-current',

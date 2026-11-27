@@ -108,6 +108,47 @@ it('paints charts from the design chart theme', function () {
         ->not->toContain('fill-indigo-600');
 });
 
+it('pairs the bar chart with a channel donut', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    $donut = $xpath->query('//svg[@role="img"][@aria-label="Revenue share by channel"]')->item(0);
+
+    expect($donut)->toBeInstanceOf(DOMElement::class)
+        ->and($xpath->query('.//circle', $donut)->length)->toBe(4)
+        ->and($xpath->query('.//circle[@stroke-dasharray]', $donut)->length)->toBe(3)
+        ->and($xpath->query('.//text', $donut)->length)->toBe(2);
+
+    expect($html)
+        ->toContain('Revenue by channel')
+        ->toContain('Direct · 46%')
+        ->toContain('Partners · 31%')
+        ->toContain('Referrals · 23%')
+        ->toContain('Total €48.3k');
+});
+
+it('paints the donut from the design chart theme', function () {
+    $classic = $this->get('/design-system/dashboard?design=classic')->assertOk()->getContent();
+
+    expect($classic)->toContain('stroke-blue-600');
+
+    $soft = $this->get('/design-system/dashboard?design=soft')->assertOk()->getContent();
+
+    expect($soft)->toContain('stroke-indigo-600');
+
+    // Bundled designs ship no chart theme, so the donut falls back to
+    // the card's text colour.
+    $dual = $this->get('/design-system/dashboard?design=base-dual')->assertOk()->getContent();
+
+    expect($dual)
+        ->toContain('stroke-current')
+        ->toContain('bg-current');
+});
+
 it('wires the invoice tabs as a real tablist', function () {
     $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
 

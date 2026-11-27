@@ -64,7 +64,10 @@
                     @endforeach
                 </div>
 
-                <div class="mt-sm">{{ $revenue }}</div>
+                <div class="mt-sm grid gap-4 lg:grid-cols-3">
+                    <div class="min-w-0 lg:col-span-2">{{ $revenue }}</div>
+                    <div class="min-w-0">{{ $channels }}</div>
+                </div>
 
                 <div class="mt-sm grid gap-4 lg:grid-cols-3">
                     <div class="min-w-0 lg:col-span-2">{{ $invoices }}</div>

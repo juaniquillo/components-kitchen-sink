@@ -98,3 +98,16 @@ it('keeps every application theme complete against its bundled source', function
         expect($actual)->toBe($expected);
     }
 });
+
+it('lines card footers up within a shared row', function () {
+    // The container is a full-height column and the foot absorbs the
+    // slack, so cards sharing a grid row end on the same line.
+    foreach (['soft', 'classic'] as $key) {
+        $card = (array) include applicationThemesPath($key).'/card.blade.php';
+
+        expect($card['container'])
+            ->toContain('flex-col')
+            ->toContain('h-full')
+            ->and($card['foot'])->toContain('mt-auto');
+    }
+});
