@@ -14,7 +14,7 @@ it('serves the dashboard in the classic design by default', function () {
         ->toContain('Total revenue')
         ->toContain('3 invoices are overdue')
         ->toContain('Invite a teammate')
-        ->toContain('Back to the gallery')
+        ->toContain('← Gallery')
         ->toContain('bg-slate-900');
 });
 
@@ -84,8 +84,8 @@ it('wires the invoice tabs as a real tablist', function () {
     $tabs = $xpath->query('//*[@role="tab"]');
     $panels = $xpath->query('//*[@role="tabpanel"]');
 
-    expect($tabs->length)->toBe(3)
-        ->and($panels->length)->toBe(3);
+    expect($tabs->length)->toBe(4)
+        ->and($panels->length)->toBe(4);
 
     // Every tab controls a panel that exists, and Alpine owns the state.
     $ids = [];
@@ -104,6 +104,118 @@ it('wires the invoice tabs as a real tablist', function () {
         ->toContain('x-bind:aria-selected')
         ->toContain('invoice-panel-paid')
         ->toContain('INV-1042');
+});
+
+it('reads as an app, not a showcase page', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    // One H1: the showcase heading is gone, Overview is the page.
+    $headings = $xpath->query('//h1');
+
+    expect($headings->length)->toBe(1)
+        ->and(trim($headings->item(0)->textContent))->toBe('Overview');
+
+    // The sidebar marks its section and the top strip links home.
+    $current = $xpath->query('//aside//a[@aria-current="page"]')->item(0);
+
+    expect($current)->toBeInstanceOf(DOMElement::class)
+        ->and(trim($current->textContent))->toBe('Overview')
+        ->and($xpath->query('//a[contains(@href, "design-system?design=")]')->length)->toBeGreaterThan(0);
+});
+
+it('builds the shell from design links and labels each switcher', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    // The sidebar follows the active design: plain links, no pills.
+    foreach ($xpath->query('//aside//a') as $link) {
+        expect($link->getAttribute('class'))->not->toContain('rounded-full');
+    }
+
+    // Design and theme switchers are labelled and no longer adjacent.
+    expect($html)
+        ->toContain('>Design<')
+        ->toContain('>Theme<');
+
+    // Grid columns can shrink, so the table wrapper scrolls instead of
+    // the page growing.
+    expect($html)
+        ->toContain('<div class="min-w-0">')
+        ->toContain('<div class="min-w-0 lg:col-span-2">');
+});
+
+it('opens the invoice dialog without script', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    $dialog = $xpath->query('//dialog[@id="new-invoice"]')->item(0);
+
+    expect($dialog)->toBeInstanceOf(DOMElement::class)
+        ->and($dialog->hasAttribute('open'))->toBeFalse();
+
+    $open = $xpath->query('//button[@command="show-modal"][@commandfor="new-invoice"]')->item(0);
+
+    expect($open)->toBeInstanceOf(DOMElement::class)
+        ->and(trim($open->textContent))->toBe('New invoice');
+
+    $close = $xpath->query('//button[@command="close"][@commandfor="new-invoice"]')->item(0);
+
+    expect($close)->toBeInstanceOf(DOMElement::class)
+        ->and(trim($close->textContent))->toBe('Cancel');
+
+    $create = $xpath->query('//button[@type="submit"][@form="new-invoice-form"]')->item(0);
+
+    expect($create)->toBeInstanceOf(DOMElement::class)
+        ->and(trim($create->textContent))->toBe('Create invoice')
+        ->and($xpath->query('//form[@id="new-invoice-form"]//input[@name="invoice-client"]')->length)->toBe(1);
+});
+
+it('equips the invoices card with a toolbar and pagination', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    expect($xpath->query('//input[@name="invoice-search"]')->length)->toBe(1)
+        ->and($xpath->query('//select[@name="invoice-status"]')->length)->toBe(1)
+        ->and($xpath->query('//a[contains(text(), "View all invoices")]')->length)->toBe(1);
+
+    expect($html)
+        ->toContain('Showing 1–3 of 42')
+        ->toContain('aria-label="Page 2"');
+});
+
+it('covers keyboard tabs, empty states and bar tooltips', function () {
+    $html = $this->get('/design-system/dashboard')->assertOk()->getContent();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<!DOCTYPE html><html><body>'.$html.'</body></html>');
+
+    $xpath = new DOMXPath($dom);
+
+    expect($xpath->query('//*[@role="tab"]')->length)->toBe(4)
+        ->and($xpath->query('//*[@role="tabpanel"]')->length)->toBe(4)
+        ->and($xpath->query('//*[@role="tabpanel"]')->item(3)->textContent)->toContain('No draft invoices.');
+
+    expect($html)
+        ->toContain('x-on:keydown.arrow-right')
+        ->toContain('x-on:keydown.home')
+        ->toContain('January · €4.1k');
 });
 
 it('styles the tablist from the active design', function () {

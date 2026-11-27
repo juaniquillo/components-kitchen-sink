@@ -77,7 +77,9 @@ Route::get('design-system/dashboard', function (Request $request) {
         ->with('kpis', Dashboard::kpis($design))
         ->with('revenue', Dashboard::revenue($design))
         ->with('invoices', Dashboard::invoices($design))
-        ->with('invite', Dashboard::invite($design));
+        ->with('invite', Dashboard::invite($design))
+        ->with('sidebar', Dashboard::sidebar($design))
+        ->with('dialog', Dashboard::newInvoiceDialog($design));
 
 })->name('design-system.dashboard');
 

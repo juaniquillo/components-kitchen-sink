@@ -11,7 +11,10 @@
         "livewire/blaze",
         "juaniquillo/laravel-backend-component",
         "juaniquillo/svg-backend-components",
-        "juaniquillo/backend-design-system"
+        "juaniquillo/backend-design-system",
+        "juaniquillo/flux-backend-components",
+        "juaniquillo/input-component-action",
+        "juaniquillo/slate-backend-components"
     ],
     "sail": false,
     "skills": [
@@ -22,11 +25,13 @@
         "livewire-development",
         "tailwindcss-development",
         "backend-design-system-development",
+        "flux-backend-development",
+        "input-component-action",
         "backend-component",
+        "slate-backend-development",
         "svg-backend-development",
         "blaze-optimize",
         "email-html-mjml",
-        "flux-backend-development",
         "mjml-backend-component-development"
     ]
 }

@@ -21,7 +21,7 @@ final class DesignSwitcher
     /**
      * @param  array<int, array{key: string, label: string}>  $designs
      */
-    public static function make(array $designs, string $current, string $route): MainBackendComponent
+    public static function make(array $designs, string $current, string $route, bool $center = true): MainBackendComponent
     {
         $links = [];
 
@@ -54,6 +54,6 @@ final class DesignSwitcher
 
         return $group
             ->setContents($links)
-            ->setThemes(['nav' => 'group-center']);
+            ->setThemes(['nav' => $center ? 'group-center' : 'group']);
     }
 }

@@ -120,9 +120,3 @@
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     }
 }
-
-.canvas-appearance {
-    display: flex;
-    justify-content: flex-end;
-    padding: 1rem 1rem 0;
-}

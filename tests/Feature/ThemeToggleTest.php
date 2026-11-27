@@ -5,14 +5,20 @@ declare(strict_types=1);
 use App\Builder\Contracts\BuilderNode;
 use App\Builder\Support\WorkspaceRepository;
 
-it('shows the theme switch on a default page', function () {
+it('shows the theme switch as labelled icon buttons', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)
         ->toContain('data-appearance-group')
         ->toContain('data-appearance="light"')
         ->toContain('data-appearance="system"')
-        ->toContain('data-appearance="dark"');
+        ->toContain('data-appearance="dark"')
+        ->toContain('aria-label="Light"')
+        ->toContain('aria-label="Auto"')
+        ->toContain('aria-label="Dark"')
+        ->toContain('mask:url(/icons/sun.svg)')
+        ->toContain('mask:url(/icons/auto.svg)')
+        ->toContain('mask:url(/icons/moon.svg)');
 });
 
 it('shows the theme switch on the canvas dashboard', function () {

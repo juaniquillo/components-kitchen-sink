@@ -24,8 +24,9 @@ final class Chart
      *
      * @param  array<int, float|int>  $values
      * @param  array<int, string>  $labels
+     * @param  array<int, string>  $tooltips
      */
-    public static function bars(array $values, array $labels, string $label): SvgBackendComponent
+    public static function bars(array $values, array $labels, string $label, array $tooltips = []): SvgBackendComponent
     {
         $max = max($values) ?: 1;
         $count = count($values);
@@ -38,10 +39,18 @@ final class Chart
         foreach ($values as $index => $value) {
             $height = max(2, (int) round($value / $max * 60));
 
-            $bars[] = SvgShape::rect($index * $step, $baseline - $height, $barWidth, $height)
+            $bar = SvgShape::rect($index * $step, $baseline - $height, $barWidth, $height)
                 ->setAttribute('fill', 'currentColor')
                 ->setAttribute('opacity', $index === $count - 1 ? '1' : '0.35')
                 ->setAttribute('rx', 2);
+
+            if (isset($tooltips[$index])) {
+                $bar->setContent(
+                    SvgComponentFactory::make(SvgComponentEnum::TITLE)->setContent($tooltips[$index])
+                );
+            }
+
+            $bars[] = $bar;
         }
 
         $months = [];

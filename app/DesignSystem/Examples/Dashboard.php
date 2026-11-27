@@ -12,20 +12,25 @@ use Juaniquillo\BackendDesignSystem\Components\Badge;
 use Juaniquillo\BackendDesignSystem\Components\Breadcrumb;
 use Juaniquillo\BackendDesignSystem\Components\Button;
 use Juaniquillo\BackendDesignSystem\Components\Card;
+use Juaniquillo\BackendDesignSystem\Components\Dialog;
 use Juaniquillo\BackendDesignSystem\Components\Field;
 use Juaniquillo\BackendDesignSystem\Components\Form as FormComponent;
 use Juaniquillo\BackendDesignSystem\Components\Heading;
 use Juaniquillo\BackendDesignSystem\Components\Inline;
+use Juaniquillo\BackendDesignSystem\Components\Input;
+use Juaniquillo\BackendDesignSystem\Components\Link;
 use Juaniquillo\BackendDesignSystem\Components\Select;
 use Juaniquillo\BackendDesignSystem\Components\Stack;
 use Juaniquillo\BackendDesignSystem\Components\Table;
 use Juaniquillo\BackendDesignSystem\Components\Text;
+use Juaniquillo\BackendDesignSystem\Contracts\DesignComponent;
 use Juaniquillo\BackendDesignSystem\Designs\Design;
 use Juaniquillo\BackendDesignSystem\Theme\AlertVariant;
 use Juaniquillo\BackendDesignSystem\Theme\BadgeVariant;
 use Juaniquillo\BackendDesignSystem\Theme\ButtonVariant;
 use Juaniquillo\BackendDesignSystem\Theme\Size;
 use Juaniquillo\BackendDesignSystem\Theme\State;
+use Juaniquillo\BaseBackendComponent\Contracts\BackendComponent;
 use RuntimeException;
 
 /**
@@ -68,7 +73,8 @@ final class Dashboard
     {
         return Inline::make($design)->children([
             Button::make($design)->label('Export'),
-            Button::make($design)->label('New invoice')->variant(ButtonVariant::Primary),
+            Button::make($design)->label('New invoice')->variant(ButtonVariant::Primary)
+                ->attributes(['command' => 'show-modal', 'commandfor' => 'new-invoice']),
         ]);
     }
 
@@ -121,6 +127,7 @@ final class Dashboard
             self::invoicePanel($design, 'all', array_keys(self::INVOICES), '€4,120.00'),
             self::invoicePanel($design, 'paid', ['INV-1042'], '€1,240.00'),
             self::invoicePanel($design, 'overdue', ['INV-1043'], '€860.00'),
+            self::invoicePanel($design, 'draft', [], null),
         ];
 
         return Card::make($design)
@@ -129,13 +136,26 @@ final class Dashboard
                 ->space(Size::Md)
                 ->attributes(['x-data' => "{ tab: 'all' }"])
                 ->children([
+                    self::invoiceToolbar($design),
                     self::tabStrip($design, [
                         'all' => 'All',
                         'paid' => 'Paid',
                         'overdue' => 'Overdue',
+                        'draft' => 'Draft',
                     ]),
                     ...$panels,
-                ]));
+                ]))
+            ->footer(Stack::make($design)->space(Size::Sm)->children([
+                Inline::make($design)->space(Size::Sm)->children([
+                    Text::make($design)->text('Showing 1–3 of 42'),
+                    Button::make($design)->label('Previous')->variant(ButtonVariant::Ghost),
+                    Button::make($design)->label('1')->variant(ButtonVariant::Primary)->attributes(['aria-current' => 'page']),
+                    Button::make($design)->label('2')->variant(ButtonVariant::Ghost)->attributes(['aria-label' => 'Page 2']),
+                    Button::make($design)->label('3')->variant(ButtonVariant::Ghost)->attributes(['aria-label' => 'Page 3']),
+                    Button::make($design)->label('Next')->variant(ButtonVariant::Ghost),
+                ]),
+                Link::make($design)->label('View all invoices')->href('#invoices'),
+            ]));
     }
 
     /**
@@ -149,8 +169,52 @@ final class Dashboard
                 [4.1, 4.4, 3.9, 4.8, 5.2, 5.0, 5.6, 5.9, 5.4, 6.1, 6.4, 6.9],
                 ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
                 'Revenue by month, January to December',
+                ['January · €4.1k', 'February · €4.4k', 'March · €3.9k', 'April · €4.8k', 'May · €5.2k', 'June · €5.0k', 'July · €5.6k', 'August · €5.9k', 'September · €5.4k', 'October · €6.1k', 'November · €6.4k', 'December · €6.9k'],
             ))
             ->footer(Badge::make($design)->label('+18.2% vs last year')->variant(BadgeVariant::Success));
+    }
+
+    /**
+     * The app shell sidebar: brand, section nav and user, built from
+     * design components. The section links are the design's own links,
+     * so the shell follows the active look.
+     */
+    public static function sidebar(Design $design): MainBackendComponent
+    {
+        $sections = [
+            ['label' => 'Overview', 'href' => '#overview', 'current' => true],
+            ['label' => 'Invoices', 'href' => '#invoices'],
+            ['label' => 'Clients', 'href' => '#clients'],
+            ['label' => 'Settings', 'href' => '#settings'],
+        ];
+
+        $links = [];
+
+        foreach ($sections as $section) {
+            $isCurrent = $section['current'] ?? false;
+
+            $link = Link::make($design)->label($section['label'])->href($section['href']);
+
+            if ($isCurrent) {
+                $link->current();
+            }
+
+            $links[] = self::element($design, ComponentEnum::LI)->setContent($link->component());
+        }
+
+        return self::element($design, ComponentEnum::DIV)
+            ->setAttribute('class', 'flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start')
+            ->setContents([
+                self::element($design, ComponentEnum::DIV)
+                    ->setAttribute('class', 'flex items-center gap-2')
+                    ->setContents([
+                        Badge::make($design)->label('A')->component(),
+                        Heading::make($design)->text('Acme')->level(3)->component(),
+                    ]),
+                self::element($design, ComponentEnum::UL)
+                    ->setAttribute('class', 'flex flex-col gap-2')
+                    ->setContents($links),
+            ]);
     }
 
     public static function invite(Design $design): Card
@@ -167,6 +231,62 @@ final class Dashboard
                     ),
                 ])
                 ->actions(Button::make($design)->label('Send invite')->variant(ButtonVariant::Primary)->type('submit')));
+    }
+
+    /**
+     * Search and status filters above the tabs.
+     */
+    private static function invoiceToolbar(Design $design): MainBackendComponent
+    {
+        return self::element($design, ComponentEnum::DIV)
+            ->setAttribute('class', 'flex flex-wrap items-end gap-2')
+            ->setContents([
+                self::element($design, ComponentEnum::DIV)
+                    ->setAttribute('class', 'min-w-52 flex-1')
+                    ->setContent(
+                        Field::make($design)->label('Search')->input(
+                            Input::make($design)->name('invoice-search')->placeholder('INV-…')->attributes(['type' => 'search', 'aria-label' => 'Search invoices'])
+                        )->component()
+                    ),
+                self::element($design, ComponentEnum::DIV)
+                    ->setAttribute('class', 'w-40')
+                    ->setContent(
+                        Field::make($design)->label('Status')->input(
+                            Select::make($design)->name('invoice-status')->options(['all' => 'All statuses', 'paid' => 'Paid', 'open' => 'Open', 'overdue' => 'Overdue'])
+                        )->component()
+                    ),
+            ]);
+    }
+
+    /**
+     * The new-invoice layer, opened and closed with invoker commands so
+     * no script is involved. The create button lives in the footer and
+     * submits the body form by id.
+     */
+    public static function newInvoiceDialog(Design $design): Dialog
+    {
+        return Dialog::make($design)
+            ->id('new-invoice')
+            ->title('New invoice')
+            ->body(FormComponent::make($design)
+                ->action('#new-invoice')
+                ->method('post')
+                ->attributes(['id' => 'new-invoice-form'])
+                ->fields([
+                    Field::make($design)->label('Client')->input('invoice-client')->required(),
+                    Field::make($design)->label('Amount')->input(
+                        Input::make($design)->name('invoice-amount')->type('number')->placeholder('0.00')
+                    ),
+                    Field::make($design)->label('Due date')->input(
+                        Input::make($design)->name('invoice-due')->type('date')
+                    ),
+                ]))
+            ->footer(Inline::make($design)->children([
+                Button::make($design)->label('Cancel')
+                    ->attributes(['command' => 'close', 'commandfor' => 'new-invoice']),
+                Button::make($design)->label('Create invoice')->variant(ButtonVariant::Primary)->type('submit')
+                    ->attributes(['form' => 'new-invoice-form']),
+            ]));
     }
 
     /**
@@ -196,6 +316,10 @@ final class Dashboard
                             'x-on:click' => "tab = '".$key."'",
                             'x-bind:aria-selected' => "tab === '".$key."'",
                             'x-bind:class' => self::classBinding($link, $current, $key),
+                            'x-on:keydown.arrow-right.prevent' => "\$el.closest('li').nextElementSibling?.querySelector('button')?.focus()",
+                            'x-on:keydown.arrow-left.prevent' => "\$el.closest('li').previousElementSibling?.querySelector('button')?.focus()",
+                            'x-on:keydown.home.prevent' => "\$el.closest('ul').querySelector('li:first-child button')?.focus()",
+                            'x-on:keydown.end.prevent' => "\$el.closest('ul').querySelector('li:last-child button')?.focus()",
                         ])
                 );
         }
@@ -217,7 +341,7 @@ final class Dashboard
     /**
      * @param  array<int, string>  $ids
      */
-    private static function invoicePanel(Design $design, string $key, array $ids, string $total): MainBackendComponent
+    private static function invoicePanel(Design $design, string $key, array $ids, ?string $total): MainBackendComponent
     {
         $rows = [];
 
@@ -246,13 +370,26 @@ final class Dashboard
         }
 
         return $panel->setContent(
-            Table::make($design)
-                ->caption('Invoices')
-                ->headers(['Invoice', 'Status', 'Amount', ''])
-                ->rows($rows)
-                ->footer(['', 'Total due', $total, ''])
-                ->component()
+            self::invoiceTable($design, $rows, $total)
         );
+    }
+
+    /**
+     * @param  array<int, array<int, string|DesignComponent|BackendComponent>>  $rows
+     */
+    private static function invoiceTable(Design $design, array $rows, ?string $total): MainBackendComponent
+    {
+        $table = Table::make($design)
+            ->caption('Invoices')
+            ->headers(['Invoice', 'Status', 'Amount', '']);
+
+        if ($rows === []) {
+            $table->empty('No draft invoices.');
+        } else {
+            $table->rows($rows)->footer(['', 'Total due', (string) $total, '']);
+        }
+
+        return $table->component();
     }
 
     /**

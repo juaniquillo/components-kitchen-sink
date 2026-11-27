@@ -58,11 +58,6 @@
 <body class="font-sans antialiased {{ $bodyClass ?? 'bg-zinc-100 dark:bg-zinc-900' }} dark:text-white">
 
     <main>
-        @if (!($disableLocalAssets ?? false))
-            <div class="canvas-appearance">
-                {{ \App\Menu\AppearanceToggle::make() }}
-            </div>
-        @endif
         {{ $slot }}
     </main>
 
